@@ -1,0 +1,53 @@
+We need a way to partially descend the move tree
+a) without keeping much state
+b) be able to pick it back up again
+c) track scores with the deepest scores rolling up (even if they're lower)(?)
+
+given a Tableau, calculate all possible moves.  Keep a list, ordered by score.
+iterate the list, descending:
+	if not too deep
+		make the move,
+		recurse.
+	else
+		reduce state and return
+
+double-iterator idea
+	one form of iteration is creating the descent tree (i.e., iterating moves and recursing)
+	second form is iterating over leaves of the descent tree.
+	
+	so - a descender fully expands the descent tree to the short-term descent limit, 
+	then, we can iterate over the leaves to produce a list of continuation points.
+	
+	continuation points are put in a list ordered by fitness
+	
+	thread then picks the next continuation point off the list and descends from there.
+
+Given a tableau, we will not descend if we've run across this tableau before
+
+How to terminate descent?
+	1) non-continuable
+		a) no available moves
+		b) tableau repeated (see above)
+		c) hit max descent limit
+	2) continuable
+		a) hit short-term descent limit
+		
+
+so - when we return from a descent, we accumulate the continuable states
+	if there are no continuable states, we're done with that sub-tree
+
+	What does a continuable state look like?
+		needs a start state, and a list of moves to get to the continuable state.
+		
+during exploration -
+	depth first
+	use basic algorithm from above
+	
+---------------------------------------------------------------------------------------------
+
+thoughts on space usage.
+If a new state is captured by a new Tableau, along with the move that generated it,
+The main change will be 2 new arrays in the new tableau, with everything else shared with the old state
+A 6 deep stack with therefore contain 6 moves, and 12 differing arrays, while a simple move stack will contain only the 6 moves.
+To the flip side, a TREE of new states will share much of the state, including most of the moves.
+maybe a datastructure to hold a tree of moves?  Then iterate the tree.  yeah baby!
