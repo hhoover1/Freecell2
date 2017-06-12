@@ -3,9 +3,7 @@
  */
 package explore;
 
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import deck.Card;
@@ -140,13 +138,10 @@ public class MoveCalculator {
 		return moves;
 	}
 
-	static private MoveCalculator dummy = new MoveCalculator();
-	
 	static List<Location> moveableColumnsOfTableau(Tableau tableau, Move lastMove) {
-		ArrayList<LocScore> moves = new ArrayList<LocScore>(8);
+		List<Location> moves = new ArrayList<Location>();
+
 		for (int tabCol = 0; tabCol < Tableau.TABLEAU_SIZE; ++tabCol) {
-			int colScore = tableau.stackCardScore(tabCol);
-			
 			// skip any card we JUST placed
 			if (lastMove != null
 					&& lastMove.to().area() == Area.Tableau
@@ -155,7 +150,7 @@ public class MoveCalculator {
 			}
 			
 			Location l = new Location(Area.Tableau, tabCol, 0);
-			moves.add(dummy.new LocScore(l, colScore));
+			moves.add(l);
 			/*
 			 * skip moving more than one card at a time for now. List<Card>
 			 * colCards = tableau.getColumn(tabCol); if (colCards.isEmpty()) {
@@ -172,29 +167,7 @@ public class MoveCalculator {
 			 */
 		}
 
-		moves.sort(Comparator.reverseOrder());
-		ArrayList<Location> froms = new ArrayList<Location>(moves.size());
-		for (LocScore ls : moves) {
-			froms.add(ls.location);
-		}
-		
-		return froms;
-	}
-	
-	private class LocScore implements Comparable<LocScore> {
-		Location location;
-		int		 score;
-		
-		public LocScore(Location l, int s) {
-			location = l;
-			score = s;
-		}
-		
-		@Override
-		public int compareTo(LocScore o) {
-			return score - o.score;
-		}
-		
+		return moves;
 	}
 
 	static List<Move> freecellMoves(Tableau tableau, Move lastMove) {
