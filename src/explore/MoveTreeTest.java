@@ -60,7 +60,7 @@ public class MoveTreeTest {
 		MoveTree child1 = new MoveTree(parent, move2, 1003);
 		String sn = child1.toString();
 		//System.out.println(sn);
-		assertEquals("MoveTree(^0,Move(Loc(Fr10):Loc(Fr00)),1,1003)", sn);
+		assertEquals("MoveTree(^0,Move(Loc(Fr10):Loc(Fr00)),1,1002)", sn);
 		sn = parent.toString();
 		//System.out.println(sn);
 		assertEquals("MoveTree(1,Move(Loc(Fr00):Loc(Fr10)),0,1000)", sn);
@@ -106,7 +106,7 @@ public class MoveTreeTest {
 
 		Iterator<MoveTree> iter = parent.iterator();
 		assertTrue(iter.hasNext());
-		assertEquals(parent, iter.next());
+		assertEquals(childs[0], iter.next());
 		int idx = 0;
 		while (iter.hasNext()) {
 			assertEquals(childs[idx++], iter.next());

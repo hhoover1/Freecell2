@@ -24,15 +24,21 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 	private int _maxDepth;
 	private MoveState _current;
 	private Stack<MoveState> _stateStack = new Stack<MoveState>();
-	private Move _next = null;
+	private MoveTableauPair _next = null;
 
+	public static void clearExamined() {
+		synchronized (TableauMoveIterator._examinedStates) {
+			TableauMoveIterator._examinedStates.clear();
+		}
+	}
+	
 	public TableauMoveIterator(Tableau tab, int maxD) {
 		_startTableau = tab;
 		_topMoveTree = new MoveTree();
 		_topMoveState = new MoveState(_startTableau, _topMoveTree, 0);
 		_maxDepth = maxD;
 		_current = startState();
-		_next = getNextDeep();
+		_next = getNext();
 	}
 
 	public TableauMoveIterator(Tableau tab, MoveTree mt, int maxD, int curD) {
@@ -41,7 +47,7 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		_topMoveState = new MoveState(_startTableau, _topMoveTree, curD);
 		_maxDepth = maxD;
 		_current = startState();
-		_next = getNextDeep();
+		_next = getNext();
 	}
 
 	public MoveTree treeRoot() {
@@ -59,79 +65,38 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 
 	@Override
 	public MoveTree next() {
-		return getNextChoose(false);
+		return nextChoose(false);
 	}
 
 	public MoveTree nextWide() {
-		return getNextChoose(true);
+		return nextChoose(true);
 	}
 
-	private MoveTree getNextChoose(boolean wideOrDeep) {
+	private MoveTree nextChoose(boolean wideOrDeep) {
 		if (_next == null) {
 			throw new NoSuchElementException();
 		}
 
-		Tableau nt = null;
-		try {
-			nt = Mover.move(_current.tableau(), _next);
-			String ntHash = nt.tableauHash();
-			synchronized (_examinedStates) {
-				_checkedStates += 1;
-				if (_examinedStates.containsKey(ntHash)) {
-					Long c = _examinedStates.get(ntHash);
-					_examinedStates.put(ntHash, new Long(c + 1));
-					_next = null;
-				} else {
-					_examinedStates.put(ntHash, new Long(1));
-				}
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if (_next == null) {
-			if (wideOrDeep) {
-				_next = this.getNextWide();
-			} else {
-				_next = this.getNextDeep();
-			}
-			if (this.hasNext()) {
-				return this.next();
-			} else {
-				return null;
-			}
-		}
-
-		MoveTree mt = new MoveTree(_current.tree(), _next, this.fitness(nt));
-		if (Mover.isWin(nt)) {
+		MoveTree mt = new MoveTree(_current.tree(), _next._move, this.fitness(_next._tableau));
+		if (Mover.isWin(_next._tableau)) {
 			Mover.printWin(mt);
-			if (wideOrDeep) {
-				_next = this.getNextWide();
-			} else {
-				_next = this.getNextDeep();
-			}
-			if (this.hasNext()) {
-				return this.next();
-			} else {
-				return null;
-			}
+			System.exit(1);
+			//_next = getNext();
 		}
 
-		MoveState ms = new MoveState(nt, mt, _current.depth() + 1);
-		_stateStack.push(_current);
-		_current = ms;
-		if (wideOrDeep) {
-			_next = this.getNextWide();
-		} else {
-			_next = this.getNextDeep();
+		if (!wideOrDeep && (_current.depth() < _maxDepth)) { // next move is deep
+			MoveState ms = new MoveState(_next._tableau, mt, _current.depth() + 1);
+			_stateStack.push(_current);
+			_current = ms;
 		}
+		
+		_next = getNext();
 
 		return mt;
 	}
 
-	private Move getNextDeep() {
-		Move next = null;
+	private MoveTableauPair getNext() {
+		MoveTableauPair next = null;
 		while (next == null) {
 			if (_current.depth() >= _maxDepth) {
 				// depth limit
@@ -140,7 +105,11 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 					_current = _stateStack.pop();
 				}
 			} else if (_current.moves().hasNext()) {
-				next = _current.moves().next();
+				Move nextMove = _current.moves().next();
+				Tableau nt = nextTableauWith(_current._tableau, nextMove);
+				if (nt != null) {
+					next = new MoveTableauPair(nt, nextMove);
+				}
 			} else if (!_stateStack.isEmpty()) {
 				_current = _stateStack.pop();
 				if (!_current.moves().hasNext() && !_current.tree().hasChildren()) {
@@ -154,26 +123,28 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		return next;
 	}
 
-	private Move getNextWide() {
-		Move next = null;
-		if (!_stateStack.isEmpty()) {
-			_current = _stateStack.pop();
-		}
-		
-		while (next == null) {
-			if (_current.moves().hasNext()) {
-				return _current.moves().next();
-			} else if (!_stateStack.isEmpty()) {
-				_current = _stateStack.pop();
-				if (!_current.moves().hasNext() && !_current.tree().hasChildren()) {
-					_current.tree().remove();
+	private Tableau nextTableauWith(Tableau tableau, Move move) {
+		Tableau nt = null;
+		try {
+			nt = Mover.move(tableau, move);
+			String ntHash = nt.tableauHash();
+			synchronized (_examinedStates) {
+				_checkedStates += 1;
+				if (_examinedStates.containsKey(ntHash)) {
+					Long c = _examinedStates.get(ntHash);
+					nt = null;
+					_examinedStates.put(ntHash, new Long(c + 1));
+				} else {
+					_examinedStates.put(ntHash, new Long(1));
 				}
-			} else {
-				break;
 			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(-1);
 		}
-		
-		return next;
+
+		return nt;
 	}
 
 	private int fitness(Tableau nt) {
@@ -188,8 +159,24 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		return null;
 	}
 
+	private class MoveTableauPair {
+		Tableau _tableau;
+		Move _move;
+
+		MoveTableauPair(Tableau t, Move m) {
+			_tableau = t;
+			_move = m;
+		}
+		
+		@Override
+		public String toString() {
+			return _move.toString() + _tableau.toString().substring(0, 33);
+		}
+	};
+
 	private class MoveState {
 		Tableau _tableau;
+		Move[] _moveArray;
 		ArrayIterator<Move> _moves;
 		MoveTree _tree;
 		int _depth;
@@ -198,8 +185,8 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 			_tableau = t;
 			_tree = m;
 			_depth = d;
-			Move[] mv = MoveCalculator.movesFrom(_tableau);
-			_moves = new ArrayIterator<Move>(mv);
+			_moveArray = MoveCalculator.movesFrom(_tableau);
+			_moves = new ArrayIterator<Move>(_moveArray);
 		}
 
 		public Tableau tableau() {
@@ -208,6 +195,10 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 
 		public ArrayIterator<Move> moves() {
 			return _moves;
+		}
+
+		public Move[] moveArray() {
+			return _moveArray;
 		}
 
 		public MoveTree tree() {
@@ -221,6 +212,10 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 
 	public ArrayIterator<Move> moves() {
 		return _current.moves();
+	}
+
+	public Move[] moveArray() {
+		return _current.moveArray();
 	}
 
 	public Tableau tableau() {

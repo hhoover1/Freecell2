@@ -221,7 +221,7 @@ public class Card implements Comparable<Card> {
 		
 		int sc = this._suit.ordinal() - bc._suit.ordinal();
 		
-		return rc;
+		return sc;
 	}
 
 	private int rankOrdinal() {

@@ -137,12 +137,12 @@ public class Tableau {
 		result += 10000 * nonEmptyFoundation;
 		
 		// total depth of foundation columns -- max 13000
-		result += 250 * totalRetired;
+		result += 2500 * totalRetired;
 
 		// number of empty tableau columns -- max 16000
 		result += 5000 * this.emptyTableauColumns();
 
-/*		// partial ordered height
+		// partial ordered height
 		result += 10 * partialOrderedHeights();
 		
 		// fully ordered depths
@@ -151,13 +151,34 @@ public class Tableau {
 		// tallest ordered stack -- max 7 + 13 == 20
 		result += tallestOrderedStack() * 100;
 		
-*/		// subtract # of cards in freecells * factor
+		result += stackCardScores();
+		
+		// subtract # of cards in freecells * factor
 		result -= 10 * (((int) Math.pow(2.0, (_freecells.length - this.emptyFreecellCount()))) - 1);
 
 		// invert and return
 		return MAX_FITNESS_VALUE - result;
 	}
 
+	private int stackCardScores() {
+		int result = 0;
+		for (int ii = 0; ii < _tableau.length; ++ii) {
+			result += stackCardScore(ii);
+		}
+		
+		return result;
+	}
+	
+	public int stackCardScore(int idx) {
+		Card[] s = _tableau[idx];
+		int result = 0;
+		for (Card c : s) {
+			result += 13 - c.rank();
+		}
+		
+		return result;
+	}
+	
 	private int emptyTableauColumns() {
 		int emptyCount = 0;
 		for (Card[] ca : this._tableau) {
@@ -167,6 +188,77 @@ public class Tableau {
 		}
 		
 		return emptyCount;
+	}
+
+	private int fullyOrderedDepths() {
+		int result = 0;
+		for (Card[] stack : _tableau) {
+			result += fullyOrderedDepth(stack);
+		}
+		
+		return result;
+	}
+
+	private int fullyOrderedDepth(Card[] stack) {
+		int result = 0;
+		if (stack.length > 0) {
+			Card lastCard = stack[stack.length - 1];
+			for (int cardIdx = stack.length - 2; cardIdx > 0; --cardIdx) {
+				Card c = stack[cardIdx];
+				if (lastCard.canBePlacedOn(c)) {
+					lastCard = c;
+					result += 1;
+				}
+			}
+		}
+
+		return result;
+	}
+	
+	private int partialOrderedHeights() {
+		int result = 0;
+		
+		for (int stackIndex = 0; stackIndex < _tableau.length; ++stackIndex) {
+			Card[] stack = _tableau[stackIndex];
+			if (stack.length > 0) {
+				Card lastCard = stack[0];
+				for (int cardIndex = 1; cardIndex < stack.length; ++cardIndex) {
+					Card c = stack[cardIndex];
+					if (c.rank() > lastCard.rank()) {
+						result += cardIndex;
+						break;
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+
+	private int tallestOrderedStack() {
+		int result = 0;
+		for (Card[] ac : _tableau) {
+			int topOrderLength = topOrderedLength(ac);
+			result = Math.max(result, topOrderLength);
+		}
+
+		return result;
+	}
+
+	private int topOrderedLength(Card[] ac) {
+		int result = ac.length == 0 ? 0 : 1;
+		int topIndex = ac.length - 1;
+		for (int ii = 0; ii < topIndex; ++ii) {
+			Card t = ac[topIndex - ii];
+			Card u = ac[topIndex - ii - 1];
+			if (t.canBePlacedOn(u)) {
+				result += 1;
+			} else {
+				break;
+			}
+		}
+
+		return result;
 	}
 
 	@Override

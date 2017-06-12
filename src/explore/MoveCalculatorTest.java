@@ -1,14 +1,17 @@
 package explore;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import deck.Deck;
 import freecellState.Location;
 import freecellState.Location.Area;
 import freecellState.Move;
+import freecellState.Mover;
 import freecellState.Tableau;
 
 public class MoveCalculatorTest {
@@ -69,9 +72,21 @@ public class MoveCalculatorTest {
 			new Move(Tab[7], Free[0])
 	};
 	
+	private static final Move[] tableau1Moves2 = {
+			new Move(Tab[6], Tab[3]),
+			new Move(Tab[6], Tab[7]),
+			new Move(Tab[0], Free[0]),
+			new Move(Tab[1], Free[0]),
+			new Move(Tab[2], Free[0]),
+			new Move(Tab[3], Free[0]),
+			new Move(Tab[4], Free[0]),
+			new Move(Tab[5], Free[0]),
+			new Move(Tab[6], Free[0]),
+			new Move(Tab[7], Free[0])
+	};
+	
 	private Tableau shortTab;
 	private Tableau tableau1;
-	private MoveCalculator mc = new MoveCalculator();
 	
 	@Before
 	public void setUp() throws Exception {
@@ -81,23 +96,23 @@ public class MoveCalculatorTest {
 
 	@Test
 	public final void testShort() {
-		Move[] moves = mc.movesFrom(shortTab);
+		Move[] moves = MoveCalculator.movesFrom(shortTab);
 		assertNotNull(moves);
 		ArrayIterator<Move> mi = new ArrayIterator<Move>(moves);
 		assertTrue(mi.hasNext());
 		int shortCount = 0;
 		while (mi.hasNext()) {
 			Move m = mi.next();
-			System.out.println(m);
+			//System.out.println(m);
 			assertEquals(shortMoves[shortCount++], m);
 		}
 		assertFalse(mi.hasNext());
-		System.out.println("---------------");
+		//System.out.println("---------------");
 	}
 
 	@Test
 	public final void testDeck1Moves() {
-		Move[] moves = mc.movesFrom(tableau1);
+		Move[] moves = MoveCalculator.movesFrom(tableau1);
 		assertNotNull(moves);
 		ArrayIterator<Move> mi = new ArrayIterator<Move>(moves);
 		assertTrue(mi.hasNext());
@@ -108,5 +123,26 @@ public class MoveCalculatorTest {
 			assertEquals(tableau1Moves[count++], m);
 		}
 		assertFalse(mi.hasNext());
+		assertEquals(tableau1Moves.length, count);
+		System.out.println("---------------");
+		assertNotNull(moves[0]);
+		Move firstMove = moves[0];
+		Tableau nt = null;
+		try {
+			nt = Mover.move(tableau1, firstMove);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Move[] moves2 = MoveCalculator.movesFrom(nt);
+		mi = new ArrayIterator<Move>(moves2);
+		count = 0;
+		while (mi.hasNext()) {
+			Move m = mi.next();
+			System.out.println(m);
+			assertEquals(tableau1Moves2[count++], m);
+		}
+		assertFalse(mi.hasNext());
+		assertEquals(tableau1Moves2.length, count);
 	}
 }

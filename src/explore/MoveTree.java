@@ -1,13 +1,16 @@
 package explore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 
 import freecellState.Move;
+import freecellState.Mover;
+import freecellState.Tableau;
 
-public class MoveTree {
+public class MoveTree implements Comparable<MoveTree> {
 	private final MoveTree _parent;
 	private final Move _move;
 	private ArrayList<MoveTree> _children = new ArrayList<MoveTree>();
@@ -43,15 +46,42 @@ public class MoveTree {
 	}
 
 	public int score() {
-		return _treeScore;
+		return _treeScore - _depth;
 	}
 
 	public void setScore(int ns) {
 		_treeScore = ns;
 	}
-	
+
 	public int depth() {
 		return _depth;
+	}
+
+	public Tableau resultingTableau(Tableau initial) {
+		return resultingTableau(initial, 0);
+	}
+
+	public Tableau resultingTableau(Tableau initial, int startDepth) {
+		Tableau result = initial;
+		Move[] moves = this.moves();
+		if (startDepth > 0) {
+			moves = Arrays.copyOfRange(moves, startDepth, moves.length);
+		}
+		for (Move m : moves) {
+			try {
+				result = Mover.move(result, m);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println(initial);
+				moves = this.moves();
+				for (Move m2 : moves) {
+					System.out.println(m2);
+				}
+				System.exit(-2);
+			}
+		}
+
+		return result;
 	}
 
 	public void remove(MoveTree rt) {
@@ -91,7 +121,7 @@ public class MoveTree {
 		return _children.iterator();
 	}
 
-	Iterator<MoveTree> iterator() {
+	public Iterator<MoveTree> iterator() {
 		return new MTIterator(this);
 	}
 
@@ -111,7 +141,9 @@ public class MoveTree {
 			_parent.addParentMoves(m);
 		}
 
-		m.add(_move);
+		if (_move != null) {
+			m.add(_move);
+		}
 	}
 
 	@Override
@@ -130,7 +162,7 @@ public class MoveTree {
 		}
 		sb.append(_depth);
 		sb.append(',');
-		sb.append(_treeScore);
+		sb.append(this.score());
 		sb.append(')');
 		return sb.toString();
 	}
@@ -144,7 +176,7 @@ public class MoveTree {
 		public MTIterator(MoveTree m) {
 			_mt = m;
 			_childIter = _mt.childIterator();
-			_next = m;
+			_next = getNextNext();
 		}
 
 		private MoveTree getNextNext() {
@@ -182,5 +214,11 @@ public class MoveTree {
 			_next = getNextNext();
 			return res;
 		}
+	}
+
+	@Override
+	public int compareTo(MoveTree o) {
+		int priorityCompare = this.score() - o.score();
+		return priorityCompare;
 	}
 }
