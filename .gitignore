@@ -5,5 +5,5 @@ src/control/run*
 bin/
 *.log
 *.save
-.gitignore
 .*~
+Freecell2_exe.jar
