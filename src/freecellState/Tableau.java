@@ -15,7 +15,7 @@ import deck.Deal;
 public class Tableau {
 	public static final int FREECELL_COUNT = 4;
 	public static final int TABLEAU_SIZE = 8;
-	private static final int MAX_FITNESS_VALUE = 40000 + 4000;
+	private static final int MAX_FITNESS_VALUE = 40000 + 4000 + 20000;
 
 	final Card[] _foundation;
 	final Card[] _freecells;
@@ -506,5 +506,9 @@ public class Tableau {
 				return ac.compareTo(bc);
 			}
 		}
+	}
+
+	public int heightOfTableauStack(int column) {
+		return _tableau[column].length;
 	}
 }

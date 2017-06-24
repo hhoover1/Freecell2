@@ -60,7 +60,7 @@ public class MoveTreeTest {
 		MoveTree child1 = new MoveTree(parent, move2, 1003);
 		String sn = child1.toString();
 		//System.out.println(sn);
-		assertEquals("MoveTree(^0,Move(Loc(Fr10):Loc(Fr00)),1,1002)", sn);
+		assertEquals("MoveTree(^0,Move(Loc(Fr10):Loc(Fr00)),1,804)", sn);
 		sn = parent.toString();
 		//System.out.println(sn);
 		assertEquals("MoveTree(1,Move(Loc(Fr00):Loc(Fr10)),0,1000)", sn);
@@ -69,7 +69,7 @@ public class MoveTreeTest {
 	@Test
 	public final void testChildIterator() {
 		MoveTree[] trees = new MoveTree[5];
-		MoveTree parent = new MoveTree(nullParent, move1, 1001);
+		MoveTree parent = new MoveTree(nullParent, move1, -8801);
 		MoveTree child1 = new MoveTree(parent, move2, 1002);
 		trees[0] = parent;
 		trees[1] = child1;
@@ -90,7 +90,7 @@ public class MoveTreeTest {
 		assertNotNull(parent.childIterator());
 		assertTrue(parent.childIterator().hasNext());
 		Iterator<MoveTree> kids = parent.iterator();
-		int count = 0;
+		int count = 1;
 		while (kids.hasNext()) {
 			MoveTree n = kids.next();
 			assertEquals(trees[count], n);
@@ -107,9 +107,11 @@ public class MoveTreeTest {
 		Iterator<MoveTree> iter = parent.iterator();
 		assertTrue(iter.hasNext());
 		assertEquals(childs[0], iter.next());
-		int idx = 0;
+		int idx = 1;
 		while (iter.hasNext()) {
-			assertEquals(childs[idx++], iter.next());
+			MoveTree iterVal = iter.next();
+			//System.out.println(String.format("%d::%s:%s", idx, childs[idx], iterVal));
+			assertEquals(childs[idx++], iterVal);
 		}
 		assertEquals(8, idx);
 	}
@@ -130,6 +132,14 @@ public class MoveTreeTest {
 		assertEquals(childs[6].move(), c31[1]);
 		assertEquals(childs[7].move(), c31[2]);
 	}
+	
+//	@Test
+//	public final void testDepthFunction() {
+//		for (int ii = 0; ii < 200; ++ii) {
+//			MoveTree m = new MoveTree(nullParent, move1, 0, ii);
+//			//System.out.println(String.format("%4d : %d", ii, m.score()));
+//		}
+//	}
 
 	private MoveTree[] makeChilds(MoveTree parent) {
 		MoveTree child1 = new MoveTree(parent, move2, 998);

@@ -11,6 +11,7 @@ import freecellState.Mover;
 import freecellState.Tableau;
 
 public class MoveTree implements Comparable<MoveTree> {
+	private static final int DEPTH_BASE = 100;
 	private final MoveTree _parent;
 	private final Move _move;
 	private ArrayList<MoveTree> _children = new ArrayList<MoveTree>();
@@ -35,6 +36,14 @@ public class MoveTree implements Comparable<MoveTree> {
 			_depth = 0;
 		}
 	}
+	
+	// special constructor for testing
+	MoveTree(MoveTree p, Move m, int score, int depth) {
+		_parent = p;
+		_move = m;
+		_treeScore = score;
+		_depth = depth;
+	}
 
 	private void addChild(MoveTree c, int cs) {
 		_children.add(c);
@@ -46,11 +55,7 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 
 	public int score() {
-		return _treeScore - _depth;
-	}
-
-	public void setScore(int ns) {
-		_treeScore = ns;
+		return _treeScore - depthFunction();
 	}
 
 	public int depth() {
@@ -84,29 +89,32 @@ public class MoveTree implements Comparable<MoveTree> {
 		return result;
 	}
 
-	public void remove(MoveTree rt) {
+	public int remove(MoveTree rt) {
+		int cnt = 1;
 		_children.remove(rt);
 		_treeScore = Integer.MAX_VALUE;
 		for (MoveTree m : _children) {
 			_treeScore = Math.min(m.score(), _treeScore);
 		}
 
-		if (_parent != null) {
+		if (_children.isEmpty() && _parent != null) {
+			cnt += _parent.remove(this);
+		} else if (_parent != null) {
 			_parent.updateScore(_treeScore);
 		}
-
-		if (_children.isEmpty() && _parent != null) {
-			_parent.remove(this);
-		}
+		
+		return cnt;
 	}
 
-	public void remove() {
+	public int remove() {
 		if (_parent != null) {
-			_parent.remove(this);
+			return _parent.remove(this);
 		}
+
+		return 0;
 	}
 
-	public void updateScore(int ns) {
+	protected void updateScore(int ns) {
 		_treeScore = Math.min(_treeScore, ns);
 		if (_treeScore == ns && _parent != null) {
 			_parent.updateScore(_treeScore);
@@ -144,6 +152,13 @@ public class MoveTree implements Comparable<MoveTree> {
 		if (_move != null) {
 			m.add(_move);
 		}
+	}
+	
+	private int depthFunction() {
+		int adjustedDepth = (DEPTH_BASE - _depth);
+		int result = (DEPTH_BASE*DEPTH_BASE) - (adjustedDepth * adjustedDepth);
+		// result *= Math.signum(-adjustedDepth);
+		return result;
 	}
 
 	@Override

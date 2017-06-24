@@ -147,7 +147,7 @@ public class TableauMoveIteratorTest {
 		}
 		assertEquals(6, count);
 		MoveTree root = tmi2.treeRoot();
-		count = 0;
+		count = 1;
 		Iterator<MoveTree> iter = root.iterator();
 		while (iter.hasNext()) {
 			MoveTree mx = iter.next();

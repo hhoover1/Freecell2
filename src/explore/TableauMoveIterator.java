@@ -18,6 +18,7 @@ import freecellState.Tableau;
 public class TableauMoveIterator implements Iterator<MoveTree> {
 	private static HashMap<String, Long> _examinedStates = new HashMap<String, Long>();
 	private static long _checkedStates = 0;
+	private static int _moveTreesRemoved = 0;
 	private Tableau _startTableau;
 	private MoveState _topMoveState;
 	private MoveTree _topMoveTree;
@@ -71,6 +72,10 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 	public MoveTree nextWide() {
 		return nextChoose(true);
 	}
+	
+	public int moveTreesRemoved() {
+		return _moveTreesRemoved;
+	}
 
 	private MoveTree nextChoose(boolean wideOrDeep) {
 		if (_next == null) {
@@ -100,9 +105,11 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		while (next == null) {
 			if (_current.depth() >= _maxDepth) {
 				// depth limit
-				_current.tree().remove();
+				_moveTreesRemoved += _current.tree().remove();
 				if (!_stateStack.isEmpty()) {
 					_current = _stateStack.pop();
+				} else {
+					break;
 				}
 			} else if (_current.moves().hasNext()) {
 				Move nextMove = _current.moves().next();
@@ -113,7 +120,7 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 			} else if (!_stateStack.isEmpty()) {
 				_current = _stateStack.pop();
 				if (!_current.moves().hasNext() && !_current.tree().hasChildren()) {
-					_current.tree().remove();
+					_moveTreesRemoved += _current.tree().remove();
 				}
 			} else {
 				break;
@@ -139,7 +146,6 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.exit(-1);
 		}
