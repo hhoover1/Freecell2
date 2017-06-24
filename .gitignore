@@ -3,3 +3,7 @@ src/control/run*
 .settings
 /bin/
 bin/
+*.log
+*.save
+.gitignore
+.*~
