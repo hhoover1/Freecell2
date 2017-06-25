@@ -32,14 +32,18 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 			TableauMoveIterator._examinedStates.clear();
 		}
 	}
-	
+
 	public TableauMoveIterator(Tableau tab, int maxD) {
 		_startTableau = tab;
 		_topMoveTree = new MoveTree();
 		_topMoveState = new MoveState(_startTableau, _topMoveTree, 0);
 		_maxDepth = maxD;
 		_current = startState();
-		_next = getNext();
+		if (_current == null) {
+			_next = null;
+		} else {
+			_next = getNext();
+		}
 	}
 
 	public TableauMoveIterator(Tableau tab, MoveTree mt, int maxD, int curD) {
@@ -48,7 +52,11 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		_topMoveState = new MoveState(_startTableau, _topMoveTree, curD);
 		_maxDepth = maxD;
 		_current = startState();
-		_next = getNext();
+		if (_current == null) {
+			_next = null;
+		} else {
+			_next = getNext();
+		}
 	}
 
 	public MoveTree treeRoot() {
@@ -72,7 +80,7 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 	public MoveTree nextWide() {
 		return nextChoose(true);
 	}
-	
+
 	public int moveTreesRemoved() {
 		return _moveTreesRemoved;
 	}
@@ -86,21 +94,26 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		if (Mover.isWin(_next._tableau)) {
 			Mover.printWin(mt);
 			System.exit(1);
-			//_next = getNext();
+			// _next = getNext();
 		}
 
-		if (!wideOrDeep && (_current.depth() < _maxDepth)) { // next move is deep
+		if (!wideOrDeep && (_current.depth() < _maxDepth)) { // next move is
+																// deep
 			MoveState ms = new MoveState(_next._tableau, mt, _current.depth() + 1);
 			_stateStack.push(_current);
 			_current = ms;
 		}
-		
+
 		_next = getNext();
 
 		return mt;
 	}
 
 	private MoveTableauPair getNext() {
+		if (_current == null) {
+			return null;
+		}
+		
 		MoveTableauPair next = null;
 		while (next == null) {
 			if (_current.depth() >= _maxDepth) {
@@ -173,7 +186,7 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 			_tableau = t;
 			_move = m;
 		}
-		
+
 		@Override
 		public String toString() {
 			return _move.toString() + _tableau.toString().substring(0, 33);
