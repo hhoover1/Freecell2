@@ -1,5 +1,6 @@
 package control;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -25,11 +26,14 @@ public class StagedDepthFirstSolver {
 		System.out.println(startTableau);
 
 		addTreesToQueue(startTableau, base, pmt);
-
+//		int count = 0;
 		while (!pmt.isEmpty()) {
 			MoveTree nextBase = pmt.poll();
 			Tableau pt = nextBase.resultingTableau(startTableau);
 			addTreesToQueue(pt, nextBase, pmt);
+//			if (++count > 100000) {
+//				rebuildQueue(pmt);
+//			}
 		}
 	}
 
@@ -86,5 +90,13 @@ public class StagedDepthFirstSolver {
 					String.format("%s", m.resultingTableau(startTableau)));
 		}
 	}
-
+	
+//	private static void rebuildQueue(Queue<MoveTree> q) {
+//		ArrayList<MoveTree> mtal = new ArrayList<MoveTree>(q.size());
+//		for (MoveTree mt : q) {
+//			mtal.add(mt);
+//		}
+//		q.clear();
+//		q.addAll(mtal);
+//	}
 }

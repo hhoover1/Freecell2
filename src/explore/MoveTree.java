@@ -47,7 +47,7 @@ public class MoveTree implements Comparable<MoveTree> {
 
 	private void addChild(MoveTree c, int cs) {
 		_children.add(c);
-		this.updateScore(cs);
+//		this.updateScore(cs);
 	}
 
 	public Move move() {
@@ -99,9 +99,9 @@ public class MoveTree implements Comparable<MoveTree> {
 
 		if (_children.isEmpty() && _parent != null) {
 			cnt += _parent.remove(this);
-		} else if (_parent != null) {
+		} /*else if (_parent != null) {
 			_parent.updateScore(_treeScore);
-		}
+		}*/
 		
 		return cnt;
 	}
