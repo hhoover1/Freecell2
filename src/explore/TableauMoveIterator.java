@@ -3,6 +3,7 @@ package explore;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Queue;
 import java.util.Stack;
 
 import freecellState.Move;
@@ -57,8 +58,39 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		} else {
 			_next = getNext();
 		}
+
+		// if hasNext is false now, there's nothing to iterate
+		// remove the tree because it's a dead end.
+		if (!this.hasNext() && this._topMoveTree.parent() != null) {
+			_moveTreesRemoved += this._topMoveTree.remove();
+		}
 	}
 
+	public MoveTree descendFor(int depth, Queue<MoveTree> pmt) {
+		return this.descendFor(depth, pmt, _current);
+	}
+
+	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, MoveState ms) {
+		MoveTree result = this._topMoveTree;
+		if (depth == 0) {
+			while (ms != null && ms._moves.hasNext()) {
+				Move move = ms._moves.next();
+				if (move != null) {
+					MoveTree mt = new MoveTree(ms.tree(), move, this.fitness(_next._tableau));
+					if (Mover.isWin(_next._tableau)) {
+						Mover.printWin(mt);
+						System.exit(1);
+						// _next = getNext();
+					}
+				}
+			}
+		} else {
+
+		}
+
+		return result;
+	}
+	
 	public MoveTree treeRoot() {
 		return _topMoveTree;
 	}
@@ -113,7 +145,7 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		if (_current == null) {
 			return null;
 		}
-		
+
 		MoveTableauPair next = null;
 		while (next == null) {
 			if (_current.depth() >= _maxDepth) {

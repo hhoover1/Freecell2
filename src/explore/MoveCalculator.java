@@ -209,14 +209,14 @@ public class MoveCalculator {
 		return -1;
 	}
 
-	public static int releaseToFoundationDepth(Tableau _tableau, int column) {
+	public static int releaseToFoundationDepth(Tableau tableau, int column) {
 		int shallowest = Integer.MAX_VALUE;
 		for (Suit s : Suit.values()) {
-			Card top = _tableau.foundation(s.ordinal());
+			Card top = tableau.foundation(s.ordinal());
 			if (top == null) {
 				top = new Card(s, 1);
 			}
-			int d = depthOfCard(_tableau, column, top);
+			int d = depthOfCard(tableau, column, top);
 			if (d >= 0) {
 				shallowest = Math.min(shallowest, d);
 			}
@@ -229,7 +229,27 @@ public class MoveCalculator {
 		return -1;
 	}
 
-	public static int releaseToTableauDepth(Tableau _tableau, int column) {
+	public static int releaseToTableauDepth(Tableau tableau, int column) {
+		Card[] tops = tableau.topTableauCards();
+
+		int shallowest = Integer.MAX_VALUE;
+		for (int ii = 0; ii < Tableau.TABLEAU_SIZE; ++ii) {
+			if (ii == column) {
+				continue;
+			}
+			
+			Card top = tops[ii];
+			if (top != null) {
+				int d = depthOfCard(tableau, column, top);
+				if (d >= 0) {
+					shallowest = Math.min(shallowest, d);
+				}
+			}
+		}
+
+		if (shallowest < Integer.MAX_VALUE) {
+			return shallowest;
+		}
 
 		return -1;
 	}

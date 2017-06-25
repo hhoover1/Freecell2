@@ -107,11 +107,21 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 
 	public int remove() {
-		if (_parent != null) {
-			return _parent.remove(this);
+		int cnt = 0;
+
+		// transitively remove children first
+		if (!_children.isEmpty()) {
+			MoveTree[] kids = _children.toArray(new MoveTree[_children.size()]);
+			for (MoveTree c : kids) {
+				cnt += c.remove();
+			}
 		}
 
-		return 0;
+		if (_parent != null) {
+			return _parent.remove(this) + cnt;
+		}
+		
+		return cnt;
 	}
 
 	protected void updateScore(int ns) {
