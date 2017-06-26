@@ -16,13 +16,21 @@ public class StagedDepthFirstSolver {
 	private static final long STATUS_UPDATE_INTERVAL = 100000;
 	private static final long TABLEAU_PRINT_INTERVAL = 1000000;
 	private static final String DECK_38 = "2H,JS,KC,4C,3D,AH,QC,AS,8H,QH,6S,3C,6C,4H,4S,TS,5C,5D,7C,6H,4D,7D,KH,KD,5S,5H,3H,9D,7H,JC,KS,9C,8C,8D,JH,2D,9H,JD,QS,QD,6D,8S,2C,TH,7S,TC,AC,9S,AD,TD,2S,3S";
-	// private static final int WIDTH_LIMIT = 3;
 	private static Deck d = Deck.deckFrom(DECK_38);
 	private static Tableau startTableau = new Tableau(d);
 	private static long count = 0;
-	private static int maxDepth = 0;
+	private static int maxDepthTraversed = 0;
+	private int _stagedDepth = INTERMEDIATE_DEPTH;
+	private int _maxExploreDepth = MAX_EXPLORE_DEPTH;
 
 	public static void main(String[] args) {
+		StagedDepthFirstSolver solver = new StagedDepthFirstSolver();
+		solver.runStagedDepthFirstSearch(INTERMEDIATE_DEPTH, MAX_EXPLORE_DEPTH);
+	}
+
+	void runStagedDepthFirstSearch(int stageDepth, int maxDepth) {
+		_stagedDepth = stageDepth;
+		_maxExploreDepth = maxDepth;
 		MoveTree base = new MoveTree();
 		PriorityQueue<MoveTree> pmt = new PriorityQueue<MoveTree>(MOVETREE_QUEUE_LENGTH);
 		
@@ -35,9 +43,9 @@ public class StagedDepthFirstSolver {
 			addTreesToQueue(pt, nextBase, pmt);
 		}
 		
-		System.out.println("No solution found");
+		System.out.println("No solution found");		
 	}
-
+	
 	/**
 	 * This method descends the tree for the specified depth, then iterates the
 	 * generated tree and puts all of the leaves into the queue.
@@ -46,15 +54,15 @@ public class StagedDepthFirstSolver {
 	 * @param parentTree
 	 * @param moveTreeQueue
 	 */
-	private static void addTreesToQueue(Tableau parentTableau, MoveTree parentTree, Queue<MoveTree> moveTreeQueue) {
-		TableauMoveIterator tmi = new TableauMoveIterator(parentTableau, parentTree, MAX_EXPLORE_DEPTH, parentTree.depth());
+	private void addTreesToQueue(Tableau parentTableau, MoveTree parentTree, Queue<MoveTree> moveTreeQueue) {
+		TableauMoveIterator tmi = new TableauMoveIterator(parentTableau, parentTree, _maxExploreDepth, parentTree.depth());
 		
-		tmi.descendFor(INTERMEDIATE_DEPTH, moveTreeQueue);
+		tmi.descendFor(_stagedDepth, moveTreeQueue);
 		Iterator<MoveTree> iter = parentTree.iterator();
 		while (iter.hasNext()) {
 			MoveTree nmt = iter.next();
-			if (nmt.depth() > maxDepth) {
-				maxDepth = nmt.depth();
+			if (nmt.depth() > maxDepthTraversed) {
+				maxDepthTraversed = nmt.depth();
 			}
 			
 			printTrace(tmi, nmt, moveTreeQueue);
@@ -65,15 +73,19 @@ public class StagedDepthFirstSolver {
 	 * @param tmi
 	 * @param m
 	 */
-	private static void printTrace(TableauMoveIterator tmi, MoveTree m, Queue<MoveTree> q) {
+	private void printTrace(TableauMoveIterator tmi, MoveTree m, Queue<MoveTree> q) {
 		count += 1;
 		if (count % STATUS_UPDATE_INTERVAL == 0) {
-			System.out.println(String.format("%8d: %d:%s-%5d - %6d, %6d", count, maxDepth, m, tmi.checkedStates(), q.size(), tmi.moveTreesRemoved()));
+			System.out.println(String.format("%8d: %d:%s-%5d - %6d, %6d", count, maxDepthTraversed, m, tmi.checkedStates(), q.size(), tmi.moveTreesRemoved()));
 		}
 
 		if (count % TABLEAU_PRINT_INTERVAL == 0) {
 			System.out.println(
 					String.format("%s", m.resultingTableau(startTableau)));
 		}
+	}
+
+	public long count() {
+		return count;
 	}
 }

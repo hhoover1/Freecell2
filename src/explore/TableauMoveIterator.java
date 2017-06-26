@@ -60,8 +60,6 @@ public class TableauMoveIterator {
 	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, MoveState moveState) {
 		if (moveState.depth() >= _maxDepth) {
 			return null;
-		} else if (moveState.depth() > _maxDepth) {
-			_maxDepth = moveState.depth();
 		}
 
 		if (depth > 0) {
@@ -89,7 +87,7 @@ public class TableauMoveIterator {
 	 */
 	private MoveState createNextMoveState(MoveState moveState) {
 		Move move = moveState.moves().next();
-		Tableau newTableau = nextTableauWith(moveState._tableau, move, moveState.depth());
+		Tableau newTableau = nextTableauWith(moveState._tableau, move, moveState.depth() + 1);
 
 		if (newTableau != null) {
 			MoveTree newMoveTree = new MoveTree(moveState.tree(), move, this.fitness(newTableau));
