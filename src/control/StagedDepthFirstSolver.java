@@ -13,8 +13,8 @@ public class StagedDepthFirstSolver {
 	private static final int INTERMEDIATE_DEPTH = 4;
 	private static final int MAX_EXPLORE_DEPTH = 150;
 	private static final int MOVETREE_QUEUE_LENGTH = 1000000;
-	private static final long STATUS_UPDATE_INTERVAL = 1000000;
-	private static final long TABLEAU_PRINT_INTERVAL = 10000000;
+	private static final long STATUS_UPDATE_INTERVAL = 100000;
+	private static final long TABLEAU_PRINT_INTERVAL = 1000000;
 	private static final String DECK_38 = "2H,JS,KC,4C,3D,AH,QC,AS,8H,QH,6S,3C,6C,4H,4S,TS,5C,5D,7C,6H,4D,7D,KH,KD,5S,5H,3H,9D,7H,JC,KS,9C,8C,8D,JH,2D,9H,JD,QS,QD,6D,8S,2C,TH,7S,TC,AC,9S,AD,TD,2S,3S";
 	// private static final int WIDTH_LIMIT = 3;
 	private static Deck d = Deck.deckFrom(DECK_38);
@@ -44,39 +44,23 @@ public class StagedDepthFirstSolver {
 	 * 
 	 * @param parentTableau
 	 * @param parentTree
-	 * @param pmt
+	 * @param moveTreeQueue
 	 */
-	private static void addTreesToQueue(Tableau parentTableau, MoveTree parentTree, Queue<MoveTree> pmt) {
+	private static void addTreesToQueue(Tableau parentTableau, MoveTree parentTree, Queue<MoveTree> moveTreeQueue) {
 		TableauMoveIterator tmi = new TableauMoveIterator(parentTableau, parentTree, MAX_EXPLORE_DEPTH, parentTree.depth());
 		if (!tmi.hasNext()) {
 			return;
 		}
 		
-		descendFor(0, tmi, pmt);
+		tmi.descendFor(INTERMEDIATE_DEPTH, moveTreeQueue);
 		Iterator<MoveTree> iter = parentTree.iterator();
 		while (iter.hasNext()) {
 			MoveTree nmt = iter.next();
-			pmt.add(nmt);
-			printTrace(tmi, nmt, pmt);
-		}
-	}
-
-	private static void descendFor(int depth, TableauMoveIterator tmi, Queue<MoveTree> pmt) {
-		if (depth < INTERMEDIATE_DEPTH) {
-			while (tmi.hasNext()) {
-				MoveTree m = tmi.next();
-				printTrace(tmi, m, pmt);
-				descendFor(depth + 1, tmi, pmt);
+			if (nmt.depth() > maxDepth) {
+				maxDepth = nmt.depth();
 			}
-		} else if (depth == INTERMEDIATE_DEPTH) {
-			//int count = 0;
-			while (tmi.hasNext()/* && ++count < WIDTH_LIMIT*/) {
-				MoveTree m = tmi.nextWide();
-				if (m != null && m.depth() > maxDepth) {
-					maxDepth = m.depth();
-				}
-				printTrace(tmi, m, pmt);
-			}
+			
+			printTrace(tmi, nmt, moveTreeQueue);
 		}
 	}
 

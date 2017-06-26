@@ -66,31 +66,67 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		}
 	}
 
+	// descendFor will start from the tableau it was constructed with,
+	// and iterate over all of the possible moves not beyond depth.
+	// the iteration happens depth-first.
+	// it returns the top of the MoveTree from where it started.
 	public MoveTree descendFor(int depth, Queue<MoveTree> pmt) {
-		return this.descendFor(depth, pmt, _current);
+		MoveTree result = this.descendFor(depth, pmt, _current);
+		return result;
 	}
 
-	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, MoveState ms) {
-		MoveTree result = this._topMoveTree;
-		if (depth == 0) {
-			while (ms != null && ms._moves.hasNext()) {
-				Move move = ms._moves.next();
-				if (move != null) {
-					MoveTree mt = new MoveTree(ms.tree(), move, this.fitness(_next._tableau));
-					if (Mover.isWin(_next._tableau)) {
-						Mover.printWin(mt);
-						System.exit(1);
-						// _next = getNext();
-					}
+	// So - we descend,
+	// The fields _current and _next are important to the existing code
+	// but we'd prefer to move to parameters...
+	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, MoveState moveState) {
+		if (moveState.depth() >= _maxDepth) {
+			return null;
+		} else if (moveState.depth() > _maxDepth) {
+			_maxDepth = moveState.depth();
+		}
+
+		if (depth > 0) {
+			while (moveState.moves().hasNext()) {
+				MoveState newMoveState = createNextMoveState(moveState);
+				if (newMoveState != null) {
+					this.descendFor(depth - 1, pmt, newMoveState);
 				}
 			}
 		} else {
-
+			while (moveState.moves().hasNext()) {
+				MoveState newMoveState = createNextMoveState(moveState);
+				if (newMoveState != null) {
+					pmt.add(newMoveState.tree());
+				}
+			}
 		}
 
-		return result;
+		return moveState.tree();
 	}
-	
+
+	/**
+	 * @param moveState
+	 * @return
+	 */
+	private MoveState createNextMoveState(MoveState moveState) {
+		Move move = moveState.moves().next();
+		Tableau newTableau = nextTableauWith(moveState._tableau, move, moveState.depth());
+
+		if (newTableau != null) {
+			MoveTree newMoveTree = new MoveTree(moveState.tree(), move, this.fitness(newTableau));
+			if (Mover.isWin(newTableau)) {
+				Mover.printWin(newMoveTree);
+				System.exit(1);
+				// _next = getNext();
+			}
+
+			MoveState newMoveState = new MoveState(newTableau, newMoveTree, moveState.depth() + 1);
+			return newMoveState;
+		}
+
+		return null;
+	}
+
 	public MoveTree treeRoot() {
 		return _topMoveTree;
 	}
@@ -141,6 +177,32 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		return mt;
 	}
 
+	private MoveTableauPair getNext(MoveState moveState) {
+		if (moveState == null) {
+			return null;
+		}
+
+		if (moveState.depth() >= _maxDepth) {
+			_moveTreesRemoved += moveState.tree().remove();
+			return null;
+		}
+
+		MoveTableauPair next = null;
+		while (next == null && moveState.moves().hasNext()) {
+			Move nextMove = moveState.moves().next();
+			Tableau nt = nextTableauWith(moveState._tableau, nextMove, moveState.depth());
+			if (nt != null) {
+				next = new MoveTableauPair(nt, nextMove);
+			}
+		}
+
+		if (next == null && !moveState.moves().hasNext() && !moveState.tree().hasChildren()) {
+			_moveTreesRemoved += moveState.tree().remove();
+		}
+
+		return next;
+	}
+
 	private MoveTableauPair getNext() {
 		if (_current == null) {
 			return null;
@@ -158,7 +220,7 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 				}
 			} else if (_current.moves().hasNext()) {
 				Move nextMove = _current.moves().next();
-				Tableau nt = nextTableauWith(_current._tableau, nextMove);
+				Tableau nt = nextTableauWith(_current._tableau, nextMove, _current.depth());
 				if (nt != null) {
 					next = new MoveTableauPair(nt, nextMove);
 				}
@@ -175,7 +237,7 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 		return next;
 	}
 
-	private Tableau nextTableauWith(Tableau tableau, Move move) {
+	private Tableau nextTableauWith(Tableau tableau, Move move, int depth) {
 		Tableau nt = null;
 		try {
 			nt = Mover.move(tableau, move);
@@ -184,10 +246,14 @@ public class TableauMoveIterator implements Iterator<MoveTree> {
 				_checkedStates += 1;
 				if (_examinedStates.containsKey(ntHash)) {
 					Long c = _examinedStates.get(ntHash);
-					nt = null;
-					_examinedStates.put(ntHash, new Long(c + 1));
+					if (depth >= c) {
+						nt = null; // already seen at shallower depth
+					} else {
+						// already seen, but only deeper.
+						_examinedStates.put(ntHash, new Long(depth));
+					}
 				} else {
-					_examinedStates.put(ntHash, new Long(1));
+					_examinedStates.put(ntHash, new Long(depth));
 				}
 			}
 		} catch (Exception e) {
