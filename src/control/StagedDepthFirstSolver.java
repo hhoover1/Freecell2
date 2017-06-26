@@ -48,9 +48,6 @@ public class StagedDepthFirstSolver {
 	 */
 	private static void addTreesToQueue(Tableau parentTableau, MoveTree parentTree, Queue<MoveTree> moveTreeQueue) {
 		TableauMoveIterator tmi = new TableauMoveIterator(parentTableau, parentTree, MAX_EXPLORE_DEPTH, parentTree.depth());
-		if (!tmi.hasNext()) {
-			return;
-		}
 		
 		tmi.descendFor(INTERMEDIATE_DEPTH, moveTreeQueue);
 		Iterator<MoveTree> iter = parentTree.iterator();
