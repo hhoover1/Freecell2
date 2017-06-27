@@ -69,9 +69,13 @@ public class TableauMoveIterator {
 					if (newMoveState.depth() < _maxDepth) {
 						this.descendFor(depth - 1, pmt, newMoveState);
 					} else {
-						newMoveState.tree().remove();
+						_moveTreesRemoved += newMoveState.tree().remove();
 					}
 				}
+			}
+			
+			if (!moveState.tree().hasChildren()) {
+				_moveTreesRemoved += moveState.tree().remove();
 			}
 		} else {
 			queueLeaves(pmt, moveState);
