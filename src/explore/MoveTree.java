@@ -11,7 +11,6 @@ import freecellState.Mover;
 import freecellState.Tableau;
 
 public class MoveTree implements Comparable<MoveTree> {
-	private static final int DEPTH_BASE = 100;
 	private final MoveTree _parent;
 	private final Move _move;
 	private ArrayList<MoveTree> _children = new ArrayList<MoveTree>();
@@ -55,7 +54,7 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 
 	public int score() {
-		return _treeScore - depthFunction();
+		return _treeScore;
 	}
 
 	public int depth() {
@@ -173,13 +172,6 @@ public class MoveTree implements Comparable<MoveTree> {
 		}
 	}
 	
-	private int depthFunction() {
-		int adjustedDepth = (DEPTH_BASE - _depth);
-		int result = (DEPTH_BASE*DEPTH_BASE) - (adjustedDepth * adjustedDepth);
-		// result *= Math.signum(-adjustedDepth);
-		return result;
-	}
-
 	@Override
 	public String toString() {
 		String cname = this.getClass().getName();

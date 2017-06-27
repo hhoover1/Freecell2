@@ -14,6 +14,7 @@ import freecellState.Tableau;
  */
 
 public class TableauMoveIterator {
+	private static final int DEPTH_BASE = 100;
 	private static HashMap<String, Long> _examinedStates = new HashMap<String, Long>();
 	private static long _checkedStates = 0;
 	private static int _moveTreesRemoved = 0;
@@ -106,7 +107,7 @@ public class TableauMoveIterator {
 		Tableau newTableau = nextTableauWith(moveState._tableau, move, moveState.depth() + 1);
 
 		if (newTableau != null) {
-			MoveTree newMoveTree = new MoveTree(moveState.tree(), move, this.fitness(newTableau));
+			MoveTree newMoveTree = new MoveTree(moveState.tree(), move, this.fitness(newTableau, moveState.depth() + 1));
 			if (Mover.isWin(newTableau)) {
 				Mover.printWin(newMoveTree);
 				System.exit(1);
@@ -136,6 +137,10 @@ public class TableauMoveIterator {
 		Tableau nt = null;
 		try {
 			nt = Mover.move(tableau, move);
+			if (this.fitness(nt, depth) == Integer.MAX_VALUE) {
+				return null;
+			}
+			
 			String ntHash = nt.tableauHash();
 			synchronized (_examinedStates) {
 				_checkedStates += 1;
@@ -159,8 +164,25 @@ public class TableauMoveIterator {
 		return nt;
 	}
 
-	private int fitness(Tableau nt) {
-		return nt.fitness();
+	private int fitness(Tableau nt, int depth) {
+		int depthFit = depthFunction(nt, depth);
+		if (depthFit == Integer.MAX_VALUE) {
+			return Integer.MAX_VALUE;
+		}
+		
+		return nt.fitness() - depthFit;
+	}
+
+	private int depthFunction(Tableau nt, int depth) {
+		int adjustedDepth = (DEPTH_BASE - depth);
+		int result = (DEPTH_BASE*DEPTH_BASE) - (adjustedDepth * adjustedDepth);
+		// result *= Math.signum(-adjustedDepth);
+		
+		if (nt.cardsLeft() + depth > _maxDepth) {
+			result = Integer.MAX_VALUE;
+		}
+		
+		return result;
 	}
 
 	private MoveState startState() {

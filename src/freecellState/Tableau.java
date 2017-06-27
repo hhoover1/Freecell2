@@ -20,21 +20,21 @@ public class Tableau {
 	final Card[] _foundation;
 	final Card[] _freecells;
 	final Card[][] _tableau;
-	
+
 	public Tableau(Card[] fd, Card[] fc, Card[][] t) {
 		_foundation = fd;
 		_freecells = fc;
 		_tableau = t;
 		this.sortStacks();
 	}
-	
+
 	public Tableau(Deck d) {
 		_foundation = new Card[Card.Suit.values().length];
 		_freecells = new Card[FREECELL_COUNT];
 		_tableau = new Card[TABLEAU_SIZE][0];
 		this.deal(d);
 	}
-	
+
 	@SuppressWarnings("unused")
 	private Tableau() {
 		_foundation = null;
@@ -45,16 +45,16 @@ public class Tableau {
 	public Card getFound(Suit suit) {
 		return _foundation[suit.ordinal()];
 	}
-	
+
 	public Card getFree(int idx) {
 		return _freecells[idx];
 	}
-	
+
 	public Card getTableau(int column, int offset) {
 		Card[] tabCol = _tableau[column];
 		return tabCol[tabCol.length - offset - 1];
 	}
-	
+
 	public Card get(Location from) throws Exception {
 		Card res = null;
 		switch (from.area()) {
@@ -72,9 +72,9 @@ public class Tableau {
 			res = _freecells[from.column()];
 			break;
 		default:
-			throw new Exception("unknown area in Location :" + from);	
+			throw new Exception("unknown area in Location :" + from);
 		}
-		
+
 		return res;
 	}
 
@@ -135,7 +135,7 @@ public class Tableau {
 		}
 		// # of non-empty foundation columns - max 40000
 		result += 10000 * nonEmptyFoundation;
-		
+
 		// total depth of foundation columns -- max 13000
 		result += 2500 * totalRetired;
 
@@ -144,15 +144,15 @@ public class Tableau {
 
 		// partial ordered height
 		result += 10 * partialOrderedHeights();
-		
+
 		// fully ordered depths
 		result += 10 * fullyOrderedDepths();
-		
+
 		// tallest ordered stack -- max 7 + 13 == 20
 		result += tallestOrderedStack() * 100;
-		
+
 		result += stackCardScores();
-		
+
 		// subtract # of cards in freecells * factor
 		result -= 10 * (((int) Math.pow(2.0, (_freecells.length - this.emptyFreecellCount()))) - 1);
 
@@ -165,20 +165,20 @@ public class Tableau {
 		for (int ii = 0; ii < _tableau.length; ++ii) {
 			result += stackCardScore(ii);
 		}
-		
+
 		return result;
 	}
-	
+
 	public int stackCardScore(int idx) {
 		Card[] s = _tableau[idx];
 		int result = 0;
 		for (Card c : s) {
 			result += 13 - c.rank();
 		}
-		
+
 		return result;
 	}
-	
+
 	private int emptyTableauColumns() {
 		int emptyCount = 0;
 		for (Card[] ca : this._tableau) {
@@ -186,7 +186,7 @@ public class Tableau {
 				emptyCount += 1;
 			}
 		}
-		
+
 		return emptyCount;
 	}
 
@@ -195,7 +195,7 @@ public class Tableau {
 		for (Card[] stack : _tableau) {
 			result += fullyOrderedDepth(stack);
 		}
-		
+
 		return result;
 	}
 
@@ -214,10 +214,10 @@ public class Tableau {
 
 		return result;
 	}
-	
+
 	private int partialOrderedHeights() {
 		int result = 0;
-		
+
 		for (int stackIndex = 0; stackIndex < _tableau.length; ++stackIndex) {
 			Card[] stack = _tableau[stackIndex];
 			if (stack.length > 0) {
@@ -231,7 +231,7 @@ public class Tableau {
 				}
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -268,7 +268,7 @@ public class Tableau {
 			Card c = _foundation[ii];
 			res += c.hashCode() * (100000 * ii);
 		}
-		
+
 		for (int ii = 0; ii < _tableau.length; ++ii) {
 			Card[] tc = _tableau[ii];
 			for (int jj = 0; jj < tc.length; ++jj) {
@@ -276,7 +276,7 @@ public class Tableau {
 				res += c.hashCode() * ii;
 			}
 		}
-		
+
 		for (int ii = 0; ii < _freecells.length; ++ii) {
 			if (_freecells[ii] != null) {
 				res += 10000000 + _freecells[ii].hashCode();
@@ -291,7 +291,7 @@ public class Tableau {
 		if (!(other instanceof Tableau)) {
 			return false;
 		}
-		
+
 		Tableau ot = (Tableau) other;
 		for (int ii = 0; ii < _freecells.length; ++ii) {
 			if (_freecells[ii] == null && ot._freecells[ii] == null) {
@@ -321,7 +321,7 @@ public class Tableau {
 			if (f1.length != f2.length) {
 				return false;
 			}
-			
+
 			for (int jj = 0; jj < f1.length; ++jj) {
 				Card c1 = f1[jj];
 				Card c2 = f2[jj];
@@ -398,14 +398,14 @@ public class Tableau {
 	public static Tableau fromString(String deckString) {
 		Deck d = Deck.deckFrom(deckString);
 		Tableau t = new Tableau(d);
-		
+
 		return t;
 	}
 
 	public static Tableau fromStringNoValidation(String deckString) {
 		Deck d = Deck.deckFromNoValidation(deckString);
 		Tableau t = new Tableau(d);
-		
+
 		return t;
 	}
 
@@ -414,7 +414,7 @@ public class Tableau {
 		if (colSize == 0) {
 			return null;
 		}
-		
+
 		Card c = _tableau[tabCol][colSize - 1];
 		return c;
 	}
@@ -422,7 +422,7 @@ public class Tableau {
 	public Card foundation(int column) {
 		return _foundation[column];
 	}
-	
+
 	public Card freecell(int column) {
 		return _freecells[column];
 	}
@@ -464,14 +464,14 @@ public class Tableau {
 		}
 		return res;
 	}
-	
+
 	public int firstEmptyFreecell() {
 		for (int ii = 0; ii < FREECELL_COUNT; ++ii) {
 			if (_freecells[ii] == null) {
 				return ii;
 			}
 		}
-		
+
 		return -1;
 	}
 
@@ -480,7 +480,7 @@ public class Tableau {
 		for (int ii = 0; ii < tops.length; ++ii) {
 			tops[ii] = this.getTopTableau(ii);
 		}
-		
+
 		return tops;
 	}
 
@@ -519,5 +519,16 @@ public class Tableau {
 
 	public int heightOfTableauStack(int column) {
 		return _tableau[column].length;
+	}
+
+	public int cardsLeft() {
+		int result = 52;
+		for (Card c : _foundation) {
+			if (c != null) {
+				result -= c.rank();
+			}
+		}
+
+		return result;
 	}
 }
