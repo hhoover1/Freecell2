@@ -135,6 +135,15 @@ public class MoveTree implements Comparable<MoveTree> {
 		return !_children.isEmpty();
 	}
 
+	public int treeSize() {
+		int count = 1;
+		for (MoveTree mt : _children) {
+			count += mt.treeSize(); 
+		}
+		
+		return count;
+	}
+	
 	Iterator<MoveTree> childIterator() {
 		return _children.iterator();
 	}
@@ -201,7 +210,7 @@ public class MoveTree implements Comparable<MoveTree> {
 		public MTIterator(MoveTree m) {
 			_mt = m;
 			_childIter = _mt.childIterator();
-			_next = getNextNext();
+			_next = m;
 		}
 
 		private MoveTree getNextNext() {

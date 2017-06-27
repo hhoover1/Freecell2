@@ -50,7 +50,11 @@ public class TableauMoveIterator {
 	// the iteration happens depth-first.
 	// it returns the top of the MoveTree from where it started.
 	public MoveTree descendFor(int depth, Queue<MoveTree> pmt) {
-		MoveTree result = this.descendFor(depth, pmt, _current);
+		MoveTree result = null;
+		if (_current != null) {
+			result = this.descendFor(depth, pmt, _current);
+		}
+
 		return result;
 	}
 
@@ -58,27 +62,35 @@ public class TableauMoveIterator {
 	// The fields _current and _next are important to the existing code
 	// but we'd prefer to move to parameters...
 	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, MoveState moveState) {
-		if (moveState.depth() >= _maxDepth) {
-			return null;
-		}
-
 		if (depth > 0) {
 			while (moveState.moves().hasNext()) {
 				MoveState newMoveState = createNextMoveState(moveState);
 				if (newMoveState != null) {
-					this.descendFor(depth - 1, pmt, newMoveState);
+					if (newMoveState.depth() < _maxDepth) {
+						this.descendFor(depth - 1, pmt, newMoveState);
+					} else {
+						newMoveState.tree().remove();
+					}
 				}
 			}
 		} else {
-			while (moveState.moves().hasNext()) {
-				MoveState newMoveState = createNextMoveState(moveState);
-				if (newMoveState != null) {
-					pmt.add(newMoveState.tree());
-				}
-			}
+			queueLeaves(pmt, moveState);
 		}
 
 		return moveState.tree();
+	}
+
+	/**
+	 * @param pmt
+	 * @param moveState
+	 */
+	private void queueLeaves(Queue<MoveTree> pmt, MoveState moveState) {
+		while (moveState.moves().hasNext()) {
+			MoveState newMoveState = createNextMoveState(moveState);
+			if (newMoveState != null) {
+				pmt.add(newMoveState.tree());
+			}
+		}
 	}
 
 	/**

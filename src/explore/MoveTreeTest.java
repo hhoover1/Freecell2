@@ -90,10 +90,11 @@ public class MoveTreeTest {
 		assertNotNull(parent.childIterator());
 		assertTrue(parent.childIterator().hasNext());
 		Iterator<MoveTree> kids = parent.iterator();
-		int count = 1;
+		assertTrue(kids.hasNext());
+		int count = 0;
 		while (kids.hasNext()) {
-			MoveTree n = kids.next();
-			assertEquals(trees[count], n);
+			MoveTree kid = kids.next();
+			assertEquals(trees[count], kid);
 			count += 1;
 		}
 		assertEquals(5, count);
@@ -106,8 +107,8 @@ public class MoveTreeTest {
 
 		Iterator<MoveTree> iter = parent.iterator();
 		assertTrue(iter.hasNext());
-		assertEquals(childs[0], iter.next());
-		int idx = 1;
+		assertEquals(parent, iter.next());
+		int idx = 0;
 		while (iter.hasNext()) {
 			MoveTree iterVal = iter.next();
 			//System.out.println(String.format("%d::%s:%s", idx, childs[idx], iterVal));
@@ -131,6 +132,23 @@ public class MoveTreeTest {
 		assertEquals(parent.move(), c31[0]);
 		assertEquals(childs[6].move(), c31[1]);
 		assertEquals(childs[7].move(), c31[2]);
+	}
+	
+	@Test
+	public final void testIterationOverChilds() {
+		MoveTree parent = new MoveTree(nullParent, move1, 999);
+		MoveTree[] kiddos = makeChilds(parent);
+		Iterator<MoveTree> iter = parent.iterator();
+		assertNotNull(iter);
+		assertTrue(iter.hasNext());
+		assertEquals(parent, iter.next());
+		int idx = 0;
+		while (iter.hasNext()) {
+			MoveTree kid = iter.next();
+			assertNotNull(kid);
+			assertEquals(kiddos[idx], kid);
+			idx += 1;
+		}
 	}
 	
 //	@Test

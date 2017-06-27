@@ -37,13 +37,22 @@ public class StagedDepthFirstSolver {
 		System.out.println(startTableau);
 
 		addTreesToQueue(startTableau, base, pmt);
+		int whileCount = 0;
 		while (!pmt.isEmpty()) {
 			MoveTree nextBase = pmt.poll();
 			Tableau pt = nextBase.resultingTableau(startTableau);
 			addTreesToQueue(pt, nextBase, pmt);
+			whileCount += 1;
 		}
 		
-		System.out.println("No solution found");		
+		System.out.println("No solution found");
+		System.out.println(String.format("while count %d, treeSize: %d", whileCount, base.treeSize()));
+		Iterator<MoveTree> iter = base.iterator();
+		int testCount = 0;
+		while (iter.hasNext()) {
+			MoveTree m = iter.next();
+			System.out.println(String.format("%06d: %s", ++testCount, m.toString()));
+		}
 	}
 	
 	/**
