@@ -15,8 +15,9 @@ import freecellState.Tableau;
 
 public class TableauMoveIterator {
 	private static final int DEPTH_BASE = 100;
-	private static HashMap<String, Long> _examinedStates = new HashMap<String, Long>();
+	private static HashMap<String, Integer> _examinedStates = new HashMap<String, Integer>();
 	private static long _checkedStates = 0;
+	private static long _repeatOffenders = 0;
 	private static int _moveTreesRemoved = 0;
 	private Tableau _startTableau;
 	private MoveState _topMoveState;
@@ -110,8 +111,9 @@ public class TableauMoveIterator {
 			MoveTree newMoveTree = new MoveTree(moveState.tree(), move, this.fitness(newTableau, moveState.depth() + 1));
 			if (Mover.isWin(newTableau)) {
 				Mover.printWin(newMoveTree);
-				System.exit(1);
-				// _next = getNext();
+				// System.exit(1);
+				_maxDepth = moveState.depth();
+				System.out.println(String.format("setting max depth to %d", _maxDepth));
 			}
 
 			MoveState newMoveState = new MoveState(newTableau, newMoveTree, moveState.depth() + 1);
@@ -133,6 +135,10 @@ public class TableauMoveIterator {
 		return _moveTreesRemoved;
 	}
 
+	public long repeatOffenders() {
+		return _repeatOffenders;
+	}
+
 	private Tableau nextTableauWith(Tableau tableau, Move move, int depth) {
 		Tableau nt = null;
 		try {
@@ -145,15 +151,16 @@ public class TableauMoveIterator {
 			synchronized (_examinedStates) {
 				_checkedStates += 1;
 				if (_examinedStates.containsKey(ntHash)) {
-					Long c = _examinedStates.get(ntHash);
+					Integer c = _examinedStates.get(ntHash);
 					if (depth >= c) {
 						nt = null; // already seen at shallower depth
+						_repeatOffenders += 1;
 					} else {
 						// already seen, but only deeper.
-						_examinedStates.put(ntHash, new Long(depth));
+						_examinedStates.put(ntHash, new Integer(depth));
 					}
 				} else {
-					_examinedStates.put(ntHash, new Long(depth));
+					_examinedStates.put(ntHash, new Integer(depth));
 				}
 			}
 		} catch (Exception e) {

@@ -146,7 +146,7 @@ public class Tableau {
 		result += 10 * partialOrderedHeights();
 
 		// fully ordered depths
-		result += 10 * fullyOrderedDepths();
+		result += 100 * fullyOrderedDepths();
 
 		// tallest ordered stack -- max 7 + 13 == 20
 		result += tallestOrderedStack() * 100;
@@ -160,7 +160,7 @@ public class Tableau {
 		return MAX_FITNESS_VALUE - result;
 	}
 
-	private int stackCardScores() {
+	int stackCardScores() {
 		int result = 0;
 		for (int ii = 0; ii < _tableau.length; ++ii) {
 			result += stackCardScore(ii);
@@ -179,7 +179,7 @@ public class Tableau {
 		return result;
 	}
 
-	private int emptyTableauColumns() {
+	int emptyTableauColumns() {
 		int emptyCount = 0;
 		for (Card[] ca : this._tableau) {
 			if (ca.length == 0) {
@@ -190,7 +190,7 @@ public class Tableau {
 		return emptyCount;
 	}
 
-	private int fullyOrderedDepths() {
+	int fullyOrderedDepths() {
 		int result = 0;
 		for (Card[] stack : _tableau) {
 			result += fullyOrderedDepth(stack);
@@ -199,13 +199,13 @@ public class Tableau {
 		return result;
 	}
 
-	private int fullyOrderedDepth(Card[] stack) {
+	int fullyOrderedDepth(Card[] stack) {
 		int result = 0;
 		if (stack.length > 0) {
-			Card lastCard = stack[stack.length - 1];
-			for (int cardIdx = stack.length - 2; cardIdx > 0; --cardIdx) {
+			Card lastCard = stack[0];
+			for (int cardIdx = 1; cardIdx < stack.length; ++cardIdx) {
 				Card c = stack[cardIdx];
-				if (lastCard.canBePlacedOn(c)) {
+				if (c.canBePlacedOn(lastCard)) {
 					lastCard = c;
 					result += 1;
 				}
@@ -215,7 +215,7 @@ public class Tableau {
 		return result;
 	}
 
-	private int partialOrderedHeights() {
+	int partialOrderedHeights() {
 		int result = 0;
 
 		for (int stackIndex = 0; stackIndex < _tableau.length; ++stackIndex) {
@@ -235,7 +235,7 @@ public class Tableau {
 		return result;
 	}
 
-	private int tallestOrderedStack() {
+	int tallestOrderedStack() {
 		int result = 0;
 		for (Card[] ac : _tableau) {
 			int topOrderLength = topOrderedLength(ac);
@@ -245,7 +245,7 @@ public class Tableau {
 		return result;
 	}
 
-	private int topOrderedLength(Card[] ac) {
+	int topOrderedLength(Card[] ac) {
 		int result = ac.length == 0 ? 0 : 1;
 		int topIndex = ac.length - 1;
 		for (int ii = 0; ii < topIndex; ++ii) {
@@ -503,9 +503,9 @@ public class Tableau {
 
 		private int compareStacks(Card[] a, Card[] b) {
 			if (a == null || a.length == 0) {
-				return b == null || b.length == 0 ? 0 : -1;
+				return b == null || b.length == 0 ? 0 : 1;
 			} else if (b == null || b.length == 0) {
-				return 1;
+				return -1;
 			} else {
 				if (a.length != b.length) {
 					return b.length - a.length;
@@ -530,5 +530,30 @@ public class Tableau {
 		}
 
 		return result;
+	}
+
+	void put(Location l, Card c) {
+		switch (l.area()) {
+		case Tableau:
+			Card[] cs = _tableau[l.column()];
+			Card[] ncs = Arrays.copyOf(cs, cs.length + 1);
+			int putIdx = cs.length;
+			for (int ii = cs.length - 1; ii > l.offset(); --ii) {
+				ncs[putIdx] = cs[ii];
+			}
+			ncs[l.offset()] = c;
+			_tableau[l.column()] = ncs;
+			break;
+		case Foundation:
+			_foundation[l.column()] = c;
+			break;
+		case Freecell:
+			_freecells[l.column()] = c;
+			break;
+		}
+	}
+
+	Card[] getTableauArray(int i) {
+		return _tableau[i];
 	}
 }

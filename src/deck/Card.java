@@ -13,6 +13,7 @@ public class Card implements Comparable<Card> {
 
 	private Suit _suit;
 	private int  _rank;
+	private String _shortName;
 	
 	public static Card cardFrom(String cs) {
 		
@@ -31,6 +32,7 @@ public class Card implements Comparable<Card> {
 		
 		_suit = s;
 		_rank = r;
+		_shortName = this.calcShortName();
 	}
 	
 	public Suit suit() {
@@ -63,13 +65,17 @@ public class Card implements Comparable<Card> {
 	}
 	
 	public String shortName() {
+		return _shortName;
+	}
+	
+	String calcShortName() {
 		String suit = _suit.name();
 		String rank = this.rankName();
 		String res = rank.substring(0,  1);
 		res += suit.substring(0, 1);
 		return res;
 	}
-	
+
 	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof Card)) {
@@ -155,7 +161,7 @@ public class Card implements Comparable<Card> {
 	}
 
 	public boolean isNextRankOf(Card foc) {
-		if (this._suit.ordinal() != foc._suit.ordinal()) {
+		if (this._suit != foc._suit) {
 			return false;
 		}
 		
