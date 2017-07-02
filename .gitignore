@@ -3,6 +3,7 @@ src/control/run*
 .settings
 /bin/
 bin/
+/perf/
 *.log
 *.save
 .*~
