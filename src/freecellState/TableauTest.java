@@ -1,6 +1,8 @@
 package freecellState;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +12,26 @@ import deck.Card.Suit;
 import freecellState.Location.Area;
 
 public class TableauTest {
+	private static final Location[] col2Locations = {
+			new Location(Area.Tableau, 2, 0),
+			new Location(Area.Tableau, 2, 1),
+			new Location(Area.Tableau, 2, 2),
+			new Location(Area.Tableau, 2, 3),
+			new Location(Area.Tableau, 2, 4),
+			new Location(Area.Tableau, 2, 5),
+			new Location(Area.Tableau, 2, 6),
+			new Location(Area.Tableau, 2, 7),
+	};
+	private static final Card[] cardStack = {
+		Card.cardFrom("6D"),
+		Card.cardFrom("7S"),
+		Card.cardFrom("8D"),
+		Card.cardFrom("9C"),
+		Card.cardFrom("TH"),
+		Card.cardFrom("JC"),
+		Card.cardFrom("QD"),
+		Card.cardFrom("KS")
+	};
 	private static final Card[] found = new Card[4];
 	private static final Card[] free = new Card[4];
 	private static Card[][] cardTab = new Card[8][];
@@ -81,9 +103,24 @@ public class TableauTest {
 	@Test
 	public final void testFitnessBasic() {
 		assertNotNull(tableau);
-		assertEquals(21374, tableau.fitness());
+		assertEquals(61374, tableau.fitness());
 	}
 
+	@Test
+	public final void testFitnessOrdered() {
+		addOrderedStack();
+		assertEquals(64846, tableau.fitness());
+	}
+	
+	@Test
+	public final void testFitnessReverseOrdered() {
+		for (int ii = 0; ii < cardStack.length; ++ii) {
+			tableau.put(col2Locations[ii], cardStack[ii]);
+		}
+		System.out.println(tableau);
+		assertEquals(66336, tableau.fitness());
+	}
+	
 	@Test
 	public final void testStackCardScore() {
 		assertNotNull(tableau);
@@ -111,37 +148,47 @@ public class TableauTest {
 		Card[] stack = tableau.getTableauArray(0);
 		assertEquals(0, tableau.fullyOrderedDepth(stack));
 		stack = tableau.getTableauArray(2);
-		assertEquals(0, tableau.fullyOrderedDepth(stack));
+		assertEquals(1, tableau.fullyOrderedDepth(stack));
 		addOrderedStack();
 		stack = tableau.getTableauArray(2);
-		assertEquals(2, tableau.fullyOrderedDepth(stack));
-		System.out.println(tableau);
+		assertEquals(8, tableau.fullyOrderedDepth(stack));
 	}
 
 	/**
 	 * 
 	 */
 	private void addOrderedStack() {
-		Location l = new Location(Area.Tableau, 2, 0);
-		Card c1 = Card.cardFrom("JD");
-		tableau.put(l,  c1);
-		l = new Location(Area.Tableau, 2, 1);
-		Card c2 = Card.cardFrom("TC");
-		tableau.put(l, c2);
-		l = new Location(Area.Tableau, 2, 2);
-		Card c3 = Card.cardFrom("9H");
-		tableau.put(l, c3);
+		for (int ii = 0; ii < TableauTest.cardStack.length; ++ii) {
+			tableau.put(TableauTest.col2Locations[ii], cardStack[col2Locations.length - ii - 1]);
+		}
 	}
 
+	@Test
+	public final void testPut() throws Exception {
+		Location l = new Location(Area.Tableau, 3, 0);
+		Card c1 = Card.cardFrom("JH");
+		tableau.put(l, c1);
+		assertEquals(c1, tableau.get(l));
+		Card c2 = Card.cardFrom("TS");
+		Location l2 = new Location(Area.Tableau, 3, 1);
+		tableau.put(l2,  c2);
+		assertEquals(c2, tableau.get(l2));
+//		Card c3 = Card.cardFrom("QC");
+//		tableau.put(l2,  c3);
+//		Location l3 = new Location(Area.Tableau, 3, 2);
+//		System.out.println(tableau);
+//		assertEquals(c2, tableau.get(l3));
+	}
+	
 	@Test
 	public final void testTallestOrderedStack() {
 		assertNotNull(tableau);
 		addOrderedStack();
-		assertEquals(3, tableau.tallestOrderedStack());
-		Card c4 = Card.cardFrom("8S");
-		Location l = new Location(Area.Tableau, 2, 3);
+		assertEquals(8, tableau.tallestOrderedStack());
+		Card c4 = Card.cardFrom("5S");
+		Location l = new Location(Area.Tableau, 2, 8);
 		tableau.put(l, c4);
-		assertEquals(4, tableau.tallestOrderedStack());
+		assertEquals(9, tableau.tallestOrderedStack());
 	}
 	
 	@Test

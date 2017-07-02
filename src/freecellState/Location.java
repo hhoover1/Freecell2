@@ -71,13 +71,13 @@ public class Location {
 	}
 
 	public String shortName() {
-		String cname = this.getClass().getName();
-		StringBuilder sb = new StringBuilder((cname.substring(cname.lastIndexOf('.') + 1)).substring(0, 3));
-		sb.append('(');
+		//String cname = this.getClass().getName();
+		StringBuilder sb = new StringBuilder(/*(cname.substring(cname.lastIndexOf('.') + 1)).substring(0, 3)*/);
+		//sb.append('(');
 		sb.append(_area.name().substring(0, 2));
 		sb.append(_column);
 		sb.append(_offset);
-		sb.append(')');
+		//sb.append(')');
 		return sb.toString();
 	}
 }

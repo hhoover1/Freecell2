@@ -189,7 +189,7 @@ public class Card implements Comparable<Card> {
 			return true;
 		}
 		
-		if (this._rank == 0 && foc._rank == 12) {
+		if (this._rank == 12 && foc._rank == 0) {
 			return true;
 		}
 		

@@ -68,9 +68,10 @@ public class Deck {
 		_deck = new Card[DECKSIZE];
 		int pos = 0;
 		for (Suit s : Suit.values()) {
-			for (int value = 0; value < Card.RANK_SIZE; ++value) {
+			for (int value = 1; value < Card.RANK_SIZE; ++value) {
 				_deck[pos++] = new Card(s, value);
 			}
+			_deck[pos++] = new Card(s, 0);
 		}
 	}
 	

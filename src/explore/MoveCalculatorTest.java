@@ -45,12 +45,12 @@ public class MoveCalculatorTest {
 	private static final Move[] shortMoves = {
 			new Move(Tab[0], Found[3]),
 			new Move(Tab[1], Tab[2]),
+			new Move(Tab[1], Free[0]),
 			new Move(Tab[2], Tab[3]),
 			new Move(Tab[3], Tab[4]),
 			new Move(Tab[4], Tab[5]),
 			new Move(Tab[5], Tab[6]),
 			new Move(Tab[0], Free[0]),
-			new Move(Tab[1], Free[0]),
 			new Move(Tab[2], Free[0]),
 			new Move(Tab[3], Free[0]),
 			new Move(Tab[4], Free[0]),
@@ -96,7 +96,9 @@ public class MoveCalculatorTest {
 
 	@Test
 	public final void testShort() {
+		//System.out.println(shortTab);
 		Move[] moves = MoveCalculator.movesFrom(shortTab);
+		//System.out.println(Arrays.toString(moves));
 		assertNotNull(moves);
 		ArrayIterator<Move> mi = new ArrayIterator<Move>(moves);
 		assertTrue(mi.hasNext());

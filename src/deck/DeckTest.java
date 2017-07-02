@@ -17,14 +17,14 @@ public class DeckTest {
 	@Test
 	public final void basicTest() throws Exception {
 		Deal d = new Deal(new Deck());
-		int dcount = 0;
+		int dcount = 1;
 		while (!d.isEmpty()) {
 			Card c = d.next();
 			int ccount = c.suit().ordinal() * SUIT_SIZE + c.rank();
 			assertEquals(ccount, dcount);
 			dcount += 1;
 		}
-		assertEquals(dcount, Deck.DECKSIZE);
+		assertEquals(dcount-1, Deck.DECKSIZE);
 	}
 
 	@Test

@@ -9,7 +9,22 @@ import org.junit.Test;
 import deck.Card.Suit;
 
 public class CardTest {
-
+	private static final Card[] heartsList = {
+			Card.cardFrom("AH"),
+			Card.cardFrom("2H"),
+			Card.cardFrom("3H"),
+			Card.cardFrom("4H"),
+			Card.cardFrom("5H"),
+			Card.cardFrom("6H"),
+			Card.cardFrom("7H"),
+			Card.cardFrom("8H"),
+			Card.cardFrom("9H"),
+			Card.cardFrom("TH"),
+			Card.cardFrom("JH"),
+			Card.cardFrom("QH"),
+			Card.cardFrom("KH")
+	};
+	
 	@Test
 	public final void testHashCode() throws Exception {
 		Card c = new Card(Suit.Hearts, 7);
@@ -100,6 +115,13 @@ public class CardTest {
 		assertFalse(t1.isNextRankOf(new Card(Suit.Hearts, 0)));
 		t1 = new Card(Suit.Diamonds, 2);
 		assertTrue(t1.isNextRankOf(new Card(Suit.Diamonds, 1)));
+		for (int ii = 1; ii < heartsList.length; ++ii) {
+			Card c1 = heartsList[ii];
+			Card c2 = heartsList[ii - 1];
+			assertTrue(c1.isNextRankOf(c2));
+			assertFalse(c2.isNextRankOf(c1));
+		}
+		assertFalse(heartsList[0].isNextRankOf(heartsList[12]));
 	}
 
 	@Test

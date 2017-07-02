@@ -18,12 +18,13 @@ public class TableauMoveIterator {
 	private static HashMap<String, Integer> _examinedStates = new HashMap<String, Integer>();
 	private static long _checkedStates = 0;
 	private static long _repeatOffenders = 0;
-	private static int _moveTreesRemoved = 0;
+	private static long _moveTreesRemoved = 0;
 	private Tableau _startTableau;
 	private MoveState _topMoveState;
 	private MoveTree _topMoveTree;
 	private int _maxDepth;
 	private MoveState _current;
+	private boolean _winOccurred = false;
 
 	public static void clearExamined() {
 		synchronized (TableauMoveIterator._examinedStates) {
@@ -85,6 +86,10 @@ public class TableauMoveIterator {
 
 		return moveState.tree();
 	}
+	
+	public boolean winOccurred() {
+		return _winOccurred;
+	}
 
 	/**
 	 * @param pmt
@@ -112,8 +117,9 @@ public class TableauMoveIterator {
 			if (Mover.isWin(newTableau)) {
 				Mover.printWin(newMoveTree);
 				// System.exit(1);
-				_maxDepth = moveState.depth();
-				System.out.println(String.format("setting max depth to %d", _maxDepth));
+				_maxDepth = moveState.depth() - 1;
+				System.out.println(String.format("Win occurred at depth %d: setting max depth to %d", moveState.depth(), _maxDepth));
+				_winOccurred  = true;
 			}
 
 			MoveState newMoveState = new MoveState(newTableau, newMoveTree, moveState.depth() + 1);
@@ -131,7 +137,7 @@ public class TableauMoveIterator {
 		return TableauMoveIterator._checkedStates;
 	}
 
-	public int moveTreesRemoved() {
+	public long moveTreesRemoved() {
 		return _moveTreesRemoved;
 	}
 
@@ -250,5 +256,9 @@ public class TableauMoveIterator {
 		}
 
 		return null;
+	}
+
+	public int maxDepth() {
+		return _maxDepth;
 	}
 }

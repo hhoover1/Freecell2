@@ -12,10 +12,24 @@ import deck.Deck;
 import deck.Card.Suit;
 import deck.Deal;
 
+/*
+ * class Tableau
+ * 
+ * Notes on a Tableau
+ * 	The Foundation tracks only the top cards of each suit.
+ *  The Freecells hold only one card in each cell
+ *  The tableau portion is a fixed array of variable arrays.
+ *  The TOP card of each of the fixed arrays is the highest index
+ *  card in the stack.  The 0 index always holds the bottom
+ *  of the stack.  We order it this way so that once cards are
+ *  put in the stack, their relative indexes don't change.
+ *  
+ */
+
 public class Tableau {
 	public static final int FREECELL_COUNT = 4;
 	public static final int TABLEAU_SIZE = 8;
-	private static final int MAX_FITNESS_VALUE = 40000 + 4000 + 20000;
+	private static final int MAX_FITNESS_VALUE = 80000 + 4000 + 20000;
 
 	final Card[] _foundation;
 	final Card[] _freecells;
@@ -146,7 +160,11 @@ public class Tableau {
 		result += 10 * partialOrderedHeights();
 
 		// fully ordered depths
-		result += 100 * fullyOrderedDepths();
+		//result += 500 * fullyOrderedDepths();
+		int[] fullyOrdered = fullyOrderedTableauDepths();
+		for (int foc : fullyOrdered) {
+			result += foc * foc * 100;
+		}
 
 		// tallest ordered stack -- max 7 + 13 == 20
 		result += tallestOrderedStack() * 100;
@@ -160,6 +178,15 @@ public class Tableau {
 		return MAX_FITNESS_VALUE - result;
 	}
 
+	int[] fullyOrderedTableauDepths() {
+		int[] res = new int[TABLEAU_SIZE];
+		for (int ii = 0; ii < _tableau.length; ++ii) {
+			res[ii] = fullyOrderedDepth(_tableau[ii]);
+		}
+		
+		return res;
+	}
+	
 	int stackCardScores() {
 		int result = 0;
 		for (int ii = 0; ii < _tableau.length; ++ii) {
@@ -193,21 +220,26 @@ public class Tableau {
 	int fullyOrderedDepths() {
 		int result = 0;
 		for (Card[] stack : _tableau) {
-			result += fullyOrderedDepth(stack);
+			int stackDepth = fullyOrderedDepth(stack);
+			if (stackDepth > 1) {
+				result += stackDepth;
+			}
 		}
 
 		return result;
 	}
 
 	int fullyOrderedDepth(Card[] stack) {
-		int result = 0;
-		if (stack.length > 0) {
+		int result = 1;
+		if (stack.length > 1) {
 			Card lastCard = stack[0];
 			for (int cardIdx = 1; cardIdx < stack.length; ++cardIdx) {
 				Card c = stack[cardIdx];
 				if (c.canBePlacedOn(lastCard)) {
 					lastCard = c;
 					result += 1;
+				} else {
+					return 0;
 				}
 			}
 		}

@@ -28,6 +28,7 @@ public class StagedDepthFirstSolver {
 	
 	private int _stagedDepth = INTERMEDIATE_DEPTH;
 	private int _maxExploreDepth = MAX_EXPLORE_DEPTH;
+	private long _flushedTrees = 0;
 
 	public static void main(String[] args) {
 		StagedDepthFirstSolver solver = new StagedDepthFirstSolver();
@@ -74,6 +75,10 @@ public class StagedDepthFirstSolver {
 				parentTree.depth());
 
 		tmi.descendFor(_stagedDepth, moveTreeQueue);
+		if (tmi.winOccurred()) {
+			this.flushDeepTrees(moveTreeQueue, tmi.maxDepth());
+		}
+		
 		Iterator<MoveTree> iter = parentTree.iterator();
 		while (iter.hasNext()) {
 			MoveTree nmt = iter.next();
@@ -82,6 +87,18 @@ public class StagedDepthFirstSolver {
 			}
 
 			printTrace(tmi, nmt, moveTreeQueue);
+		}
+	}
+
+	private void flushDeepTrees(Queue<MoveTree> moveTreeQueue, int newMaxDepth) {
+		MoveTree[] queuedTrees = moveTreeQueue.toArray(new MoveTree[moveTreeQueue.size()]);
+		moveTreeQueue.clear();
+		for (MoveTree mt : queuedTrees) {
+			if (mt.depth() < newMaxDepth) {
+				moveTreeQueue.add(mt);
+			} else {
+				_flushedTrees  += 1;
+			}
 		}
 	}
 
@@ -95,8 +112,8 @@ public class StagedDepthFirstSolver {
 		if (count % STATUS_UPDATE_INTERVAL == 0) {
 			System.out.println(String.format("%s: %3d: %s", 
 					dateFormatter.format(d), maxDepthTraversed, m));
-			System.out.println(String.format("%8d: checked-%5d: qSize-%6d: treesKilled-%6d: repeats-%6d", count,
-					tmi.checkedStates(), q.size(), tmi.moveTreesRemoved(), tmi.repeatOffenders()));
+			System.out.println(String.format("%8d: checked-%5d: qSize-%6d: treesKilled-%6d: repeats-%6d: flushed: %d", count,
+					tmi.checkedStates(), q.size(), tmi.moveTreesRemoved(), tmi.repeatOffenders(), _flushedTrees));
 		}
 
 		if (count % TABLEAU_PRINT_INTERVAL == 0) {
