@@ -2,6 +2,7 @@ package control;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.PriorityQueue;
@@ -23,8 +24,8 @@ public class StagedDepthFirstSolver {
 	private static Tableau startTableau = new Tableau(d);
 	private static long count = 0;
 	private static final DateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ss.SSS");
+	private static final int PARALLEL_TOPS = 32;
 
-	
 	private int _stagedDepth = INTERMEDIATE_DEPTH;
 	private int _maxExploreDepth = MAX_EXPLORE_DEPTH;
 	private long _flushedTrees = 0;
@@ -37,17 +38,17 @@ public class StagedDepthFirstSolver {
 
 	private class Meter implements TableauMoveIterator.ProgressionMeter {
 		private StagedDepthFirstSolver _solver;
-		
+
 		public Meter(StagedDepthFirstSolver solver) {
 			_solver = solver;
 		}
-		
+
 		@Override
 		public void progressOneNode(Tableau t, MoveTree newTree, TableauMoveIterator tmi) {
 			_solver.printTrace(tmi, newTree, t, _priorityMoveQueue);
 		}
 	};
-	
+
 	void runStagedDepthFirstSearch(int stageDepth, int maxDepth) {
 		_stagedDepth = stageDepth;
 		_maxExploreDepth = maxDepth;
@@ -56,12 +57,20 @@ public class StagedDepthFirstSolver {
 		System.out.println(startTableau);
 
 		addTreesToQueue(startTableau, base, _priorityMoveQueue);
+		ArrayList<MoveTree> parallelTops = new ArrayList<MoveTree>(PARALLEL_TOPS);
 		int whileCount = 0;
 		while (!_priorityMoveQueue.isEmpty()) {
-			MoveTree nextBase = _priorityMoveQueue.poll();
-			Tableau pt = nextBase.resultingTableau(startTableau);
-			addTreesToQueue(pt, nextBase, _priorityMoveQueue);
-			whileCount += 1;
+			for (int ii = 0; ii < PARALLEL_TOPS && !_priorityMoveQueue.isEmpty(); ++ii) {
+				MoveTree nextBase = _priorityMoveQueue.poll();
+				parallelTops.add(nextBase);
+			}
+			
+			for (MoveTree nextBase : parallelTops) {
+				Tableau pt = nextBase.resultingTableau(startTableau);
+				addTreesToQueue(pt, nextBase, _priorityMoveQueue);
+				whileCount += 1;
+			}
+			parallelTops.clear();
 		}
 
 		System.out.println("No solution found");
@@ -100,7 +109,7 @@ public class StagedDepthFirstSolver {
 			if (mt.depth() < newMaxDepth) {
 				moveTreeQueue.add(mt);
 			} else {
-				_flushedTrees  += 1;
+				_flushedTrees += 1;
 			}
 		}
 	}
@@ -113,8 +122,7 @@ public class StagedDepthFirstSolver {
 		count += 1;
 		Date d = new Date();
 		if (count % STATUS_UPDATE_INTERVAL == 0) {
-			System.out.println(String.format("%s: %3d: %s", 
-					dateFormatter.format(d), tmi.maxCurrentDepth(), m));
+			System.out.println(String.format("%s: %3d: %s", dateFormatter.format(d), tmi.maxCurrentDepth(), m));
 			System.out.println(String.format("%8d- checked:%5d-qSize:%6d-treesKilled:%6d-repeats:%6d-flushed:%d", count,
 					tmi.checkedStates(), q.size(), tmi.moveTreesRemoved(), tmi.repeatOffenders(), _flushedTrees));
 		}
