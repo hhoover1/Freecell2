@@ -136,6 +136,11 @@ public class CardStackTest {
 	}
 
 	@Test
+	public final void testCardAt() {
+		final String test1 = "8D,7S,6H,5C"
+	}
+	
+	@Test
 	public final void testSplit() throws Exception {
 		final String test1 = "5S,4H,3C";
 		CardSet cs = CardStack.cardSetFrom(test1);

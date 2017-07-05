@@ -31,12 +31,17 @@ public class CardStack implements CardSet {
 		_cards = cards;
 	}
 
+	@SuppressWarnings("unused")
 	private CardStack() {
 		_cards = new Card[0];
 	}
 
 	public static CardSet cardSetFrom(String setString) {
 		String[] cards = setString.split(",");
+		return cardsFrom(cards);
+	}
+
+	public static CardSet cardsFrom(String[] cards) {
 		List<Card> lcs = new ArrayList<Card>();
 		for (String s : cards) {
 			Card nc = Card.cardFrom(s);
@@ -104,7 +109,7 @@ public class CardStack implements CardSet {
 	 */
 	@Override
 	public boolean isNextRankOf(CardSet foc) {
-		return this.top().isNextRankOf(foc);
+		return this.top().isNextRankOf(foc.bottom());
 	}
 
 	/*
@@ -114,7 +119,7 @@ public class CardStack implements CardSet {
 	 */
 	@Override
 	public boolean isPreviousRankOf(CardSet foc) {
-		return this.top().isPreviousRankOf(foc);
+		return this.top().isPreviousRankOf(foc.bottom());
 	}
 
 	/*
@@ -157,6 +162,11 @@ public class CardStack implements CardSet {
 		return _cards.length;
 	}
 
+	@Override
+	public Card cardAt(int index) {
+		return this._cards[index];
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -178,8 +188,8 @@ public class CardStack implements CardSet {
 		} else {
 			Card[] c1 = Arrays.copyOf(_cards, where);
 			Card[] c2 = Arrays.copyOfRange(_cards, where, _cards.length);
-			result[0] = new CardStack(c1);
-			result[1] = new CardStack(c2);
+			result[0] = c1.length > 0 ? new CardStack(c1) : null;
+			result[1] = c2.length > 0 ? new CardStack(c2): null;
 		}
 
 		return result;

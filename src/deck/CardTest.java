@@ -164,11 +164,16 @@ public class CardTest {
 		CardSet[] split = t1.split(0);
 		assertNotNull(split);
 		assertEquals(2, split.length);
+		assertEquals(t1, split[1]);
+		assertEquals(null, split[0]);
+		split = t1.split(1);
+		assertNotNull(split);
+		assertEquals(2, split.length);
 		assertEquals(t1, split[0]);
 		assertEquals(null, split[1]);
 		try {
-			split = t1.split(1);
-			fail("should not succeed on split at 1");
+			split = t1.split(2);
+			fail("should not succeed on split at 2");
 		} catch (Exception e) {
 		}
 	}

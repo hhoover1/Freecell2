@@ -237,16 +237,29 @@ public class Card implements Comparable<Card>, CardSet {
 	public int size() {
 		return 1;
 	}
+	
+	@Override
+	public Card cardAt(int index) {
+		if (index != 0) {
+			throw new ArrayIndexOutOfBoundsException("index must be 0 for Card");
+		}
+		
+		return this;
+	}
 
 	@Override
 	public CardSet[] split(int where) throws Exception {
 		CardSet[] result = new CardSet[2];
 		if (where == 0) {
+			result[0] = null;
+			result[1] = this;
+		} else if (where == 1) {
 			result[0] = this;
 			result[1] = null;
-			return result;
 		} else {
-			throw new Exception("cannot split a card anywhere except 0");
+			throw new Exception("cannot split a card anywhere except 0 or 1");
 		}
+
+		return result;
 	}
 }
