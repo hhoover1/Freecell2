@@ -136,8 +136,10 @@ public class CardStackTest {
 	}
 
 	@Test
-	public final void testCardAt() {
-		final String test1 = "8D,7S,6H,5C"
+	public final void testCardAt() throws Exception {
+		final String test1 = "8D,7S,6H,5C";
+		CardSet cs = CardSet.cardsFrom(test1);
+		
 	}
 	
 	@Test
