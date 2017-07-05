@@ -139,7 +139,10 @@ public class CardStackTest {
 	public final void testCardAt() throws Exception {
 		final String test1 = "8D,7S,6H,5C";
 		CardSet cs = CardSet.cardsFrom(test1);
-		
+		Card[] cards = {Card.cardFrom("8D"), Card.cardFrom("7S"), Card.cardFrom("6H"), Card.cardFrom("5C") };
+		for (int ii = 0; ii < cards.length; ++ii) {
+			assertEquals(cards[ii], cs.cardAt(ii));
+		}
 	}
 	
 	@Test

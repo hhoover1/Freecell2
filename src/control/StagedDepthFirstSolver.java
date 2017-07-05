@@ -64,7 +64,7 @@ public class StagedDepthFirstSolver {
 				MoveTree nextBase = _priorityMoveQueue.poll();
 				parallelTops.add(nextBase);
 			}
-			
+
 			for (MoveTree nextBase : parallelTops) {
 				Tableau pt = nextBase.resultingTableau(startTableau);
 				addTreesToQueue(pt, nextBase, _priorityMoveQueue);
