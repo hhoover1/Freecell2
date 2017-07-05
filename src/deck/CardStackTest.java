@@ -17,7 +17,7 @@ public class CardStackTest {
 	public final void testCardStack() {
 		Card[] cards = new Card[1];
 		cards[0] = Card.cardFrom("AS");
-		CardSet nc = new CardStack(cards);
+		CardLike nc = new CardStack(cards);
 		assertNotNull(nc);
 		try {
 			nc = new CardStack(null);
@@ -41,7 +41,7 @@ public class CardStackTest {
 	@Test
 	public final void testCardSetFrom() {
 		final String test1 = "AS,JC";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		assertNotNull(cs);
 		assertEquals(2, cs.size());
 	}
@@ -49,7 +49,7 @@ public class CardStackTest {
 	@Test
 	public final void testSuit() {
 		final String test1 = "AS,JC";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		assertNotNull(cs);
 		assertEquals(Suit.Clubs, cs.suit());
 	}
@@ -57,7 +57,7 @@ public class CardStackTest {
 	@Test
 	public final void testRank() {
 		final String test1 = "AS,JC";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		assertNotNull(cs);
 		assertEquals(11, cs.rank());
 	}
@@ -65,7 +65,7 @@ public class CardStackTest {
 	@Test
 	public final void testRankName() {
 		final String test1 = "AS,JC";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		assertNotNull(cs);
 		assertEquals("Jack", cs.rankName());
 	}
@@ -73,7 +73,7 @@ public class CardStackTest {
 	@Test
 	public final void testShortName() {
 		final String test1 = "AS,JC,TH,5D";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		assertNotNull(cs);
 		assertEquals("(" + test1 + ")", cs.shortName());
 	}
@@ -81,7 +81,7 @@ public class CardStackTest {
 	@Test
 	public final void testIsNextRankOf() {
 		final String test1 = "5S,4H";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		Card t1 = Card.cardFrom("3H");
 		assertTrue(cs.isNextRankOf(t1));
 	}
@@ -89,7 +89,7 @@ public class CardStackTest {
 	@Test
 	public final void testIsPreviousRankOf() {
 		final String test1 = "5S,4H";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		Card t1 = Card.cardFrom("5H");
 		assertTrue(cs.isPreviousRankOf(t1));
 	}
@@ -97,11 +97,11 @@ public class CardStackTest {
 	@Test
 	public final void testCanBePlacedOn() {
 		final String test1 = "5S,4H";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		Card t1 = Card.cardFrom("3C");
 		Card t2 = Card.cardFrom("6D");
-		CardSet cs1 = CardStack.cardSetFrom("8D,7C,6D");
-		CardSet cs2 = CardStack.cardSetFrom("3S,2H");
+		CardLike cs1 = CardStack.cardSetFrom("8D,7C,6D");
+		CardLike cs2 = CardStack.cardSetFrom("3S,2H");
 		assertTrue(t1.canBePlacedOn(cs));
 		assertTrue(cs.canBePlacedOn(t2));
 		assertFalse(cs.canBePlacedOn(t1));
@@ -115,7 +115,7 @@ public class CardStackTest {
 	@Test
 	public final void testTop() {
 		final String test1 = "5S,4H";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		final Card tc1 = Card.cardFrom("4H");
 		assertEquals(tc1, cs.top());
 	}
@@ -123,7 +123,7 @@ public class CardStackTest {
 	@Test
 	public final void testBottom() {
 		final String test1 = "5S,4H,3C";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		final Card tc1 = Card.cardFrom("5S");
 		assertEquals(tc1, cs.bottom());
 	}
@@ -131,14 +131,14 @@ public class CardStackTest {
 	@Test
 	public final void testSize() {
 		final String test1 = "5S,4H";
-		CardSet cs = CardStack.cardSetFrom(test1);
+		CardLike cs = CardStack.cardSetFrom(test1);
 		assertEquals(2, cs.size());
 	}
 
 	@Test
 	public final void testCardAt() throws Exception {
 		final String test1 = "8D,7S,6H,5C";
-		CardSet cs = CardSet.cardsFrom(test1);
+		CardLike cs = CardLike.cardsFrom(test1);
 		Card[] cards = {Card.cardFrom("8D"), Card.cardFrom("7S"), Card.cardFrom("6H"), Card.cardFrom("5C") };
 		for (int ii = 0; ii < cards.length; ++ii) {
 			assertEquals(cards[ii], cs.cardAt(ii));
@@ -148,8 +148,8 @@ public class CardStackTest {
 	@Test
 	public final void testSplit() throws Exception {
 		final String test1 = "5S,4H,3C";
-		CardSet cs = CardStack.cardSetFrom(test1);
-		CardSet[] tcs = cs.split(1);
+		CardLike cs = CardStack.cardSetFrom(test1);
+		CardLike[] tcs = cs.split(1);
 		assertNotNull(tcs);
 		assertEquals(2, tcs.length);
 		assertNotNull(tcs[0]);

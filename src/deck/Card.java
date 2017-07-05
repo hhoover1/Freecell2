@@ -1,6 +1,6 @@
 package deck;
 
-public class Card implements Comparable<Card>, CardSet {
+public class Card implements Comparable<Card>, CardLike {
 	public enum Suit {
 		Hearts,
 		Clubs,
@@ -160,7 +160,7 @@ public class Card implements Comparable<Card>, CardSet {
 		return suit;
 	}
 
-	public boolean isNextRankOf(CardSet foc) {
+	public boolean isNextRankOf(CardLike foc) {
 		if (this._suit != foc.suit()) {
 			return false;
 		}
@@ -176,7 +176,7 @@ public class Card implements Comparable<Card>, CardSet {
 		return false;
 	}
 
-	public boolean isPreviousRankOf(CardSet foc) {
+	public boolean isPreviousRankOf(CardLike foc) {
 		if (foc.rank() == 1) {
 			return false;
 		}
@@ -188,7 +188,7 @@ public class Card implements Comparable<Card>, CardSet {
 		return false;
 	}
 
-	public boolean canBePlacedOn(CardSet belowCard) {
+	public boolean canBePlacedOn(CardLike belowCard) {
 		if (belowCard == null) {
 			return true;
 		}
@@ -202,7 +202,7 @@ public class Card implements Comparable<Card>, CardSet {
 		return false;
 	}
 
-	private boolean colorOpposite(CardSet belowCard) {
+	private boolean colorOpposite(CardLike belowCard) {
 		int thisSuit = this.suit().ordinal();
 		int otherSuit = belowCard.suit().ordinal();
 		if (thisSuit % 2 == 0) {
@@ -248,8 +248,8 @@ public class Card implements Comparable<Card>, CardSet {
 	}
 
 	@Override
-	public CardSet[] split(int where) throws Exception {
-		CardSet[] result = new CardSet[2];
+	public CardLike[] split(int where) throws Exception {
+		CardLike[] result = new CardLike[2];
 		if (where == 0) {
 			result[0] = null;
 			result[1] = this;

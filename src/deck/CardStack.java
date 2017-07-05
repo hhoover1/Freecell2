@@ -13,7 +13,7 @@ import deck.Card.Suit;
  * @author hhoover
  *
  */
-public class CardStack implements CardSet {
+public class CardStack implements CardLike {
 	Card[] _cards;
 
 	public CardStack(Card[] cards) {
@@ -36,12 +36,12 @@ public class CardStack implements CardSet {
 		_cards = new Card[0];
 	}
 
-	public static CardSet cardSetFrom(String setString) {
+	public static CardLike cardSetFrom(String setString) {
 		String[] cards = setString.split(",");
 		return cardsFrom(cards);
 	}
 
-	public static CardSet cardsFrom(String[] cards) {
+	public static CardLike cardsFrom(String[] cards) {
 		List<Card> lcs = new ArrayList<Card>();
 		for (String s : cards) {
 			Card nc = Card.cardFrom(s);
@@ -108,7 +108,7 @@ public class CardStack implements CardSet {
 	 * @see deck.CardSet#isNextRankOf(deck.CardSet)
 	 */
 	@Override
-	public boolean isNextRankOf(CardSet foc) {
+	public boolean isNextRankOf(CardLike foc) {
 		return this.top().isNextRankOf(foc.bottom());
 	}
 
@@ -118,7 +118,7 @@ public class CardStack implements CardSet {
 	 * @see deck.CardSet#isPreviousRankOf(deck.CardSet)
 	 */
 	@Override
-	public boolean isPreviousRankOf(CardSet foc) {
+	public boolean isPreviousRankOf(CardLike foc) {
 		return this.top().isPreviousRankOf(foc.bottom());
 	}
 
@@ -128,7 +128,7 @@ public class CardStack implements CardSet {
 	 * @see deck.CardSet#canBePlacedOn(deck.CardSet)
 	 */
 	@Override
-	public boolean canBePlacedOn(CardSet belowCard) {
+	public boolean canBePlacedOn(CardLike belowCard) {
 		return this.bottom().canBePlacedOn(belowCard);
 	}
 
@@ -173,8 +173,8 @@ public class CardStack implements CardSet {
 	 * @see deck.CardSet#split(int)
 	 */
 	@Override
-	public CardSet[] split(int where) {
-		CardSet[] result = new CardSet[2];
+	public CardLike[] split(int where) {
+		CardLike[] result = new CardLike[2];
 		if (where == 1) {
 			Card r = this.top();
 			Card[] ncards = Arrays.copyOf(_cards, _cards.length - 1);

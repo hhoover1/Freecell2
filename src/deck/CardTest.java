@@ -161,7 +161,7 @@ public class CardTest {
 	@Test
 	public final void testSplit() throws Exception {
 		Card t1 = Card.cardFrom("AH");
-		CardSet[] split = t1.split(0);
+		CardLike[] split = t1.split(0);
 		assertNotNull(split);
 		assertEquals(2, split.length);
 		assertEquals(t1, split[1]);
