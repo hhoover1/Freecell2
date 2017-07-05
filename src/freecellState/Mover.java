@@ -55,6 +55,7 @@ public class Mover {
 		default:
 			throw new Exception("unknown Area in from: " + from);
 		}
+		m.setCard(c);
 		
 		switch (to.area()) {
 		case Foundation:

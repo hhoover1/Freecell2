@@ -132,4 +132,44 @@ public class CardTest {
 		assertTrue(t1.isPreviousRankOf(new Card(Suit.Clubs, 4)));
 	}
 
+	@Test
+	public final void testCanBePlacedOn() {
+		Card t1 = Card.cardFrom("3C");
+		Card t2 = Card.cardFrom("4D");
+		assertTrue(t1.canBePlacedOn(t2));
+		assertFalse(t2.canBePlacedOn(t1));
+	}
+
+	@Test
+	public final void testSize() {
+		Card t1 = Card.cardFrom("AS");
+		assertEquals(1, t1.size());
+	}
+	
+	@Test
+	public final void testTop() {
+		Card t1 = Card.cardFrom("AS");
+		assertEquals(t1, t1.top());
+	}
+	
+	@Test
+	public final void testBottom() {
+		Card t1 = Card.cardFrom("AH");
+		assertEquals(t1, t1.bottom());
+	}
+	
+	@Test
+	public final void testSplit() throws Exception {
+		Card t1 = Card.cardFrom("AH");
+		CardSet[] split = t1.split(0);
+		assertNotNull(split);
+		assertEquals(2, split.length);
+		assertEquals(t1, split[0]);
+		assertEquals(null, split[1]);
+		try {
+			split = t1.split(1);
+			fail("should not succeed on split at 1");
+		} catch (Exception e) {
+		}
+	}
 }

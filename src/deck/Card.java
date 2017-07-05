@@ -1,6 +1,6 @@
 package deck;
 
-public class Card implements Comparable<Card> {
+public class Card implements Comparable<Card>, CardSet {
 	public enum Suit {
 		Hearts,
 		Clubs,
@@ -160,46 +160,39 @@ public class Card implements Comparable<Card> {
 		return suit;
 	}
 
-	public boolean isNextRankOf(Card foc) {
-		if (this._suit != foc._suit) {
+	public boolean isNextRankOf(CardSet foc) {
+		if (this._suit != foc.suit()) {
 			return false;
 		}
 		
-		if (this._rank == 1 && foc._rank == 0) {
+		if (this.rank() == 1) {
 			return false;
 		}
 
-		if (this._rank == foc._rank + 1) {
-			return true;
-		}
-		
-		if (this._rank == 0 && foc._rank == 12) {
+		if (this.rank() == foc.rank() + 1) {
 			return true;
 		}
 		
 		return false;
 	}
 
-	public boolean isPreviousRankOf(Card foc) {
-		if (this._rank == 0 && foc._rank == 1) {
+	public boolean isPreviousRankOf(CardSet foc) {
+		if (foc.rank() == 1) {
 			return false;
 		}
 		
-		if (this._rank == foc._rank - 1) {
-			return true;
-		}
-		
-		if (this._rank == 12 && foc._rank == 0) {
+		if (this.rank() == foc.rank() - 1) {
 			return true;
 		}
 		
 		return false;
 	}
 
-	public boolean canBePlacedOn(Card belowCard) {
+	public boolean canBePlacedOn(CardSet belowCard) {
 		if (belowCard == null) {
 			return true;
 		}
+		
 		if (this.colorOpposite(belowCard)) {
 			if (this.isPreviousRankOf(belowCard)) {
 				return true;
@@ -209,7 +202,7 @@ public class Card implements Comparable<Card> {
 		return false;
 	}
 
-	private boolean colorOpposite(Card belowCard) {
+	private boolean colorOpposite(CardSet belowCard) {
 		int thisSuit = this.suit().ordinal();
 		int otherSuit = belowCard.suit().ordinal();
 		if (thisSuit % 2 == 0) {
@@ -220,7 +213,7 @@ public class Card implements Comparable<Card> {
 	}
 
 	public int compareTo(Card bc) {
-		int rc = this.rankOrdinal() - bc.rankOrdinal();
+		int rc = this.rank() - bc.rank();
 		if (rc != 0) {
 			return rc;
 		}
@@ -230,11 +223,30 @@ public class Card implements Comparable<Card> {
 		return sc;
 	}
 
-	private int rankOrdinal() {
-		if (this._rank == KING_RANK) {
-			return 13;
+	@Override
+	public Card top() {
+		return this;
+	}
+
+	@Override
+	public Card bottom() {
+		return this;
+	}
+
+	@Override
+	public int size() {
+		return 1;
+	}
+
+	@Override
+	public CardSet[] split(int where) throws Exception {
+		CardSet[] result = new CardSet[2];
+		if (where == 0) {
+			result[0] = this;
+			result[1] = null;
+			return result;
+		} else {
+			throw new Exception("cannot split a card anywhere except 0");
 		}
-		
-		return this._rank;
 	}
 }
