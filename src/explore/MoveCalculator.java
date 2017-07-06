@@ -4,11 +4,9 @@
 package explore;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import deck.Card;
-import deck.Card.Suit;
 import freecellState.Location;
 import freecellState.Location.Area;
 import freecellState.Move;
@@ -19,13 +17,8 @@ import freecellState.Tableau;
  *
  */
 public class MoveCalculator {
-	private static MoveCalculator mc = new MoveCalculator();
-
 	public static Move[] movesFrom(Tableau t, boolean foundationOnly) {
 		List<Move> lm = calculatePossibleMoves(t, null, foundationOnly);
-		if (!foundationOnly) {
-			lm.sort(mc.new MoveValueComparator(t));
-		}
 		Move[] res = lm.toArray(new Move[0]);
 		return res;
 	}
@@ -201,122 +194,5 @@ public class MoveCalculator {
 		}
 
 		return moves;
-	}
-
-	private static int depthOfCard(Tableau t, int column, Card c) {
-		for (int depth = 0; depth < t.heightOfTableauStack(column); ++depth) {
-			Card test = t.getTableau(column, depth);
-			if (test != null && test.isNextRankOf(c)) {
-				return depth;
-			}
-		}
-
-		return -1;
-	}
-
-	public static int releaseToFoundationDepth(Tableau tableau, int column) {
-		int shallowest = Integer.MAX_VALUE;
-		for (Suit s : Suit.values()) {
-			Card top = tableau.foundation(s.ordinal());
-			if (top == null) {
-				top = new Card(s, 1);
-			}
-			int d = depthOfCard(tableau, column, top);
-			if (d >= 0) {
-				shallowest = Math.min(shallowest, d);
-			}
-		}
-
-		if (shallowest < Integer.MAX_VALUE) {
-			return shallowest;
-		}
-
-		return -1;
-	}
-
-	public static int releaseToTableauDepth(Tableau tableau, int column) {
-		Card[] tops = tableau.topTableauCards();
-
-		int shallowest = Integer.MAX_VALUE;
-		for (int ii = 0; ii < Tableau.TABLEAU_SIZE; ++ii) {
-			if (ii == column) {
-				continue;
-			}
-
-			Card top = tops[ii];
-			if (top != null) {
-				int d = depthOfCard(tableau, column, top);
-				if (d >= 0) {
-					shallowest = Math.min(shallowest, d);
-				}
-			}
-		}
-
-		if (shallowest < Integer.MAX_VALUE) {
-			return shallowest;
-		}
-
-		return -1;
-	}
-
-	public class MoveValueComparator implements Comparator<Move> {
-		private Tableau _tableau;
-
-		public MoveValueComparator(Tableau t) {
-			_tableau = t;
-		}
-
-		// ordering of moves, valuable to less:
-		// to foundation
-		// to tableau, releasing a to-foundation move
-		// to freecell, releasing a to-foundation move
-		// tableau to tableau, releasing a sequence of freecell-to-tableau moves
-		// tableau to tableau, releasing a to-tableau move
-		// tableau to tableau, releasing a freecell-to-tableau move
-		// tableau to freecell, releasing a sequence of freecell-to-tableau
-		// moves
-		// tableau to freecell, releasing a freecell to tableau move
-		// all of the above, transitively from two below.
-		// to tableau, no release
-		// to freecell, no release
-
-		private int moveValue(Move m) {
-			int result = 0;
-
-			switch (m.to().area()) {
-			case Foundation:
-				result = 1000;
-				break;
-
-			case Tableau:
-				int rtfd = MoveCalculator.releaseToFoundationDepth(_tableau, m.from().column());
-				if (rtfd >= 0) {
-					result = 100 - (10 * rtfd);
-					break;
-				}
-
-				int rttd = MoveCalculator.releaseToTableauDepth(_tableau, m.from().column());
-				if (rttd >= 0) {
-					result = 70 - (7 * rttd);
-				}
-
-				break;
-			case Freecell:
-				rtfd = MoveCalculator.releaseToFoundationDepth(_tableau, m.from().column());
-				if (rtfd >= 0) {
-					result = 10 - rtfd;
-					break;
-				}
-
-				break;
-			}
-
-			return result;
-		}
-
-		@Override
-		public int compare(Move o1, Move o2) {
-			return moveValue(o2) - moveValue(o1);
-		}
 	}
 }

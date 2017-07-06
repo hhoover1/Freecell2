@@ -156,13 +156,4 @@ public class MoveCalculatorTest {
 		assertFalse(mi.hasNext());
 		assertTrue(moveSet.isEmpty());
 	}
-	
-	@Test
-	public final void testMoveComparator() {
-		Move m1 = shortMoves[0];
-		Move m2 = shortMoves[1];
-		MoveCalculator mc = new MoveCalculator();
-		MoveCalculator.MoveValueComparator mvc = mc.new MoveValueComparator(shortTab);
-		assertTrue(mvc.compare(m1, m2) < 0);
-	}
 }
