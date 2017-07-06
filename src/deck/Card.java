@@ -9,7 +9,8 @@ public class Card implements Comparable<Card>, CardLike {
 	}
 
 	public static final int RANK_SIZE = 13;
-	public static final int KING_RANK = 0;
+	public static final int KING_RANK = 13;
+	private static final int HIDDEN_KING_RANK = 0;
 
 	private Suit _suit;
 	private int  _rank;
@@ -40,8 +41,8 @@ public class Card implements Comparable<Card>, CardLike {
 	}
 	
 	public int rank() {
-		if (_rank == KING_RANK) {
-			return 13;
+		if (_rank == HIDDEN_KING_RANK) {
+			return KING_RANK;
 		}
 		
 		return _rank;
