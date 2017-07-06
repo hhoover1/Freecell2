@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -118,14 +120,18 @@ public class MoveCalculatorTest {
 		assertNotNull(moves);
 		ArrayIterator<Move> mi = new ArrayIterator<Move>(moves);
 		assertTrue(mi.hasNext());
-		int count = 0;
+		HashSet<Move> moveSet = new HashSet<Move>(tableau1Moves.length);
+		for (Move m : tableau1Moves) {
+			moveSet.add(m);
+		}
 		while (mi.hasNext()) {
 			Move m = mi.next();
 			System.out.println(m);
-			assertEquals(tableau1Moves[count++], m);
+			assertTrue(moveSet.contains(m));
+			assertTrue(moveSet.remove(m));
 		}
 		assertFalse(mi.hasNext());
-		assertEquals(tableau1Moves.length, count);
+		assertTrue(moveSet.isEmpty());
 		System.out.println("---------------");
 		assertNotNull(moves[0]);
 		Move firstMove = moves[0];
@@ -138,14 +144,17 @@ public class MoveCalculatorTest {
 		}
 		Move[] moves2 = MoveCalculator.movesFrom(nt);
 		mi = new ArrayIterator<Move>(moves2);
-		count = 0;
+		for (Move m: tableau1Moves2) {
+			moveSet.add(m);
+		}
 		while (mi.hasNext()) {
 			Move m = mi.next();
 			System.out.println(m);
-			assertEquals(tableau1Moves2[count++], m);
+			assertTrue(moveSet.contains(m));
+			assertTrue(moveSet.remove(m));
 		}
 		assertFalse(mi.hasNext());
-		assertEquals(tableau1Moves2.length, count);
+		assertTrue(moveSet.isEmpty());
 	}
 	
 	@Test

@@ -36,6 +36,21 @@ public class Move implements Comparable<Move> {
 		_card = c;
 	}
 
+	public String shortName() {
+		String cname = this.getClass().getName();
+		StringBuilder sb = new StringBuilder(cname.substring(cname.lastIndexOf('.') + 1));
+		sb.append('(');
+		if (_card != null) {
+			sb.append(_card.shortName());
+			sb.append("f:");
+		}
+		sb.append(_from.shortName());
+		sb.append(":");
+		sb.append(_to.shortName());
+		sb.append(')');
+		return sb.toString();
+	}
+
 	@Override
 	public String toString() {
 		String cname = this.getClass().getName();
@@ -81,19 +96,10 @@ public class Move implements Comparable<Move> {
 		
 		return false;
 	}
-
-	public String shortName() {
-		String cname = this.getClass().getName();
-		StringBuilder sb = new StringBuilder(cname.substring(cname.lastIndexOf('.') + 1));
-		sb.append('(');
-		if (_card != null) {
-			sb.append(_card.shortName());
-			sb.append("f:");
-		}
-		sb.append(_from.shortName());
-		sb.append(":");
-		sb.append(_to.shortName());
-		sb.append(')');
-		return sb.toString();
+	
+	@Override
+	public int hashCode() {
+		int res = _from.hashCode() + _to.hashCode();
+		return res;
 	}
 }

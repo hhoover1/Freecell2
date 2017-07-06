@@ -103,13 +103,13 @@ public class TableauTest {
 	@Test
 	public final void testFitnessBasic() {
 		assertNotNull(tableau);
-		assertEquals(61374, tableau.fitness());
+		assertEquals(60674, tableau.fitness());
 	}
 
 	@Test
 	public final void testFitnessOrdered() {
 		addOrderedStack();
-		assertEquals(64846, tableau.fitness());
+		assertEquals(58646, tableau.fitness());
 	}
 	
 	@Test
@@ -118,7 +118,7 @@ public class TableauTest {
 			tableau.put(col2Locations[ii], cardStack[ii]);
 		}
 		System.out.println(tableau);
-		assertEquals(66336, tableau.fitness());
+		assertEquals(65736, tableau.fitness());
 	}
 	
 	@Test

@@ -1,6 +1,9 @@
 package explore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 
 import freecellState.Move;
@@ -20,13 +23,10 @@ public class TableauMoveIterator {
 	private static long _checkedStates = 0;
 	private static long _repeatOffenders = 0;
 	private static long _moveTreesRemoved = 0;
-	private Tableau _startTableau;
-	private MoveState _topMoveState;
-	private MoveTree _topMoveTree;
 	private int _maxDepth;
-	private int _maxCurrentDepth = 0;
+	private int _maxCurrentDepth;
 	private MoveState _current;
-	private boolean _winOccurred = false;
+	private List<MoveTree> _wins = new ArrayList<MoveTree>();
 
 	public interface ProgressionMeter {
 		void progressOneNode(Tableau t, MoveTree newTree, TableauMoveIterator tmi);
@@ -39,12 +39,9 @@ public class TableauMoveIterator {
 	}
 
 	public TableauMoveIterator(Tableau tab, MoveTree parentTree, int maxD, int maxCurrentDepth) {
-		_startTableau = tab;
-		_topMoveTree = parentTree;
-		_topMoveState = new MoveState(_startTableau, _topMoveTree, 0);
 		_maxDepth = maxD;
 		_maxCurrentDepth = maxCurrentDepth;
-		_current = startState();
+		_current = new MoveState(tab, parentTree);
 	}
 
 	public ArrayIterator<Move> moves() {
@@ -88,7 +85,7 @@ public class TableauMoveIterator {
 	// The fields _current and _next are important to the existing code
 	// but we'd prefer to move to parameters...
 	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter, MoveState moveState) {
-		if (depth > 0) {
+		if (depth > 1) { // generated leaves should be at 0, not -1
 			while (moveState.moves().hasNext()) {
 				MoveState newMoveState = createNextMoveState(moveState, meter);
 				if (newMoveState != null) {
@@ -112,7 +109,11 @@ public class TableauMoveIterator {
 	}
 	
 	public boolean winOccurred() {
-		return _winOccurred;
+		return !_wins.isEmpty();
+	}
+	
+	public Iterator<MoveTree> wins() {
+		return _wins.iterator();
 	}
 
 	/**
@@ -123,6 +124,7 @@ public class TableauMoveIterator {
 		while (moveState.moves().hasNext()) {
 			MoveState newMoveState = createNextMoveState(moveState, meter);
 			if (newMoveState != null) {
+				this._maxCurrentDepth = Math.max(this._maxCurrentDepth, newMoveState.depth());
 				pmt.add(newMoveState.tree());
 			}
 		}
@@ -141,14 +143,14 @@ public class TableauMoveIterator {
 			meter.progressOneNode(newTableau, newMoveTree, this);
 			
 			if (Mover.isWin(newTableau)) {
+				_wins.add(newMoveTree);
 				Mover.printWin(newMoveTree);
 				// System.exit(1);
 				_maxDepth = moveState.depth() - 1;
 				System.out.println(String.format("Win occurred at depth %d: setting max depth to %d", moveState.depth(), _maxDepth));
-				_winOccurred  = true;
 			}
 
-			MoveState newMoveState = new MoveState(newTableau, newMoveTree, moveState.depth() + 1);
+			MoveState newMoveState = new MoveState(newTableau, newMoveTree);
 			return newMoveState;
 		}
 
@@ -220,25 +222,15 @@ public class TableauMoveIterator {
 		return result;
 	}
 
-	private MoveState startState() {
-		if (_topMoveState != null && _topMoveState._moves.hasNext()) {
-			return _topMoveState;
-		}
-
-		return null;
-	}
-
 	private class MoveState {
 		Tableau _tableau;
 		Move[] _moveArray;
 		ArrayIterator<Move> _moves;
 		MoveTree _tree;
-		int _depth;
 
-		MoveState(Tableau t, MoveTree m, int d) {
+		MoveState(Tableau t, MoveTree m) {
 			_tableau = t;
 			_tree = m;
-			_depth = d;
 			_moveArray = MoveCalculator.movesFrom(_tableau);
 			_moves = new ArrayIterator<Move>(_moveArray);
 		}
@@ -260,7 +252,7 @@ public class TableauMoveIterator {
 		}
 
 		public int depth() {
-			return _depth;
+			return _tree.depth();
 		}
 	}
 }
