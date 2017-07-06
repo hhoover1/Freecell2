@@ -27,7 +27,8 @@ public class TableauMoveIteratorTest {
 	public final void testTableauMoveIteratorTableauInt() {
 		Tableau t = new Tableau(found1, new Card[4], tableau1);
 		System.out.println(t);
-		TableauMoveIterator tmi = new TableauMoveIterator(t, 10);
+		MoveTree root = new MoveTree();
+		TableauMoveIterator tmi = new TableauMoveIterator(t, root, 10, 0);
 		assertNotNull(tmi);
 	}
 

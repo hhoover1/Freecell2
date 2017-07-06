@@ -38,19 +38,12 @@ public class TableauMoveIterator {
 		}
 	}
 
-	public TableauMoveIterator(Tableau tab, int maxD) {
+	public TableauMoveIterator(Tableau tab, MoveTree parentTree, int maxD, int maxCurrentDepth) {
 		_startTableau = tab;
 		_topMoveTree = new MoveTree();
 		_topMoveState = new MoveState(_startTableau, _topMoveTree, 0);
 		_maxDepth = maxD;
-		_current = startState();
-	}
-
-	public TableauMoveIterator(Tableau tab, MoveTree mt, int maxD, int curD) {
-		_startTableau = tab;
-		_topMoveTree = mt;
-		_topMoveState = new MoveState(_startTableau, _topMoveTree, curD);
-		_maxDepth = maxD;
+		_maxCurrentDepth = maxCurrentDepth;
 		_current = startState();
 	}
 

@@ -62,7 +62,7 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 
 	public Tableau resultingTableau(Tableau initial) {
-		return resultingTableau(initial, 0);
+;		return resultingTableau(initial, 0);
 	}
 
 	public Tableau resultingTableau(Tableau initial, int startDepth) {
