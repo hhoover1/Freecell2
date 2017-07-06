@@ -40,7 +40,7 @@ public class TableauMoveIterator {
 
 	public TableauMoveIterator(Tableau tab, MoveTree parentTree, int maxD, int maxCurrentDepth) {
 		_startTableau = tab;
-		_topMoveTree = new MoveTree();
+		_topMoveTree = parentTree;
 		_topMoveState = new MoveState(_startTableau, _topMoveTree, 0);
 		_maxDepth = maxD;
 		_maxCurrentDepth = maxCurrentDepth;
@@ -153,10 +153,6 @@ public class TableauMoveIterator {
 		}
 
 		return null;
-	}
-
-	public MoveTree treeRoot() {
-		return _topMoveTree;
 	}
 
 	public long checkedStates() {

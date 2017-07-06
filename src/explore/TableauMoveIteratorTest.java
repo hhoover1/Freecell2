@@ -40,15 +40,6 @@ public class TableauMoveIteratorTest {
 		assertNotNull(tmi);
 	}
 
-	@Test
-	public final void testTreeRoot() {
-		Tableau t = new Tableau(found1, new Card[Tableau.FREECELL_COUNT], tableau1);
-		MoveTree m = new MoveTree();
-		TableauMoveIterator tmi = new TableauMoveIterator(t, m, 120, 0);
-		assertNotNull(tmi);
-		assertNotNull(tmi.treeRoot());
-	}
-
 //	private void printTableauAndHash(Tableau t, MoveTree m1) {
 //		Tableau st = m1.resultingTableau(t);
 //		System.out.println(st);
