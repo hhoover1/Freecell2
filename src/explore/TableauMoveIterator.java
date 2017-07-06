@@ -85,13 +85,8 @@ public class TableauMoveIterator {
 	// The fields _current and _next are important to the existing code
 	// but we'd prefer to move to parameters...
 	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter, MoveState moveState) {
-		if (depth > 1 || !moveState.tableau().hasTrappedCard()) { // forget the
-																	// interim
-																	// depth
-																	// check if
-																	// no
-																	// trapped
-																	// cards.
+		boolean deepDive = !moveState.tableau().hasTrappedCard();
+		if (depth > 1 || deepDive) { // forget the interim depth check if no trapped cards.
 			while (moveState.moves().hasNext()) {
 				MoveState newMoveState = createNextMoveState(moveState, meter);
 				if (newMoveState != null) {

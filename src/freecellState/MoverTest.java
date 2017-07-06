@@ -65,4 +65,35 @@ public class MoverTest {
 		assertNotNull(newT);
 		assertEquals(Card.cardFrom("AD"), newT.foundation(2));
 	}
+	
+	@Test
+	public final void testIsWin_Win() {
+		Card[] found = {Card.cardFrom("KH"), Card.cardFrom("KC"), Card.cardFrom("KD"), Card.cardFrom("KS") };
+		Card[][] tab = new Card[Tableau.TABLEAU_SIZE][];
+		Card[] free = new Card[Tableau.FREECELL_COUNT];
+		for (int ii = 0; ii < tab.length; ++ii) {
+			tab[ii] = new Card[0];
+		}
+		Tableau winTab = new Tableau(found, free, tab);
+		assertNotNull(winTab);
+		assertFalse(winTab.hasTrappedCard());
+		assertTrue(Mover.isWin(winTab));
+	}
+	
+	@Test
+	public final void testIsWin_NotWin() {
+		Card[] found = {Card.cardFrom("KH"), Card.cardFrom("QC"), Card.cardFrom("KD"), Card.cardFrom("KS") };
+		Card[][] tab = new Card[Tableau.TABLEAU_SIZE][];
+		Card[] free = new Card[Tableau.FREECELL_COUNT];
+		for (int ii = 1; ii < tab.length; ++ii) {
+			tab[ii] = new Card[0];
+		}
+		Card[] holdOut = { Card.cardFrom("KC") };
+		tab[0] = holdOut;
+		
+		Tableau winTab = new Tableau(found, free, tab);
+		assertNotNull(winTab);
+		assertFalse(winTab.hasTrappedCard());
+		assertFalse(Mover.isWin(winTab));		
+	}
 }
