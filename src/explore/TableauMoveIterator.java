@@ -31,7 +31,7 @@ public class TableauMoveIterator {
 	public interface ProgressionMeter {
 		void progressOneNode(Tableau t, MoveTree newTree, TableauMoveIterator tmi);
 	};
-	
+
 	public static void clearExamined() {
 		synchronized (TableauMoveIterator._examinedStates) {
 			TableauMoveIterator._examinedStates.clear();
@@ -63,7 +63,7 @@ public class TableauMoveIterator {
 	public int maxDepth() {
 		return _maxDepth;
 	}
-	
+
 	public int maxCurrentDepth() {
 		return _maxCurrentDepth;
 	}
@@ -85,7 +85,13 @@ public class TableauMoveIterator {
 	// The fields _current and _next are important to the existing code
 	// but we'd prefer to move to parameters...
 	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter, MoveState moveState) {
-		if (depth > 1) { // generated leaves should be at 0, not -1
+		if (depth > 1 || !moveState.tableau().hasTrappedCard()) { // forget the
+																	// interim
+																	// depth
+																	// check if
+																	// no
+																	// trapped
+																	// cards.
 			while (moveState.moves().hasNext()) {
 				MoveState newMoveState = createNextMoveState(moveState, meter);
 				if (newMoveState != null) {
@@ -97,7 +103,7 @@ public class TableauMoveIterator {
 					}
 				}
 			}
-			
+
 			if (!moveState.tree().hasChildren()) {
 				_moveTreesRemoved += moveState.tree().remove();
 			}
@@ -107,11 +113,11 @@ public class TableauMoveIterator {
 
 		return moveState.tree();
 	}
-	
+
 	public boolean winOccurred() {
 		return !_wins.isEmpty();
 	}
-	
+
 	public Iterator<MoveTree> wins() {
 		return _wins.iterator();
 	}
@@ -139,15 +145,17 @@ public class TableauMoveIterator {
 		Tableau newTableau = nextTableauWith(moveState._tableau, move, moveState.depth() + 1);
 
 		if (newTableau != null) {
-			MoveTree newMoveTree = new MoveTree(moveState.tree(), move, this.fitness(newTableau, moveState.depth() + 1));
+			MoveTree newMoveTree = new MoveTree(moveState.tree(), move,
+					this.fitness(newTableau, moveState.depth() + 1));
 			meter.progressOneNode(newTableau, newMoveTree, this);
-			
+
 			if (Mover.isWin(newTableau)) {
 				_wins.add(newMoveTree);
 				Mover.printWin(newMoveTree);
 				// System.exit(1);
 				_maxDepth = moveState.depth() - 1;
-				System.out.println(String.format("Win occurred at depth %d: setting max depth to %d", moveState.depth(), _maxDepth));
+				System.out.println(String.format("Win occurred at depth %d: setting max depth to %d", moveState.depth(),
+						_maxDepth));
 			}
 
 			MoveState newMoveState = new MoveState(newTableau, newMoveTree);
@@ -176,21 +184,23 @@ public class TableauMoveIterator {
 			if (this.fitness(nt, depth) == Integer.MAX_VALUE) {
 				return null;
 			}
-			
-			String ntHash = nt.tableauHash();
-			synchronized (_examinedStates) {
-				_checkedStates += 1;
-				if (_examinedStates.containsKey(ntHash)) {
-					Integer c = _examinedStates.get(ntHash);
-					if (depth >= c) {
-						nt = null; // already seen at shallower depth
-						_repeatOffenders += 1;
+
+			if (!Mover.isWin(nt)) {
+				String ntHash = nt.tableauHash();
+				synchronized (_examinedStates) {
+					_checkedStates += 1;
+					if (_examinedStates.containsKey(ntHash)) {
+						Integer c = _examinedStates.get(ntHash);
+						if (depth >= c) {
+							nt = null; // already seen at shallower depth
+							_repeatOffenders += 1;
+						} else {
+							// already seen, but only deeper.
+							_examinedStates.put(ntHash, new Integer(depth));
+						}
 					} else {
-						// already seen, but only deeper.
 						_examinedStates.put(ntHash, new Integer(depth));
 					}
-				} else {
-					_examinedStates.put(ntHash, new Integer(depth));
 				}
 			}
 		} catch (Exception e) {
@@ -206,19 +216,19 @@ public class TableauMoveIterator {
 		if (depthFit == Integer.MAX_VALUE) {
 			return Integer.MAX_VALUE;
 		}
-		
+
 		return nt.fitness() - depthFit;
 	}
 
 	private int depthFunction(Tableau nt, int depth) {
 		int adjustedDepth = (DEPTH_BASE - depth);
-		int result = (DEPTH_BASE*DEPTH_BASE) - (adjustedDepth * adjustedDepth);
+		int result = (DEPTH_BASE * DEPTH_BASE) - (adjustedDepth * adjustedDepth);
 		// result *= Math.signum(-adjustedDepth);
-		
+
 		if (nt.cardsLeft() + depth > _maxDepth) {
 			result = Integer.MAX_VALUE;
 		}
-		
+
 		return result;
 	}
 

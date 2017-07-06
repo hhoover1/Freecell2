@@ -395,15 +395,21 @@ public class Tableau {
 		sb.append('(');
 
 		// print foundation
-		sb.append("\nfoundation:\n");
-		for (int ii = 0; ii < _foundation.length; ++ii) {
-			Card c = _foundation[ii];
+		sb.append("foundation:\n");
+		Card c = _foundation[0];
+		if (c != null) {
+			sb.append(c.shortName());
+		} else {
+			sb.append("  ");
+		}
+		for (int ii = 1; ii < _foundation.length; ++ii) {
+			sb.append(',');
+			c = _foundation[ii];
 			if (c != null) {
 				sb.append(c.shortName());
 			} else {
 				sb.append("  ");
 			}
-			sb.append(',');
 		}
 
 		// print tableau
@@ -413,8 +419,8 @@ public class Tableau {
 			for (int column = 0; column < _tableau.length; ++column) {
 				Card[] t = _tableau[column];
 				if (t.length != 0 && row < t.length) {
-					Card c = t[row];
-					sb.append(c.shortName());
+					Card tc = t[row];
+					sb.append(tc.shortName());
 					sb.append(", ");
 				} else {
 					sb.append("  , ");
