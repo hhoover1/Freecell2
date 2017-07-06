@@ -29,7 +29,8 @@ import deck.Deal;
 public class Tableau {
 	public static final int FREECELL_COUNT = 4;
 	public static final int TABLEAU_SIZE = 8;
-	private static final int MAX_FITNESS_VALUE = 80000 + 4000 + 20000;
+	private static final int MAX_FITNESS_VALUE = 80000 + 80000 + 4000 + 20000 + 10000;
+	private static final int NO_TRAPPED_CARDS = 10000;
 
 	final Card[] _foundation;
 	final Card[] _freecells;
@@ -136,6 +137,23 @@ public class Tableau {
 		return "fail";
 	}
 
+	public boolean hasTrappedCard() {
+		for (Card[] col : _tableau) {
+			if (col != null && col.length > 1) {
+				Card lastCard = col[col.length - 1];
+				for (int ii = col.length - 2; ii >= 0; --ii) {
+					Card c = col[ii];
+					if (c.rank() < lastCard.rank()) {
+						return true;
+					}
+					lastCard = c;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
 	public int fitness() {
 		// bestest tableau is one card from done.
 		int result = 0;
@@ -170,6 +188,10 @@ public class Tableau {
 		result += tallestOrderedStack() * 100;
 
 		result += stackCardScores();
+		
+		if (!this.hasTrappedCard()) {
+			result += NO_TRAPPED_CARDS;
+		}
 
 		// subtract # of cards in freecells * factor
 		result -= 10 * (((int) Math.pow(2.0, (_freecells.length - this.emptyFreecellCount()))) - 1);

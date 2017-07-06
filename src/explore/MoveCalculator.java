@@ -21,14 +21,16 @@ import freecellState.Tableau;
 public class MoveCalculator {
 	private static MoveCalculator mc = new MoveCalculator();
 
-	public static Move[] movesFrom(Tableau t) {
-		List<Move> lm = calculatePossibleMoves(t, null);
-		lm.sort(mc.new MoveValueComparator(t));
+	public static Move[] movesFrom(Tableau t, boolean foundationOnly) {
+		List<Move> lm = calculatePossibleMoves(t, null, foundationOnly);
+		if (!foundationOnly) {
+			lm.sort(mc.new MoveValueComparator(t));
+		}
 		Move[] res = lm.toArray(new Move[0]);
 		return res;
 	}
 
-	public static List<Move> calculatePossibleMoves(Tableau tableau, Move lastMove) {
+	public static List<Move> calculatePossibleMoves(Tableau tableau, Move lastMove, boolean foundationOnly) {
 		List<Move> possibleMoveCollection = new ArrayList<Move>();
 
 		// check if any freecells can land in the foundation
@@ -38,19 +40,22 @@ public class MoveCalculator {
 		List<Move> tabToFound = checkTableauToFoundation(tableau);
 		possibleMoveCollection.addAll(tabToFound);
 
-		// check if any freecells can land on a tableau column
-		List<Move> freeToTab = checkFreecellsToTableau(tableau);
-		possibleMoveCollection.addAll(freeToTab);
+		if (!foundationOnly) {
+			// check if any freecells can land on a tableau column
+			List<Move> freeToTab = checkFreecellsToTableau(tableau);
+			possibleMoveCollection.addAll(freeToTab);
 
-		// locate moveable stacks in tableau
-		// check each step of the column to see if any can land. largest first.
-		List<Location> moveableColumns = moveableColumnsOfTableau(tableau, lastMove);
-		List<Move> viableTableauMoves = legalMovesFrom(tableau, moveableColumns);
-		possibleMoveCollection.addAll(viableTableauMoves);
+			// locate moveable stacks in tableau
+			// check each step of the column to see if any can land. largest
+			// first.
+			List<Location> moveableColumns = moveableColumnsOfTableau(tableau, lastMove);
+			List<Move> viableTableauMoves = legalMovesFrom(tableau, moveableColumns);
+			possibleMoveCollection.addAll(viableTableauMoves);
 
-		// propose each of the top tableau cards to the first open freecell
-		List<Move> freecellMoves = freecellMoves(tableau, lastMove);
-		possibleMoveCollection.addAll(freecellMoves);
+			// propose each of the top tableau cards to the first open freecell
+			List<Move> freecellMoves = freecellMoves(tableau, lastMove);
+			possibleMoveCollection.addAll(freecellMoves);
+		}
 
 		return possibleMoveCollection;
 	}
@@ -237,7 +242,7 @@ public class MoveCalculator {
 			if (ii == column) {
 				continue;
 			}
-			
+
 			Card top = tops[ii];
 			if (top != null) {
 				int d = depthOfCard(tableau, column, top);

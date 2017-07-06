@@ -231,7 +231,7 @@ public class TableauMoveIterator {
 		MoveState(Tableau t, MoveTree m) {
 			_tableau = t;
 			_tree = m;
-			_moveArray = MoveCalculator.movesFrom(_tableau);
+			_moveArray = MoveCalculator.movesFrom(_tableau, !_tableau.hasTrappedCard());
 			_moves = new ArrayIterator<Move>(_moveArray);
 		}
 

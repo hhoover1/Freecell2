@@ -99,7 +99,7 @@ public class MoveCalculatorTest {
 	@Test
 	public final void testShort() {
 		//System.out.println(shortTab);
-		Move[] moves = MoveCalculator.movesFrom(shortTab);
+		Move[] moves = MoveCalculator.movesFrom(shortTab, false);
 		//System.out.println(Arrays.toString(moves));
 		assertNotNull(moves);
 		ArrayIterator<Move> mi = new ArrayIterator<Move>(moves);
@@ -116,7 +116,7 @@ public class MoveCalculatorTest {
 
 	@Test
 	public final void testDeck1Moves() {
-		Move[] moves = MoveCalculator.movesFrom(tableau1);
+		Move[] moves = MoveCalculator.movesFrom(tableau1, false);
 		assertNotNull(moves);
 		ArrayIterator<Move> mi = new ArrayIterator<Move>(moves);
 		assertTrue(mi.hasNext());
@@ -142,7 +142,7 @@ public class MoveCalculatorTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Move[] moves2 = MoveCalculator.movesFrom(nt);
+		Move[] moves2 = MoveCalculator.movesFrom(nt, false);
 		mi = new ArrayIterator<Move>(moves2);
 		for (Move m: tableau1Moves2) {
 			moveSet.add(m);

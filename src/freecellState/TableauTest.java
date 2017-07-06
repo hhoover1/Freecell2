@@ -3,6 +3,7 @@ package freecellState;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -103,13 +104,13 @@ public class TableauTest {
 	@Test
 	public final void testFitnessBasic() {
 		assertNotNull(tableau);
-		assertEquals(60674, tableau.fitness());
+		assertEquals(150674, tableau.fitness());
 	}
 
 	@Test
 	public final void testFitnessOrdered() {
 		addOrderedStack();
-		assertEquals(58646, tableau.fitness());
+		assertEquals(148646, tableau.fitness());
 	}
 	
 	@Test
@@ -118,7 +119,7 @@ public class TableauTest {
 			tableau.put(col2Locations[ii], cardStack[ii]);
 		}
 		System.out.println(tableau);
-		assertEquals(65736, tableau.fitness());
+		assertEquals(155736, tableau.fitness());
 	}
 	
 	@Test
@@ -196,5 +197,10 @@ public class TableauTest {
 		String s = tableau.toString();
 		assertNotNull(s);
 		System.out.println(s);
+	}
+	
+	@Test
+	public final void testHasTrappedCard() {
+		assertTrue(tableau.hasTrappedCard());
 	}
 }
