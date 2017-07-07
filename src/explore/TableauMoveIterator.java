@@ -1,8 +1,8 @@
 package explore;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
@@ -122,8 +122,8 @@ public class TableauMoveIterator {
 		return !_wins.isEmpty();
 	}
 
-	public Iterator<MoveTree> wins() {
-		return _wins.iterator();
+	public Collection<MoveTree> wins() {
+		return _wins;
 	}
 
 	/**

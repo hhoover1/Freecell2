@@ -4,13 +4,14 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
 import deck.Deck;
 import explore.MoveTree;
 import explore.TableauMoveIterator;
+import freecellState.Mover;
 import freecellState.Tableau;
 
 public class StagedDepthFirstSolver {
@@ -19,8 +20,10 @@ public class StagedDepthFirstSolver {
 	private static final int MOVETREE_QUEUE_LENGTH = 1000000;
 	private static final long STATUS_UPDATE_INTERVAL = 100000;
 	private static final long TABLEAU_PRINT_INTERVAL = 1000000;
-	private static final String DECK_38 = "2H,JS,KC,4C,3D,AH,QC,AS,8H,QH,6S,3C,6C,4H,4S,TS,5C,5D,7C,6H,4D,7D,KH,KD,5S,5H,3H,9D,7H,JC,KS,9C,8C,8D,JH,2D,9H,JD,QS,QD,6D,8S,2C,TH,7S,TC,AC,9S,AD,TD,2S,3S";
-	private static Deck d = Deck.deckFrom(DECK_38);
+//	private static final String DECK_38 = "2H,JS,KC,4C,3D,AH,QC,AS,8H,QH,6S,3C,6C,4H,4S,TS,5C,5D,7C,6H,4D,7D,KH,KD,5S,5H,3H,9D,7H,JC,KS,9C,8C,8D,JH,2D,9H,JD,QS,QD,6D,8S,2C,TH,7S,TC,AC,9S,AD,TD,2S,3S";
+//	private static final String DECKSTRING = "3H,KH,2D,KD,JD,4H,9D,TS,7C,KS,7D,QH,8C,6H,4C,9S,7H,6C,2C,2H,5D,3D,8S,JH,TC,AD,7S,QS,8D,9H,5C,6S,5S,AH,TH,KC,3C,4D,9C,AS,4S,QC,JC,AC,3S,TD,QD,8H,5H,6D,JS,2S";
+	private static final String DECKSTRING_24943 = "JS,6C,AS,3H,2C,7D,7H,7S,6S,4H,3D,5C,KS,8S,5D,4C,5S,4D,8H,QD,TH,8D,TS,7C,TC,AD,JH,6H,4S,KC,QS,JD,3C,2S,9S,TD,QC,2H,QH,8C,AC,9D,9H,AH,KH,6D,KD,5H,9C,2D,3S,JC";
+	private static Deck d = Deck.deckFrom(DECKSTRING_24943);
 	private static Tableau startTableau = new Tableau(d);
 	private static long count = 0;
 	private static final DateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ss.SSS");
@@ -32,6 +35,7 @@ public class StagedDepthFirstSolver {
 	private Queue<MoveTree> _priorityMoveQueue = new PriorityQueue<MoveTree>(MOVETREE_QUEUE_LENGTH);
 	private int _maxDepthExplored = 0;
 	private static StagedDepthFirstSolver solver = new StagedDepthFirstSolver();
+	private List<MoveTree> _wins = new ArrayList<MoveTree>(100);
 
 	public static void main(String[] args) {
 		solver.runStagedDepthFirstSearch(INTERMEDIATE_DEPTH, MAX_EXPLORE_DEPTH);
@@ -74,13 +78,16 @@ public class StagedDepthFirstSolver {
 			parallelTops.clear();
 		}
 
-		System.out.println("No solution found");
+		if (_wins.isEmpty()) {
+			System.out.println("No solution found");
+		} else {
+			System.out.println(String.format("Found %d wins:", _wins.size()));
+		}
 		System.out.println(String.format("while count %d, treeSize: %d", whileCount, base.treeSize()));
-		Iterator<MoveTree> iter = base.iterator();
-		int testCount = 0;
-		while (iter.hasNext()) {
-			MoveTree m = iter.next();
-			System.out.println(String.format("%06d: %s", ++testCount, m.toString()));
+		int winCount = 0;
+		for (MoveTree mt : _wins) {
+			System.out.println(String.format("Win #%d - depth %d", ++winCount, mt.depth()));
+			Mover.printWin(mt);
 		}
 	}
 
@@ -100,6 +107,7 @@ public class StagedDepthFirstSolver {
 		tmi.descendFor(_stagedDepth, moveTreeQueue, meter);
 		if (tmi.winOccurred()) {
 			this.flushDeepTrees(moveTreeQueue, tmi.maxDepth());
+			_wins.addAll(tmi.wins());
 		}
 		
 		_maxDepthExplored = tmi.maxCurrentDepth();
@@ -110,7 +118,7 @@ public class StagedDepthFirstSolver {
 		MoveTree[] queuedTrees = moveTreeQueue.toArray(new MoveTree[moveTreeQueue.size()]);
 		moveTreeQueue.clear();
 		for (MoveTree mt : queuedTrees) {
-			if (mt.depth() < newMaxDepth) {
+			if (mt.depth() + mt.resultingTableau(startTableau).cardsLeft() < newMaxDepth) {
 				moveTreeQueue.add(mt);
 			} else {
 				_flushedTrees += mt.remove();

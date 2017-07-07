@@ -90,8 +90,9 @@ public class Mover {
 	public static void printWin(MoveTree mt) {
 		System.out.println("It's a win?");
 		Move[] moves = mt.moves();
+		int moveNumber = 0;
 		for (Move m : moves) {
-			System.out.println(m.shortName());
+			System.out.println(String.format("%3d: %s", ++moveNumber, m.shortName()));
 		}
 	}
 }
