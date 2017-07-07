@@ -103,6 +103,7 @@ public class StagedDepthFirstSolver {
 		}
 		
 		_maxDepthExplored = tmi.maxCurrentDepth();
+		_maxExploreDepth = Math.min(_maxExploreDepth, tmi.maxDepth());
 	}
 
 	private void flushDeepTrees(Queue<MoveTree> moveTreeQueue, int newMaxDepth) {
@@ -112,7 +113,7 @@ public class StagedDepthFirstSolver {
 			if (mt.depth() < newMaxDepth) {
 				moveTreeQueue.add(mt);
 			} else {
-				_flushedTrees += 1;
+				_flushedTrees += mt.remove();
 			}
 		}
 	}

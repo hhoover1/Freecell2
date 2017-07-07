@@ -27,6 +27,7 @@ public class TableauMoveIterator {
 	private int _maxCurrentDepth;
 	private MoveState _current;
 	private List<MoveTree> _wins = new ArrayList<MoveTree>();
+	//private boolean triggeredDeepDive = false;
 
 	public interface ProgressionMeter {
 		void progressOneNode(Tableau t, MoveTree newTree, TableauMoveIterator tmi);
@@ -86,11 +87,19 @@ public class TableauMoveIterator {
 	// but we'd prefer to move to parameters...
 	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter, MoveState moveState) {
 		boolean deepDive = !moveState.tableau().hasTrappedCard();
+//		if (deepDive && !triggeredDeepDive) {
+//			System.out.println(String.format("Starting Deep Dive at depth %d", moveState.depth()));
+//			triggeredDeepDive = true;
+//		} else if (triggeredDeepDive && !deepDive) {
+//			System.out.println(String.format("Resetting deepDive at depth %d", moveState.depth()));
+//			triggeredDeepDive = false;
+//		}
+		
 		if (depth > 1 || deepDive) { // forget the interim depth check if no trapped cards.
 			while (moveState.moves().hasNext()) {
 				MoveState newMoveState = createNextMoveState(moveState, meter);
 				if (newMoveState != null) {
-					if (newMoveState.depth() < _maxDepth) {
+					if (newMoveState.depth() <= _maxDepth) {
 						this._maxCurrentDepth = Math.max(newMoveState.depth(), _maxCurrentDepth);
 						this.descendFor(depth - 1, pmt, meter, newMoveState);
 					} else {
@@ -148,7 +157,7 @@ public class TableauMoveIterator {
 				_wins.add(newMoveTree);
 				Mover.printWin(newMoveTree);
 				// System.exit(1);
-				_maxDepth = moveState.depth() - 1;
+				_maxDepth = Math.min(_maxDepth, moveState.depth() - 1);
 				System.out.println(String.format("Win occurred at depth %d: setting max depth to %d", moveState.depth(),
 						_maxDepth));
 			}

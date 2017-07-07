@@ -89,12 +89,9 @@ public class Mover {
 
 	public static void printWin(MoveTree mt) {
 		System.out.println("It's a win?");
-		if (mt.parent() == null) {
-			if (mt.move() != null) {
-				System.out.println(mt.move());
-			}
-		} else {
-			printWin(mt.parent());
+		Move[] moves = mt.moves();
+		for (Move m : moves) {
+			System.out.println(m.shortName());
 		}
 	}
 }
