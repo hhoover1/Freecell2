@@ -87,13 +87,6 @@ public class TableauMoveIterator {
 	// but we'd prefer to move to parameters...
 	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter, MoveState moveState) {
 		boolean deepDive = !moveState.tableau().hasTrappedCard();
-//		if (deepDive && !triggeredDeepDive) {
-//			System.out.println(String.format("Starting Deep Dive at depth %d", moveState.depth()));
-//			triggeredDeepDive = true;
-//		} else if (triggeredDeepDive && !deepDive) {
-//			System.out.println(String.format("Resetting deepDive at depth %d", moveState.depth()));
-//			triggeredDeepDive = false;
-//		}
 		
 		if (depth > 1 || deepDive) { // forget the interim depth check if no trapped cards.
 			while (moveState.moves().hasNext()) {
@@ -184,6 +177,7 @@ public class TableauMoveIterator {
 	private Tableau nextTableauWith(Tableau tableau, Move move, int depth) {
 		Tableau nt = null;
 		try {
+			_checkedStates += 1;
 			nt = Mover.move(tableau, move);
 			if (this.fitness(nt, depth) == Integer.MAX_VALUE) {
 				return null;
@@ -192,7 +186,6 @@ public class TableauMoveIterator {
 			if (!Mover.isWin(nt)) {
 				String ntHash = nt.tableauHash();
 				synchronized (_examinedStates) {
-					_checkedStates += 1;
 					if (_examinedStates.containsKey(ntHash)) {
 						Integer c = _examinedStates.get(ntHash);
 						if (depth >= c) {
@@ -229,7 +222,7 @@ public class TableauMoveIterator {
 		int result = (DEPTH_BASE * DEPTH_BASE) - (adjustedDepth * adjustedDepth);
 		// result *= Math.signum(-adjustedDepth);
 
-		if (nt.cardsLeft() + depth > _maxDepth) {
+		if (nt.cardsLeft() + nt.trappedDepths() + depth > _maxDepth) {
 			result = Integer.MAX_VALUE;
 		}
 

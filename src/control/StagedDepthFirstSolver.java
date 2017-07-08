@@ -118,7 +118,8 @@ public class StagedDepthFirstSolver {
 		MoveTree[] queuedTrees = moveTreeQueue.toArray(new MoveTree[moveTreeQueue.size()]);
 		moveTreeQueue.clear();
 		for (MoveTree mt : queuedTrees) {
-			if (mt.depth() + mt.resultingTableau(startTableau).cardsLeft() < newMaxDepth) {
+			Tableau t = mt.resultingTableau(startTableau);
+			if (mt.depth() + t.cardsLeft() + t.trappedDepths() <= newMaxDepth) {
 				moveTreeQueue.add(mt);
 			} else {
 				_flushedTrees += mt.remove();

@@ -139,19 +139,47 @@ public class Tableau {
 
 	public boolean hasTrappedCard() {
 		for (Card[] col : _tableau) {
-			if (col != null && col.length > 1) {
-				Card lastCard = col[col.length - 1];
-				for (int ii = col.length - 2; ii >= 0; --ii) {
-					Card c = col[ii];
-					if (c.rank() < lastCard.rank()) {
-						return true;
-					}
-					lastCard = c;
-				}
+			if (trappedCardHeight(col) >= 0) {
+				return true;
 			}
 		}
 		
 		return false;
+	}
+
+	public int trappedCardHeight(int colIdx) {
+		Card[] col = _tableau[colIdx];
+		return trappedCardHeight(col);
+	}
+	
+	public int trappedDepths() {
+		int depths = 0;
+		for (int ii = 0; ii < Tableau.TABLEAU_SIZE; ++ii) {
+			int d = this.trappedCardHeight(ii);
+			if (d >= 0) {
+				depths += this.heightOfTableauStack(ii) - d - 1;
+			}
+		}
+		
+		return depths;
+	}
+
+	/**
+	 * @param col
+	 */
+	private int trappedCardHeight(Card[] col) {
+		if (col != null && col.length > 1) {
+			Card lastCard = col[col.length - 1];
+			for (int ii = col.length - 2; ii >= 0; --ii) {
+				Card c = col[ii];
+				if (c.rank() < lastCard.rank()) {
+					return ii;
+				}
+				lastCard = c;
+			}
+		}
+		
+		return -1;
 	}
 	
 	public int fitness() {
