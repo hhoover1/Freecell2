@@ -1,5 +1,7 @@
 package control;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import control.MoveTreeStatisticsCalculator.MoveTreeStatistic;
 import deck.Deck;
 import explore.MoveTree;
 import explore.TableauMoveIterator;
@@ -20,10 +23,13 @@ public class StagedDepthFirstSolver {
 	private static final int MOVETREE_QUEUE_LENGTH = 1000000;
 	private static final long STATUS_UPDATE_INTERVAL = 100000;
 	private static final long TABLEAU_PRINT_INTERVAL = 1000000;
-//	private static final String DECK_38 = "2H,JS,KC,4C,3D,AH,QC,AS,8H,QH,6S,3C,6C,4H,4S,TS,5C,5D,7C,6H,4D,7D,KH,KD,5S,5H,3H,9D,7H,JC,KS,9C,8C,8D,JH,2D,9H,JD,QS,QD,6D,8S,2C,TH,7S,TC,AC,9S,AD,TD,2S,3S";
-//	private static final String DECKSTRING = "3H,KH,2D,KD,JD,4H,9D,TS,7C,KS,7D,QH,8C,6H,4C,9S,7H,6C,2C,2H,5D,3D,8S,JH,TC,AD,7S,QS,8D,9H,5C,6S,5S,AH,TH,KC,3C,4D,9C,AS,4S,QC,JC,AC,3S,TD,QD,8H,5H,6D,JS,2S";
-	private static final String DECKSTRING_24943 = "JS,6C,AS,3H,2C,7D,7H,7S,6S,4H,3D,5C,KS,8S,5D,4C,5S,4D,8H,QD,TH,8D,TS,7C,TC,AD,JH,6H,4S,KC,QS,JD,3C,2S,9S,TD,QC,2H,QH,8C,AC,9D,9H,AH,KH,6D,KD,5H,9C,2D,3S,JC";
-	private static Deck d = Deck.deckFrom(DECKSTRING_24943);
+	private static final long LOG_INTERVAL = 10000000;
+	private static final String DECK_38 = "2H,JS,KC,4C,3D,AH,QC,AS,8H,QH,6S,3C,6C,4H,4S,TS,5C,5D,7C,6H,4D,7D,KH,KD,5S,5H,3H,9D,7H,JC,KS,9C,8C,8D,JH,2D,9H,JD,QS,QD,6D,8S,2C,TH,7S,TC,AC,9S,AD,TD,2S,3S";
+	// private static final String DECKSTRING =
+	// "3H,KH,2D,KD,JD,4H,9D,TS,7C,KS,7D,QH,8C,6H,4C,9S,7H,6C,2C,2H,5D,3D,8S,JH,TC,AD,7S,QS,8D,9H,5C,6S,5S,AH,TH,KC,3C,4D,9C,AS,4S,QC,JC,AC,3S,TD,QD,8H,5H,6D,JS,2S";
+	// private static final String DECKSTRING_24943 =
+	// "JS,6C,AS,3H,2C,7D,7H,7S,6S,4H,3D,5C,KS,8S,5D,4C,5S,4D,8H,QD,TH,8D,TS,7C,TC,AD,JH,6H,4S,KC,QS,JD,3C,2S,9S,TD,QC,2H,QH,8C,AC,9D,9H,AH,KH,6D,KD,5H,9C,2D,3S,JC";
+	private static Deck d = Deck.deckFrom(DECK_38);
 	private static Tableau startTableau = new Tableau(d);
 	private static long count = 0;
 	private static final DateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ss.SSS");
@@ -34,11 +40,27 @@ public class StagedDepthFirstSolver {
 	private long _flushedTrees = 0;
 	private Queue<MoveTree> _priorityMoveQueue = new PriorityQueue<MoveTree>(MOVETREE_QUEUE_LENGTH);
 	private int _maxDepthExplored = 0;
-	private static StagedDepthFirstSolver solver = new StagedDepthFirstSolver();
+	private static StagedDepthFirstSolver solver;
+	private static final MoveTree _rootMoveTree = new MoveTree();
 	private List<MoveTree> _wins = new ArrayList<MoveTree>(100);
+	private PrintStream logOut;
 
 	public static void main(String[] args) {
+		String fName = "statistics.log";
+		if (args.length > 0) {
+			fName = args[0];
+		}
+		solver = new StagedDepthFirstSolver(fName);
 		solver.runStagedDepthFirstSearch(INTERMEDIATE_DEPTH, MAX_EXPLORE_DEPTH);
+	}
+
+	public StagedDepthFirstSolver(String logName) {
+		try {
+			logOut = new PrintStream(logName);
+		} catch (FileNotFoundException e) {
+			System.err.println("failed to open log file: '" + logName + "'");
+			e.printStackTrace();
+		}
 	}
 
 	private class Meter implements TableauMoveIterator.ProgressionMeter {
@@ -57,7 +79,7 @@ public class StagedDepthFirstSolver {
 	void runStagedDepthFirstSearch(int stageDepth, int maxDepth) {
 		_stagedDepth = stageDepth;
 		_maxExploreDepth = maxDepth;
-		MoveTree base = new MoveTree();
+		MoveTree base = _rootMoveTree;
 
 		System.out.println(startTableau);
 
@@ -109,7 +131,7 @@ public class StagedDepthFirstSolver {
 			this.flushDeepTrees(moveTreeQueue, tmi.maxDepth());
 			_wins.addAll(tmi.wins());
 		}
-		
+
 		_maxDepthExplored = tmi.maxCurrentDepth();
 		_maxExploreDepth = Math.min(_maxExploreDepth, tmi.maxDepth());
 	}
@@ -142,10 +164,57 @@ public class StagedDepthFirstSolver {
 
 		if (count % TABLEAU_PRINT_INTERVAL == 0) {
 			System.out.println(String.format("%s", t));
+			System.out.flush();
+		}
+
+		if (count % LOG_INTERVAL == 0) {
+			StatisticsPrinter sp = new StatisticsPrinter(_rootMoveTree, q);
+			sp.printStatisticsOn(logOut);
+			logOut.flush();
 		}
 	}
 
 	public long count() {
 		return count;
+	}
+
+	class StatisticsPrinter {
+		MoveTreeStatisticsCalculator mtsc;
+		MoveTree _root;
+		Queue<MoveTree> _queue;
+
+		StatisticsPrinter(MoveTree root, Queue<MoveTree> queue) {
+			mtsc = new MoveTreeStatisticsCalculator(startTableau);
+			_root = root;
+			_queue = queue;
+		}
+
+		public void printStatisticsOn(PrintStream out) {
+			mtsc.calculateStatistics(_root, _queue);
+			out.println(String.format("Start dump at %s", dateFormatter.format(new Date())));
+			out.println("global tree stats:");
+			printStat(out, mtsc.globalTreeStats());
+			out.println("\nby depth:");
+			for (int ii = 0; ii < mtsc.treeDepth(); ++ii) {
+				out.print(String.format("depth: %3d - ", ii));
+				printStat(out, mtsc.treeStatAtDepth(ii));
+			}
+			out.print("\nglobal queue stats:");
+			printStat(out, mtsc.globalQueueStats());
+			for (int ii = 0; ii < mtsc.queueDepth(); ++ii) {
+				MoveTreeStatistic mts = mtsc.queueStatAtDepth(ii);
+				if (mts.validData()) {
+					out.print(String.format("depth: %3d - ", ii));
+					printStat(out, mts);
+				}
+			}
+		}
+
+		private void printStat(PrintStream out, MoveTreeStatistic stat) {
+			String minMax = stat.formatMinMax("score: %6d, %6d - remaining: %2d, %2d");
+			String p = String.format("count: %7d, minMax: %s, avgScore: %5.1f, avgRemain: %5.1f", stat.count(), minMax,
+					stat.averageScore(), stat.averageRemainingMoves());
+			out.println(p);
+		}
 	}
 }

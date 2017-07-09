@@ -11,7 +11,7 @@ public class StagedDepthFirstSolverTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		_solver = new StagedDepthFirstSolver();
+		_solver = new StagedDepthFirstSolver("testingLog.log");
 	}
 
 	@Test
