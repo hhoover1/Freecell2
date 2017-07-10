@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Random;
 
 import control.MoveTreeStatisticsCalculator.MoveTreeStatistic;
 import deck.Deck;
@@ -24,12 +25,14 @@ public class StagedDepthFirstSolver {
 	private static final long STATUS_UPDATE_INTERVAL = 100000;
 	private static final long TABLEAU_PRINT_INTERVAL = 1000000;
 	private static final long LOG_INTERVAL = 10000000;
-	private static final String DECK_38 = "2H,JS,KC,4C,3D,AH,QC,AS,8H,QH,6S,3C,6C,4H,4S,TS,5C,5D,7C,6H,4D,7D,KH,KD,5S,5H,3H,9D,7H,JC,KS,9C,8C,8D,JH,2D,9H,JD,QS,QD,6D,8S,2C,TH,7S,TC,AC,9S,AD,TD,2S,3S";
+	private static final int RANDOM_PRIORITY_INTERVAL = 10000000;
+	// private static final String DECK_38 = "2H,JS,KC,4C,3D,AH,QC,AS,8H,QH,6S,3C,6C,4H,4S,TS,5C,5D,7C,6H,4D,7D,KH,KD,5S,5H,3H,9D,7H,JC,KS,9C,8C,8D,JH,2D,9H,JD,QS,QD,6D,8S,2C,TH,7S,TC,AC,9S,AD,TD,2S,3S";
 	// private static final String DECKSTRING =
 	// "3H,KH,2D,KD,JD,4H,9D,TS,7C,KS,7D,QH,8C,6H,4C,9S,7H,6C,2C,2H,5D,3D,8S,JH,TC,AD,7S,QS,8D,9H,5C,6S,5S,AH,TH,KC,3C,4D,9C,AS,4S,QC,JC,AC,3S,TD,QD,8H,5H,6D,JS,2S";
 	// private static final String DECKSTRING_24943 =
 	// "JS,6C,AS,3H,2C,7D,7H,7S,6S,4H,3D,5C,KS,8S,5D,4C,5S,4D,8H,QD,TH,8D,TS,7C,TC,AD,JH,6H,4S,KC,QS,JD,3C,2S,9S,TD,QC,2H,QH,8C,AC,9D,9H,AH,KH,6D,KD,5H,9C,2D,3S,JC";
-	private static Deck d = Deck.deckFrom(DECK_38);
+	private static final String DECKSTRING_170414 = "3S,6C,4H,9D,TC,9S,KD,TD,4D,8H,3H,JS,7C,4S,7D,KC,2C,TS,QD,QC,KS,7H,9H,QH,AH,9C,5D,5H,6H,2H,TH,4C,2D,AC,8S,JC,5S,6S,8C,KH,8D,5C,3C,6D,AD,3D,JH,7S,JD,2S,QS,AS";
+	private static Deck d = Deck.deckFrom(DECKSTRING_170414);
 	private static Tableau startTableau = new Tableau(d);
 	private static long count = 0;
 	private static final DateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ss.SSS");
@@ -85,11 +88,12 @@ public class StagedDepthFirstSolver {
 
 		addTreesToQueue(startTableau, base, _priorityMoveQueue);
 		ArrayList<MoveTree> parallelTops = new ArrayList<MoveTree>(PARALLEL_TOPS);
-		int whileCount = 0;
+		int whileCount = PARALLEL_TOPS;
 		while (!_priorityMoveQueue.isEmpty()) {
-			for (int ii = 0; ii < PARALLEL_TOPS && !_priorityMoveQueue.isEmpty(); ++ii) {
-				MoveTree nextBase = _priorityMoveQueue.poll();
-				parallelTops.add(nextBase);
+			if (whileCount % RANDOM_PRIORITY_INTERVAL < PARALLEL_TOPS) {
+				grabRandomOfQueue(parallelTops);
+			} else {
+				grabTopOfQueue(parallelTops);
 			}
 
 			for (MoveTree nextBase : parallelTops) {
@@ -110,6 +114,27 @@ public class StagedDepthFirstSolver {
 		for (MoveTree mt : _wins) {
 			System.out.println(String.format("Win #%d - depth %d", ++winCount, mt.depth()));
 			Mover.printWin(mt);
+		}
+	}
+
+	private void grabRandomOfQueue(ArrayList<MoveTree> parallelTops) {
+		MoveTree[] allQueue = _priorityMoveQueue.toArray(new MoveTree[_priorityMoveQueue.size()]);
+		Random r = new Random();
+		for (int ii = 0; ii < PARALLEL_TOPS; ++ii) {
+			MoveTree m = allQueue[r.nextInt(allQueue.length)];
+			parallelTops.add(m);
+		}
+	}
+
+	/**
+	 * @param parallelTops
+	 */
+	private void grabTopOfQueue(ArrayList<MoveTree> parallelTops) {
+		for (int ii = 0; ii < PARALLEL_TOPS; ++ii) {
+			MoveTree nextBase = _priorityMoveQueue.poll();
+			if (nextBase != null) {
+				parallelTops.add(nextBase);
+			}
 		}
 	}
 
