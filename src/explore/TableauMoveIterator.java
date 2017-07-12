@@ -150,8 +150,8 @@ public class TableauMoveIterator {
 				_wins.add(newMoveTree);
 				Mover.printWin(newMoveTree);
 				// System.exit(1);
-				_maxDepth = Math.min(_maxDepth, moveState.depth() - 1);
-				System.out.println(String.format("Win occurred at depth %d: setting max depth to %d", moveState.depth(),
+				_maxDepth = Math.min(_maxDepth, newMoveTree.depth() - 1);
+				System.out.println(String.format("Win occurred at depth %d: setting max depth to %d", newMoveTree.depth(),
 						_maxDepth));
 			}
 
