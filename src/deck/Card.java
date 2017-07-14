@@ -110,6 +110,7 @@ public class Card implements Comparable<Card>, CardLike {
 		int rank = -1;
 		switch (s1.charAt(0)) {
 		case 'A':
+		case 'a':
 			rank = 1;
 			break;
 		case '2':
@@ -123,19 +124,23 @@ public class Card implements Comparable<Card>, CardLike {
 			rank = Integer.parseInt(s1);
 			break;
 		case 'T':
+		case 't':
 			rank = 10;
 			break;
 		case 'J':
+		case 'j':
 			rank = 11;
 			break;
 		case 'Q':
+		case 'q':
 			rank = 12;
 			break;
 		case 'K':
+		case 'k':
 			rank = 0;
 			break;
 		default:
-			throw new IllegalArgumentException("unknown rank character");
+			throw new IllegalArgumentException(String.format("unknown rank character (%s)", s1));
 		}
 		return rank;
 	}
@@ -144,15 +149,19 @@ public class Card implements Comparable<Card>, CardLike {
 		Suit suit;
 		switch (s2.charAt(0)) {
 		case 'H':
+		case 'h':
 			suit = Suit.Hearts;
 			break;
 		case 'C':
+		case 'c':
 			suit = Suit.Clubs;
 			break;
 		case 'D':
+		case 'd':
 			suit = Suit.Diamonds;
 			break;
 		case 'S':
+		case 's':
 			suit = Suit.Spades;
 			break;
 		default:

@@ -32,7 +32,9 @@ public class StagedDepthFirstSolver {
 	// private static final String DECKSTRING_24943 =
 	// "JS,6C,AS,3H,2C,7D,7H,7S,6S,4H,3D,5C,KS,8S,5D,4C,5S,4D,8H,QD,TH,8D,TS,7C,TC,AD,JH,6H,4S,KC,QS,JD,3C,2S,9S,TD,QC,2H,QH,8C,AC,9D,9H,AH,KH,6D,KD,5H,9C,2D,3S,JC";
 	private static final String DECKSTRING_170414 = "3S,6C,4H,9D,TC,9S,KD,TD,4D,8H,3H,JS,7C,4S,7D,KC,2C,TS,QD,QC,KS,7H,9H,QH,AH,9C,5D,5H,6H,2H,TH,4C,2D,AC,8S,JC,5S,6S,8C,KH,8D,5C,3C,6D,AD,3D,JH,7S,JD,2S,QS,AS";
-	private static Deck d = Deck.deckFrom(DECKSTRING_170414);
+	private static final String DECKSTRING_3920 = "QS,TS,7C,5H,9S,QH,5S,6S,9C,AS,3D,4H,8S,2H,8H,KC,AH,3H,8C,7H,9D,5D,JD,TH,4C,6D,QC,6C,TC,KD,TD,4D,KS,AD,JS,2D,7D,6H,JC,AC,8D,4S,3C,5C,7S,9H,QD,KH,3S,JH,2C,2S";
+	private static final String DECKSTRING_40041 = "JS,2H,2D,JC,JD,6D,5C,2S,QH,5H,JH,TD,3C,7c,AD,AS,tc,KD,5S,3D,8S,KC,QS,2C,3H,TH,4C,QD,KS,9D,8H,8D,4S,9C,3S,4D,9S,TS,7D,6H,6C,QC,AH,KH,AC,6S,7S,5D,9H,8C,7H,4H";
+	private static Deck d = Deck.deckFrom(DECKSTRING_40041);
 	private static Tableau startTableau = new Tableau(d);
 	private static long count = 0;
 	private static final DateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ss.SSS");
