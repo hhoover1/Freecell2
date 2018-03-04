@@ -19,8 +19,8 @@ import freecellState.Mover;
 import freecellState.Tableau;
 
 public class StagedDepthFirstSolver {
-	private static final int INTERMEDIATE_DEPTH = 6;
-	public static final int MAX_EXPLORE_DEPTH = 150;
+	private static int INTERMEDIATE_DEPTH = 6;
+	public static int MAX_EXPLORE_DEPTH = 150;
 	private static final int MOVETREE_QUEUE_LENGTH = 1000000;
 	private static final long STATUS_UPDATE_INTERVAL = 100000;
 	private static final long TABLEAU_PRINT_INTERVAL = 1000000;
@@ -34,11 +34,14 @@ public class StagedDepthFirstSolver {
 	private static final String DECKSTRING_170414 = "3S,6C,4H,9D,TC,9S,KD,TD,4D,8H,3H,JS,7C,4S,7D,KC,2C,TS,QD,QC,KS,7H,9H,QH,AH,9C,5D,5H,6H,2H,TH,4C,2D,AC,8S,JC,5S,6S,8C,KH,8D,5C,3C,6D,AD,3D,JH,7S,JD,2S,QS,AS";
 	private static final String DECKSTRING_3920 = "QS,TS,7C,5H,9S,QH,5S,6S,9C,AS,3D,4H,8S,2H,8H,KC,AH,3H,8C,7H,9D,5D,JD,TH,4C,6D,QC,6C,TC,KD,TD,4D,KS,AD,JS,2D,7D,6H,JC,AC,8D,4S,3C,5C,7S,9H,QD,KH,3S,JH,2C,2S";
 	private static final String DECKSTRING_40041 = "JS,2H,2D,JC,JD,6D,5C,2S,QH,5H,JH,TD,3C,7c,AD,AS,tc,KD,5S,3D,8S,KC,QS,2C,3H,TH,4C,QD,KS,9D,8H,8D,4S,9C,3S,4D,9S,TS,7D,6H,6C,QC,AH,KH,AC,6S,7S,5D,9H,8C,7H,4H";
-	private static Deck d = Deck.deckFrom(DECKSTRING_40041);
-	private static Tableau startTableau = new Tableau(d);
+	private static final String DECKSTRING_635 = "9C,7H,3D,4D,5H,AS,4S,4H,AH,KD,8S,QC,5C,7S,JC,6C,KH,6D,7D,3S,8H,QS,JS,2D,9S,KS,AD,3C,AC,6H,6S,QH,TD,8C,TC,2H,2C,9H,KC,JD,QD,5D,4C,5S,2S,9D,TS,7C,JH,8D,TH,3H";
+	private static String deckString = DECKSTRING_635;
+	private static Deck deck;
+	private static Tableau startTableau;
 	private static long count = 0;
 	private static final DateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ss.SSS");
 	private static final int PARALLEL_TOPS = 32;
+	private static String fName = "statistics.log";
 
 	private int _stagedDepth = INTERMEDIATE_DEPTH;
 	private int _maxExploreDepth = MAX_EXPLORE_DEPTH;
@@ -51,12 +54,74 @@ public class StagedDepthFirstSolver {
 	private PrintStream logOut;
 
 	public static void main(String[] args) {
-		String fName = "statistics.log";
 		if (args.length > 0) {
-			fName = args[0];
+			parseArgs(args);
 		}
+
+		initialize();
 		solver = new StagedDepthFirstSolver(fName);
 		solver.runStagedDepthFirstSearch(INTERMEDIATE_DEPTH, MAX_EXPLORE_DEPTH);
+	}
+
+	private static void initialize() {
+		deck = Deck.deckFrom(deckString);
+		startTableau = new Tableau(deck);
+	}
+
+	private static void parseArgs(String[] args) {
+		if (args.length == 0) {
+			return;
+		}
+
+		int argIdx = 0;
+		while (argIdx < args.length - 1) {
+			String a1 = args[argIdx++];
+			String a2 = args[argIdx++];
+			if (a1 != null) {
+				processArg(a1, a2);
+			} else {
+				break;
+			}
+		}
+	}
+
+	private static void processArg(String a1, String a2) {
+		if (a1.equalsIgnoreCase("-f")) {
+			fName = a2;
+		} else if (a1.equalsIgnoreCase("-d") || a1.equalsIgnoreCase("-deck")) {
+			int whichDeck = Integer.parseInt(a2);
+			switch (whichDeck) {
+			case 0:
+			case 170414:
+				deckString = DECKSTRING_170414;
+				break;
+			case 1:
+			case 3920:
+				deckString = DECKSTRING_3920;
+				break;
+			case 2:
+			case 40041:
+				deckString = DECKSTRING_40041;
+				break;
+			case 3:
+			case 38:
+				deckString = DECKSTRING_38;
+				break;
+			case 635:
+				deckString = DECKSTRING_635;
+				break;
+			default:
+				deckString = DECKSTRING_635;
+			}
+		} else if (a1.equalsIgnoreCase("-maxDepth")) {
+			MAX_EXPLORE_DEPTH = Integer.parseInt(a2);
+		} else if (a1.equalsIgnoreCase("-s") || a1.equalsIgnoreCase("-stageDepth")) {
+			INTERMEDIATE_DEPTH = Integer.parseInt(a2);
+		} else if (a1.equalsIgnoreCase("-ds") || a1.equalsIgnoreCase("-deckString")) {
+			deckString = a2;
+		} else {
+			System.err.println(String.format("unknown flag: %s", a1));
+		}
 	}
 
 	public StagedDepthFirstSolver(String logName) {

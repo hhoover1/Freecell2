@@ -31,7 +31,7 @@ public class DeckTest {
 	public final void shuffleTest() throws Exception {
 		Deck dk1 = new Deck();
 		Deck dk2 = new Deck();
-		Deck dk3 = new Deck();
+		Deck dk3 = new Deck(1);
 		dk2.shuffle();
 		dk3.shuffle();
 		Deal d1 = new Deal(dk1);

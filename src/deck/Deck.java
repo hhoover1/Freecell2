@@ -2,7 +2,6 @@ package deck;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.Scanner;
 
 import deck.Card.Suit;
@@ -11,6 +10,7 @@ public class Deck {
 	public static final int DECKSIZE = 52;
 
 	private Card[] _deck;
+	private int seed;
 	
 	public static Deck deckFromNoValidation(String in) {
 		Deck res = new Deck();
@@ -65,6 +65,14 @@ public class Deck {
 	}
 
 	public Deck() {
+		initDeck();
+		this.seed = -1;
+	}
+
+	/**
+	 * 
+	 */
+	private void initDeck() {
 		_deck = new Card[DECKSIZE];
 		int pos = 0;
 		for (Suit s : Suit.values()) {
@@ -73,6 +81,11 @@ public class Deck {
 			}
 			_deck[pos++] = new Card(s, 0);
 		}
+	}
+	
+	public Deck(int seed) {
+		this.seed = seed;
+		this.initDeck();
 	}
 	
 	public Deck(Deck d) {
@@ -84,14 +97,19 @@ public class Deck {
 	}
 
 	public void shuffle() {
-		Random r = new Random();
+		deck.Random r;
+		if (this.seed >= 0 && this.seed < 32767) {
+			r = new MSFT_Random(this.seed);
+		} else {
+			r = new RandomWrapper();
+		}
 		ArrayList<Card> shuf = new ArrayList<Card>(DECKSIZE);
 		ArrayList<Card> from = new ArrayList<Card>(DECKSIZE);
 		for (Card c : _deck) {
 			from.add(c);
 		}
 		while (!from.isEmpty()) {
-			int ii = r.nextInt(from.size());
+			int ii = r.next() % from.size();
 			Card c = from.get(ii);
 			from.remove(ii);
 			shuf.add(c);
