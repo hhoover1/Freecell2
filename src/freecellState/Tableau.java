@@ -34,19 +34,25 @@ public class Tableau {
 
 	final Card[] _foundation;
 	final Card[] _freecells;
-	final Card[][] _tableau;
+	//final Card[][] _tableau;
+	final TableauStack[] _tableau;
 
-	public Tableau(Card[] fd, Card[] fc, Card[][] t) {
+	public Tableau(Card[] fd, Card[] fc, TableauStack[] newT) {
 		_foundation = fd;
 		_freecells = fc;
-		_tableau = t;
+		_tableau = newT;
 		this.sortStacks();
 	}
 
 	public Tableau(Deck d) {
 		_foundation = new Card[Card.Suit.values().length];
 		_freecells = new Card[FREECELL_COUNT];
-		_tableau = new Card[TABLEAU_SIZE][0];
+		//_tableau = new Card[TABLEAU_SIZE][0];
+		_tableau = new TableauStack[TABLEAU_SIZE];
+		for (int colIdx = 0; colIdx < _tableau.length; ++colIdx) {
+			_tableau[colIdx] = new TableauStack(colIdx);
+		}
+		
 		this.deal(d);
 	}
 
@@ -65,20 +71,20 @@ public class Tableau {
 		return _freecells[idx];
 	}
 
-	public Card getTableau(int column, int offset) {
-		Card[] tabCol = _tableau[column];
-		return tabCol[tabCol.length - offset - 1];
+	public Card getCardFromTableau(int column, int offset) {
+		TableauStack tabCol = _tableau[column];
+		return tabCol.getCard(offset);
 	}
 
 	public Card get(Location from) throws Exception {
 		Card res = null;
 		switch (from.area()) {
 		case Tableau:
-			Card[] col = _tableau[from.column()];
-			if (from.offset() != col.length - 1) {
+			TableauStack col = _tableau[from.column()];
+			if (from.offset() != col.stackHeight() - 1) {
 				throw new Exception("get only returns top card! : " + from);
 			}
-			res = col[from.offset()];
+			res = col.getCard(from.offset());
 			break;
 		case Foundation:
 			res = _foundation[from.column()];
@@ -110,10 +116,10 @@ public class Tableau {
 			}
 		}
 		Card[] template = new Card[0];
-		for (int ii = 0; ii < TABLEAU_SIZE; ++ii) {
-			ArrayList<Card> cc = stacks.get(ii);
-			Card[] ca = cc.toArray(template);
-			_tableau[ii] = ca;
+		for (int colIdx = 0; colIdx < TABLEAU_SIZE; ++colIdx) {
+			ArrayList<Card> cc = stacks.get(colIdx);
+			TableauStack ca = new TableauStack(cc.toArray(template), colIdx);
+			_tableau[colIdx] = ca;
 		}
 
 		this.sortStacks();
@@ -138,7 +144,7 @@ public class Tableau {
 	}
 
 	public boolean hasTrappedCard() {
-		for (Card[] col : _tableau) {
+		for (TableauStack col : _tableau) {
 			if (trappedCardHeight(col) >= 0) {
 				return true;
 			}
@@ -148,7 +154,7 @@ public class Tableau {
 	}
 
 	public int trappedCardHeight(int colIdx) {
-		Card[] col = _tableau[colIdx];
+		TableauStack col = _tableau[colIdx];
 		return trappedCardHeight(col);
 	}
 	
@@ -167,11 +173,11 @@ public class Tableau {
 	/**
 	 * @param col
 	 */
-	private int trappedCardHeight(Card[] col) {
-		if (col != null && col.length > 1) {
-			Card lastCard = col[col.length - 1];
-			for (int ii = col.length - 2; ii >= 0; --ii) {
-				Card c = col[ii];
+	private int trappedCardHeight(TableauStack col) {
+		if (col != null && col.stackHeight() > 1) {
+			Card lastCard = col.topCard();
+			for (int ii = col.stackHeight() - 2; ii >= 0; --ii) {
+				Card c = col.getCard(ii);
 				if (c.rank() < lastCard.rank()) {
 					return ii;
 				}
@@ -247,9 +253,9 @@ public class Tableau {
 	}
 
 	public int stackCardScore(int idx) {
-		Card[] s = _tableau[idx];
+		TableauStack s = _tableau[idx];
 		int result = 0;
-		for (Card c : s) {
+		for (Card c : s.cards()) {
 			result += 13 - c.rank();
 		}
 
@@ -258,8 +264,8 @@ public class Tableau {
 
 	int emptyTableauColumns() {
 		int emptyCount = 0;
-		for (Card[] ca : this._tableau) {
-			if (ca.length == 0) {
+		for (TableauStack ca : this._tableau) {
+			if (ca.stackHeight() == 0) {
 				emptyCount += 1;
 			}
 		}
@@ -269,7 +275,7 @@ public class Tableau {
 
 	int fullyOrderedDepths() {
 		int result = 0;
-		for (Card[] stack : _tableau) {
+		for (TableauStack stack : _tableau) {
 			int stackDepth = fullyOrderedDepth(stack);
 			if (stackDepth > 1) {
 				result += stackDepth;
@@ -279,12 +285,12 @@ public class Tableau {
 		return result;
 	}
 
-	int fullyOrderedDepth(Card[] stack) {
+	int fullyOrderedDepth(TableauStack _tableau2) {
 		int result = 1;
-		if (stack.length > 1) {
-			Card lastCard = stack[0];
-			for (int cardIdx = 1; cardIdx < stack.length; ++cardIdx) {
-				Card c = stack[cardIdx];
+		if (_tableau2.stackHeight() > 1) {
+			Card lastCard = _tableau2.getCard(_tableau2.stackHeight() - 1);
+			for (int cardIdx = _tableau2.stackHeight() - 2; cardIdx >= 0; --cardIdx) {
+				Card c = _tableau2.getCard(cardIdx);
 				if (c.canBePlacedOn(lastCard)) {
 					lastCard = c;
 					result += 1;
@@ -301,11 +307,11 @@ public class Tableau {
 		int result = 0;
 
 		for (int stackIndex = 0; stackIndex < _tableau.length; ++stackIndex) {
-			Card[] stack = _tableau[stackIndex];
-			if (stack.length > 0) {
-				Card lastCard = stack[0];
-				for (int cardIndex = 1; cardIndex < stack.length; ++cardIndex) {
-					Card c = stack[cardIndex];
+			TableauStack stack = _tableau[stackIndex];
+			if (stack.stackHeight() > 0) {
+				Card lastCard = stack.getCard(0);
+				for (int cardIndex = 1; cardIndex < stack.stackHeight(); ++cardIndex) {
+					Card c = stack.getCard(cardIndex);
 					if (c.rank() > lastCard.rank()) {
 						result += cardIndex;
 						break;
@@ -319,7 +325,7 @@ public class Tableau {
 
 	int tallestOrderedStack() {
 		int result = 0;
-		for (Card[] ac : _tableau) {
+		for (TableauStack ac : _tableau) {
 			int topOrderLength = topOrderedLength(ac);
 			result = Math.max(result, topOrderLength);
 		}
@@ -327,12 +333,12 @@ public class Tableau {
 		return result;
 	}
 
-	int topOrderedLength(Card[] ac) {
-		int result = ac.length == 0 ? 0 : 1;
-		int topIndex = ac.length - 1;
+	int topOrderedLength(TableauStack ac) {
+		int result = ac.stackHeight() == 0 ? 0 : 1;
+		int topIndex = ac.stackHeight() - 1;
 		for (int ii = 0; ii < topIndex; ++ii) {
-			Card t = ac[topIndex - ii];
-			Card u = ac[topIndex - ii - 1];
+			Card t = ac.getCard(ii);
+			Card u = ac.getCard(ii + 1);
 			if (t.canBePlacedOn(u)) {
 				result += 1;
 			} else {
@@ -352,9 +358,9 @@ public class Tableau {
 		}
 
 		for (int ii = 0; ii < _tableau.length; ++ii) {
-			Card[] tc = _tableau[ii];
-			for (int jj = 0; jj < tc.length; ++jj) {
-				Card c = tc[jj];
+			TableauStack tc = _tableau[ii];
+			for (int jj = 0; jj < tc.stackHeight(); ++jj) {
+				Card c = tc.getCard(jj);
 				res += c.hashCode() * ii;
 			}
 		}
@@ -398,15 +404,15 @@ public class Tableau {
 		}
 
 		for (int ii = 0; ii < _tableau.length; ++ii) {
-			Card[] f1 = _tableau[ii];
-			Card[] f2 = ot._tableau[ii];
-			if (f1.length != f2.length) {
+			TableauStack f1 = _tableau[ii];
+			TableauStack f2 = ot._tableau[ii];
+			if (f1.stackHeight() != f2.stackHeight()) {
 				return false;
 			}
 
-			for (int jj = 0; jj < f1.length; ++jj) {
-				Card c1 = f1[jj];
-				Card c2 = f2[jj];
+			for (int jj = 0; jj < f1.stackHeight(); ++jj) {
+				Card c1 = f1.getCard(jj);
+				Card c2 = f2.getCard(jj);
 				if (!(c1.equals(c2))) {
 					return false;
 				}
@@ -442,12 +448,14 @@ public class Tableau {
 
 		// print tableau
 		sb.append("\n\ntableau:\n");
+		TableauStack[] stacks = Arrays.copyOf(_tableau, _tableau.length);
+		Arrays.sort(stacks);
 		int tallestColumn = this.tallestColumn();
 		for (int row = 0; row < tallestColumn; ++row) {
-			for (int column = 0; column < _tableau.length; ++column) {
-				Card[] t = _tableau[column];
-				if (t.length != 0 && row < t.length) {
-					Card tc = t[row];
+			for (int column = 0; column < stacks.length; ++column) {
+				TableauStack t = stacks[column];
+				if (t.stackHeight() != 0 && row < t.stackHeight()) {
+					Card tc = t.getCard(t.stackHeight() - row - 1);
 					sb.append(tc.shortName());
 					sb.append(", ");
 				} else {
@@ -476,8 +484,8 @@ public class Tableau {
 	private int tallestColumn() {
 		int res = Integer.MIN_VALUE;
 		for (int ii = 0; ii < _tableau.length; ++ii) {
-			Card[] t = _tableau[ii];
-			res = Math.max(res, t.length);
+			TableauStack t = _tableau[ii];
+			res = Math.max(res, t.stackHeight());
 		}
 
 		return res;
@@ -498,12 +506,12 @@ public class Tableau {
 	}
 
 	public Card getTopTableau(int tabCol) {
-		int colSize = _tableau[tabCol].length;
+		int colSize = _tableau[tabCol].stackHeight();
 		if (colSize == 0) {
 			return null;
 		}
 
-		Card c = _tableau[tabCol][colSize - 1];
+		Card c = this.getCardFromTableau(tabCol, colSize - 1);
 		return c;
 	}
 
@@ -517,7 +525,7 @@ public class Tableau {
 
 	public List<Card> getCards(Location from) {
 		List<Card> res = new ArrayList<Card>();
-		Card[] fromStack = null;
+		TableauStack fromStack = null;
 
 		switch (from.area()) {
 		case Foundation:
@@ -526,9 +534,9 @@ public class Tableau {
 			break;
 		case Tableau:
 			fromStack = _tableau[from.column()];
-			if (fromStack.length > 0) {
+			if (fromStack.stackHeight() > 0) {
 				for (int ii = 0; ii < from.offset() + 1; ++ii) {
-					c = fromStack[fromStack.length - ii - 1];
+					c = fromStack.getCard(fromStack.stackHeight() - ii - 1);
 					res.add(c);
 				}
 			}
@@ -576,37 +584,37 @@ public class Tableau {
 	// moving all freecell cards to the lowest slots
 	// this shortens searching by eliminating otherwise duplicate states.
 	private void sortStacks() {
-		Arrays.sort(_tableau, (Comparator<? super Card[]>) new CompareStacks());
+		Arrays.sort(_tableau, (Comparator<? super TableauStack>) new CompareStacks());
 		int placeIdx = 0;
 		for (Card c : this._freecells) {
 			this._freecells[placeIdx++] = c;
 		}
 	}
 
-	private class CompareStacks implements Comparator<Card[]> {
+	private class CompareStacks implements Comparator<TableauStack> {
 
-		public int compare(Card[] a, Card[] b) {
+		public int compare(TableauStack a, TableauStack b) {
 			return this.compareStacks(a, b);
 		}
 
-		private int compareStacks(Card[] a, Card[] b) {
-			if (a == null || a.length == 0) {
-				return b == null || b.length == 0 ? 0 : 1;
-			} else if (b == null || b.length == 0) {
+		private int compareStacks(TableauStack a, TableauStack b) {
+			if (a == null || a.stackHeight() == 0) {
+				return b == null || b.stackHeight() == 0 ? 0 : 1;
+			} else if (b == null || b.stackHeight() == 0) {
 				return -1;
 			} else {
-				if (a.length != b.length) {
-					return b.length - a.length;
+				if (a.stackHeight() != b.stackHeight()) {
+					return b.stackHeight() - a.stackHeight();
 				}
-				Card ac = a[a.length - 1];
-				Card bc = b[b.length - 1];
+				Card ac = a.getCard(a.stackHeight() - 1);
+				Card bc = b.getCard(b.stackHeight() - 1);
 				return ac.compareTo(bc);
 			}
 		}
 	}
 
 	public int heightOfTableauStack(int column) {
-		return _tableau[column].length;
+		return _tableau[column].stackHeight();
 	}
 
 	public int cardsLeft() {
@@ -623,13 +631,9 @@ public class Tableau {
 	void put(Location l, Card c) {
 		switch (l.area()) {
 		case Tableau:
-			Card[] cs = _tableau[l.column()];
-			Card[] ncs = Arrays.copyOf(cs, cs.length + 1);
-			int putIdx = cs.length;
-			for (int ii = cs.length - 1; ii > l.offset(); --ii) {
-				ncs[putIdx] = cs[ii];
-			}
-			ncs[l.offset()] = c;
+			TableauStack cs = _tableau[l.column()];
+			TableauStack ncs = new TableauStack(cs);
+			ncs.insertCard(c, l.offset());
 			_tableau[l.column()] = ncs;
 			break;
 		case Foundation:
@@ -641,7 +645,7 @@ public class Tableau {
 		}
 	}
 
-	Card[] getTableauArray(int i) {
+	TableauStack getTableauStack(int i) {
 		return _tableau[i];
 	}
 }

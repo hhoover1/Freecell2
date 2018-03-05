@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import deck.Card;
 import freecellState.Tableau;
+import freecellState.TableauStack;
 
 public class TableauMoveIteratorTest {
 //	private static final Location Fo00 = new Location(Area.Foundation, 0, 0);
@@ -25,7 +26,7 @@ public class TableauMoveIteratorTest {
 
 	@Test
 	public final void testTableauMoveIteratorTableauInt() {
-		Tableau t = new Tableau(found1, new Card[4], tableau1);
+		Tableau t = new Tableau(found1, new Card[4], TableauStack.fromCardArray(tableau1));
 		System.out.println(t);
 		MoveTree root = new MoveTree();
 		TableauMoveIterator tmi = new TableauMoveIterator(t, root, 10, 0);
@@ -34,7 +35,7 @@ public class TableauMoveIteratorTest {
 
 	@Test
 	public final void testTableauMoveIteratorTableauMoveTreeInt() {
-		Tableau t = new Tableau(found1, new Card[Tableau.FREECELL_COUNT], tableau1);
+		Tableau t = new Tableau(found1, new Card[Tableau.FREECELL_COUNT], TableauStack.fromCardArray(tableau1));
 		MoveTree m = new MoveTree();
 		TableauMoveIterator tmi = new TableauMoveIterator(t, m, 120, 0);
 		assertNotNull(tmi);

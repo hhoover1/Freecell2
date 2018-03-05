@@ -20,28 +20,28 @@ public class MoveCalculatorTest {
 	private static final String SHORTDECK = "AS,7S,6H,5C,4H,3C,2D,KD"; // AS,2D,3C,4H,5C,6H,7S,KD
 	private static final String DECKSTRING = "3H,KH,2D,KD,JD,4H,9D,TS,7C,KS,7D,QH,8C,6H,4C,9S,7H,6C,2C,2H,5D,3D,8S,JH,TC,AD,7S,QS,8D,9H,5C,6S,5S,AH,TH,KC,3C,4D,9C,AS,4S,QC,JC,AC,3S,TD,QD,8H,5H,6D,JS,2S";
 	private static final Location[] Found = {
-			new Location(Area.Foundation, 0, 0),
-			new Location(Area.Foundation, 1, 0),
-			new Location(Area.Foundation, 2, 0),
-			new Location(Area.Foundation, 3, 0),
+			new Location(Area.Foundation, 0, 0, -1),
+			new Location(Area.Foundation, 1, 0, -1),
+			new Location(Area.Foundation, 2, 0, -1),
+			new Location(Area.Foundation, 3, 0, -1),
 	};
 	
 	private static final Location[] Tab = {
-			new Location(Area.Tableau, 0, 0),
-			new Location(Area.Tableau, 1, 0),
-			new Location(Area.Tableau, 2, 0),
-			new Location(Area.Tableau, 3, 0),
-			new Location(Area.Tableau, 4, 0),
-			new Location(Area.Tableau, 5, 0),
-			new Location(Area.Tableau, 6, 0),
-			new Location(Area.Tableau, 7, 0),
+			new Location(Area.Tableau, 0, 0, -1),
+			new Location(Area.Tableau, 1, 0, -1),
+			new Location(Area.Tableau, 2, 0, -1),
+			new Location(Area.Tableau, 3, 0, -1),
+			new Location(Area.Tableau, 4, 0, -1),
+			new Location(Area.Tableau, 5, 0, -1),
+			new Location(Area.Tableau, 6, 0, -1),
+			new Location(Area.Tableau, 7, 0, -1),
 	};
 	
 	private static final Location[] Free = {
-			new Location(Area.Freecell, 0, 0),
-			new Location(Area.Freecell, 1, 0),
-			new Location(Area.Freecell, 2, 0),
-			new Location(Area.Freecell, 3, 0),
+			new Location(Area.Freecell, 0, 0, -1),
+			new Location(Area.Freecell, 1, 0, -1),
+			new Location(Area.Freecell, 2, 0, -1),
+			new Location(Area.Freecell, 3, 0, -1),
 	};
 	
 	private static final Move[] shortMoves = {

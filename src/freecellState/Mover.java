@@ -21,7 +21,7 @@ public class Mover {
 		
 		Card[] newFd;
 		Card[] newFr;
-		Card[][] newT;
+		TableauStack[] newT;
 		if (to.area() == Area.Foundation) {
 			newFd = Arrays.copyOf(tableau._foundation, tableau._foundation.length);
 		} else {
@@ -47,10 +47,10 @@ public class Mover {
 			newFr[from.column()] = null;
 			break;
 		case Tableau:
-			Card[] tc = newT[from.column()];
-			c = tc[tc.length - from.offset() - 1];
-			tc = Arrays.copyOf(tc, tc.length - 1);
-			newT[from.column()] = tc;
+			TableauStack tc = newT[from.column()];
+			TableauStack ntc = new TableauStack(tc);
+			c = ntc.removeCard(tc.stackHeight() - from.offset() - 1);
+			newT[from.column()] = ntc;
 			break;
 		default:
 			throw new Exception("unknown Area in from: " + from);
@@ -65,10 +65,10 @@ public class Mover {
 			newFr[to.column()] = c;
 			break;
 		case Tableau:
-			int newLength = newT[to.column()].length + 1;
-			Card[] tc = Arrays.copyOf(newT[to.column()], newLength);
-			tc[newLength - 1] = c;
-			newT[to.column()] = tc;
+			int newLength = newT[to.column()].stackHeight() + 1;
+			TableauStack ntc = new TableauStack(newT[to.column()]);
+			ntc.addCardToStack(c);
+			newT[to.column()] = ntc;
 			break;
 		default:
 			throw new Exception("unknown to Area in Mover.move: " + to);

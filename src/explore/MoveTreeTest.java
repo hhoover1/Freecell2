@@ -13,9 +13,9 @@ import freecellState.Move;
 
 public class MoveTreeTest {
 	private final MoveTree nullParent = null;
-	private final Location free0 = new Location(Area.Freecell, 0, 0);
-	private final Location free1 = new Location(Area.Freecell, 1, 0);
-	private final Location tab00 = new Location(Area.Tableau, 0, 0);
+	private final Location free0 = new Location(Area.Freecell, 0, 0, -1);
+	private final Location free1 = new Location(Area.Freecell, 1, 0, -1);
+	private final Location tab00 = new Location(Area.Tableau, 0, 0, -1);
 	private final Move move1 = new Move(free0, free1);
 	private final Move move2 = new Move(free1, free0);
 	private final Move move3 = new Move(free0, tab00);

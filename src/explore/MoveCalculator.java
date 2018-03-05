@@ -58,10 +58,10 @@ public class MoveCalculator {
 		for (int tabCol = 0; tabCol < Tableau.TABLEAU_SIZE; ++tabCol) {
 			Card c = tableau.getTopTableau(tabCol);
 			if (c != null) {
-				Location to = new Location(Area.Foundation, c.suit().ordinal(), 0);
+				Location to = new Location(Area.Foundation, c.suit().ordinal(), 0, -1);
 				Card oc = tableau.foundation(to.column());
 				if ((oc == null && c.rank() == 1) || (oc != null && c.isNextRankOf(oc))) {
-					Location from = new Location(Area.Tableau, tabCol, 0);
+					Location from = new Location(Area.Tableau, tabCol, 0, -1);
 					Move m = new Move(from, to);
 					result.add(m);
 				}
@@ -79,8 +79,8 @@ public class MoveCalculator {
 				int foundIdx = frc.suit().ordinal();
 				Card foc = tableau.foundation(foundIdx);
 				if ((foc != null && frc.isNextRankOf(foc)) || ((foc == null && frc.rank() == 1))) {
-					Location from = new Location(Area.Freecell, freeIdx, 0);
-					Location to = new Location(Area.Foundation, foundIdx, 0);
+					Location from = new Location(Area.Freecell, freeIdx, 0, -1);
+					Location to = new Location(Area.Foundation, foundIdx, 0, -1);
 					Move m = new Move(from, to);
 					result.add(m);
 				}
@@ -98,8 +98,8 @@ public class MoveCalculator {
 				for (int tabIdx = 0; tabIdx < Tableau.TABLEAU_SIZE; ++tabIdx) {
 					Card ftc = tableau.getTopTableau(tabIdx);
 					if (ftc == null || frc.canBePlacedOn(ftc)) {
-						Location from = new Location(Area.Freecell, freeIdx, 0);
-						Location to = new Location(Area.Tableau, tabIdx, 0);
+						Location from = new Location(Area.Freecell, freeIdx, 0, -1);
+						Location to = new Location(Area.Tableau, tabIdx, 0, -1);
 						Move m = new Move(from, to);
 						result.add(m);
 					}
@@ -129,7 +129,7 @@ public class MoveCalculator {
 				}
 
 				if (bottomCard.canBePlacedOn(tableau.getTopTableau(tabCol))) {
-					Location to = new Location(Area.Tableau, tabCol, 0);
+					Location to = new Location(Area.Tableau, tabCol, 0, -1);
 					Move m = new Move(l, to);
 					moves.add(m);
 				}
@@ -148,7 +148,7 @@ public class MoveCalculator {
 				continue;
 			}
 
-			Location l = new Location(Area.Tableau, tabCol, 0);
+			Location l = new Location(Area.Tableau, tabCol, 0, -1);
 			moves.add(l);
 			/*
 			 * skip moving more than one card at a time for now. List<Card>
@@ -178,7 +178,7 @@ public class MoveCalculator {
 		ArrayList<Move> moves = new ArrayList<Move>();
 		int openFree = tableau.firstEmptyFreecell();
 		if (openFree >= 0) {
-			Location to = new Location(Area.Freecell, openFree, 0);
+			Location to = new Location(Area.Freecell, openFree, 0, -1);
 
 			for (int tabCol = 0; tabCol < Tableau.TABLEAU_SIZE; ++tabCol) {
 				if (tabCol == lastCol) {
@@ -186,7 +186,7 @@ public class MoveCalculator {
 				}
 
 				if (tableau.getTopTableau(tabCol) != null) {
-					Location from = new Location(Area.Tableau, tabCol, 0);
+					Location from = new Location(Area.Tableau, tabCol, 0, -1);
 					Move m = new Move(from, to);
 					moves.add(m);
 				}

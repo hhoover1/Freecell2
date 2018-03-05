@@ -8,13 +8,15 @@ public class Location {
 	}
 	
 	private final Area _area;
-	private final int _column;
-	private final int _offset;
+	private final byte _column;
+	private final byte _offset;
+	private final byte _origColumn;
 	
-	public Location(Area a, int col, int off) {
+	public Location(Area a, int col, int off, int origCol) {
 		_area = a;
-		_column = col;
-		_offset = off;
+		_column = (byte)col;
+		_offset = (byte)off;
+		_origColumn = (byte)-1;
 	}
 	
 	public Area area() {
@@ -27,6 +29,10 @@ public class Location {
 	
 	public int offset() {
 		return _offset;
+	}
+	
+	public int originalColumn() {
+		return _origColumn;
 	}
 	
 	@Override
