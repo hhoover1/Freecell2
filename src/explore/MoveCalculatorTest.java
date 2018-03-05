@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 import org.junit.Before;
@@ -27,14 +28,14 @@ public class MoveCalculatorTest {
 	};
 	
 	private static final Location[] Tab = {
-			new Location(Area.Tableau, 0, 0, -1),
-			new Location(Area.Tableau, 1, 0, -1),
-			new Location(Area.Tableau, 2, 0, -1),
-			new Location(Area.Tableau, 3, 0, -1),
-			new Location(Area.Tableau, 4, 0, -1),
-			new Location(Area.Tableau, 5, 0, -1),
-			new Location(Area.Tableau, 6, 0, -1),
-			new Location(Area.Tableau, 7, 0, -1),
+			new Location(Area.Tableau, 0, 0, 0),
+			new Location(Area.Tableau, 1, 0, 1),
+			new Location(Area.Tableau, 2, 0, 2),
+			new Location(Area.Tableau, 3, 0, 3),
+			new Location(Area.Tableau, 4, 0, 4),
+			new Location(Area.Tableau, 5, 0, 5),
+			new Location(Area.Tableau, 6, 0, 6),
+			new Location(Area.Tableau, 7, 0, 7),
 	};
 	
 	private static final Location[] Free = {
@@ -47,12 +48,11 @@ public class MoveCalculatorTest {
 	private static final Move[] shortMoves = {
 			new Move(Tab[0], Found[3]),
 			new Move(Tab[1], Tab[2]),
-			new Move(Tab[1], Free[0]),
 			new Move(Tab[2], Tab[3]),
 			new Move(Tab[3], Tab[4]),
 			new Move(Tab[4], Tab[5]),
 			new Move(Tab[5], Tab[6]),
-			new Move(Tab[0], Free[0]),
+			new Move(Tab[1], Free[0]),
 			new Move(Tab[2], Free[0]),
 			new Move(Tab[3], Free[0]),
 			new Move(Tab[4], Free[0]),
@@ -94,29 +94,32 @@ public class MoveCalculatorTest {
 	public void setUp() throws Exception {
 		shortTab = Tableau.fromStringNoValidation(SHORTDECK);
 		tableau1 = Tableau.fromStringNoValidation(DECKSTRING);
+		Move.debuggingMove = false;
 	}
 
 	@Test
 	public final void testShort() {
-		//System.out.println(shortTab);
+		System.out.println("shortTab = " + shortTab);
 		Move[] moves = MoveCalculator.movesFrom(shortTab, false);
-		//System.out.println(Arrays.toString(moves));
+		System.out.println("moves = " + Arrays.toString(moves));
 		assertNotNull(moves);
 		ArrayIterator<Move> mi = new ArrayIterator<Move>(moves);
 		assertTrue(mi.hasNext());
 		int shortCount = 0;
 		while (mi.hasNext()) {
 			Move m = mi.next();
-			//System.out.println(m);
+			System.out.println("move(" + shortCount + "): " + m);
 			assertEquals(shortMoves[shortCount++], m);
 		}
 		assertFalse(mi.hasNext());
-		//System.out.println("---------------");
+		System.out.println("---------------");
 	}
 
 	@Test
 	public final void testDeck1Moves() {
+		System.out.println("tableau1 =\n" + tableau1);
 		Move[] moves = MoveCalculator.movesFrom(tableau1, false);
+		System.out.println("moves = " + Arrays.toString(moves));
 		assertNotNull(moves);
 		ArrayIterator<Move> mi = new ArrayIterator<Move>(moves);
 		assertTrue(mi.hasNext());
@@ -126,7 +129,7 @@ public class MoveCalculatorTest {
 		}
 		while (mi.hasNext()) {
 			Move m = mi.next();
-			System.out.println(m);
+			System.out.println("move: " + m);
 			assertTrue(moveSet.contains(m));
 			assertTrue(moveSet.remove(m));
 		}

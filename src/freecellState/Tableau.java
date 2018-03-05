@@ -106,6 +106,7 @@ public class Tableau {
 		for (int ii = 0; ii < TABLEAU_SIZE; ++ii) {
 			stacks.add(new ArrayList<Card>(8));
 		}
+		
 		while (!d.isEmpty()) {
 			try {
 				Card c = d.next();
@@ -115,6 +116,7 @@ public class Tableau {
 				e.printStackTrace();
 			}
 		}
+		
 		Card[] template = new Card[0];
 		for (int colIdx = 0; colIdx < TABLEAU_SIZE; ++colIdx) {
 			ArrayList<Card> cc = stacks.get(colIdx);
@@ -505,13 +507,13 @@ public class Tableau {
 		return t;
 	}
 
-	public Card getTopTableau(int tabCol) {
+	public Card getTopOfTableauCol(int tabCol) {
 		int colSize = _tableau[tabCol].stackHeight();
 		if (colSize == 0) {
 			return null;
 		}
 
-		Card c = this.getCardFromTableau(tabCol, colSize - 1);
+		Card c = this.getCardFromTableau(tabCol, 0);
 		return c;
 	}
 
@@ -536,7 +538,7 @@ public class Tableau {
 			fromStack = _tableau[from.column()];
 			if (fromStack.stackHeight() > 0) {
 				for (int ii = 0; ii < from.offset() + 1; ++ii) {
-					c = fromStack.getCard(fromStack.stackHeight() - ii - 1);
+					c = fromStack.getCard(ii);
 					res.add(c);
 				}
 			}
@@ -574,7 +576,7 @@ public class Tableau {
 	public Card[] topTableauCards() {
 		Card[] tops = new Card[TABLEAU_SIZE];
 		for (int ii = 0; ii < tops.length; ++ii) {
-			tops[ii] = this.getTopTableau(ii);
+			tops[ii] = this.getTopOfTableauCol(ii);
 		}
 
 		return tops;
@@ -606,8 +608,8 @@ public class Tableau {
 				if (a.stackHeight() != b.stackHeight()) {
 					return b.stackHeight() - a.stackHeight();
 				}
-				Card ac = a.getCard(a.stackHeight() - 1);
-				Card bc = b.getCard(b.stackHeight() - 1);
+				Card ac = a.getCard(0);
+				Card bc = b.getCard(0);
 				return ac.compareTo(bc);
 			}
 		}
@@ -647,5 +649,10 @@ public class Tableau {
 
 	TableauStack getTableauStack(int i) {
 		return _tableau[i];
+	}
+
+	public int originalColumn(int tabCol) {
+		TableauStack ts = _tableau[tabCol];
+		return ts.originalColumn();
 	}
 }

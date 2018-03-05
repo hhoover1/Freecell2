@@ -7,6 +7,7 @@ public class Move implements Comparable<Move> {
 	private Card _card;
 	private final Location _from;
 	private final Location _to;
+	public static boolean debuggingMove = false;
 
 	public Move(Location f, Location t) {
 		_card = null;
@@ -56,21 +57,33 @@ public class Move implements Comparable<Move> {
 		String cname = this.getClass().getName();
 		StringBuilder sb = new StringBuilder(cname.substring(cname.lastIndexOf('.') + 1));
 		sb.append('(');
-/*		if (_card != null) {
-			sb.append(_card);
-			sb.append(" from: ");
+		
+		if (debuggingMove) {
+			if (_card != null) {
+				sb.append(_card);
+				sb.append(" from: ");
+			}
+			this.appendDebugRep(sb);
+		} else {
+			this.appendStringRep(sb);
 		}
-		sb.append(_from);
-		sb.append(", to: ");
-		sb.append(_to);
-*/		
-		sb.append(_from.shortName());
-		sb.append(':');
-		sb.append(_to.shortName());
+		
 		sb.append(')');
 		return sb.toString();
 	}
+	
+	public void appendStringRep(StringBuilder sb) {
+		sb.append(_from.shortName());
+		sb.append(':');
+		sb.append(_to.shortName());
+	}
 
+	public void appendDebugRep(StringBuilder sb) {
+		sb.append(_from.debugShortName());
+		sb.append(':');
+		sb.append(_to.debugShortName());
+	}
+	
 	public int compareTo(Move _move) {
 		if (this._from.area() == Area.Freecell) {
 			return 2;

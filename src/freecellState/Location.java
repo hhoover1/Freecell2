@@ -16,7 +16,7 @@ public class Location {
 		_area = a;
 		_column = (byte)col;
 		_offset = (byte)off;
-		_origColumn = (byte)-1;
+		_origColumn = (byte)origCol;
 	}
 	
 	public Area area() {
@@ -68,7 +68,9 @@ public class Location {
 		StringBuilder sb = new StringBuilder(cname.substring(cname.lastIndexOf('.') + 1));
 		sb.append('(');
 		sb.append(_area);
-		sb.append(", ");
+		sb.append("(");
+		sb.append(_origColumn);
+		sb.append("), ");
 		sb.append(_column);
 		sb.append(", ");
 		sb.append(_offset);
@@ -76,14 +78,24 @@ public class Location {
 		return sb.toString();
 	}
 
-	public String shortName() {
-		//String cname = this.getClass().getName();
-		StringBuilder sb = new StringBuilder(/*(cname.substring(cname.lastIndexOf('.') + 1)).substring(0, 3)*/);
-		//sb.append('(');
+	public String debugShortName() {
+		StringBuilder sb = new StringBuilder();
 		sb.append(_area.name().substring(0, 2));
 		sb.append(_column);
 		sb.append(_offset);
-		//sb.append(')');
+		return sb.toString();
+	}
+	
+	public String shortName() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(_area.name().substring(0, 2));
+		if (_area == Area.Tableau) {
+			sb.append(_origColumn);
+		} else {
+			sb.append(_column);
+		}
+		
+		sb.append(_offset);
 		return sb.toString();
 	}
 }

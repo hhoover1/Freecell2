@@ -56,12 +56,12 @@ public class MoveCalculator {
 	static List<Move> checkTableauToFoundation(Tableau tableau) {
 		List<Move> result = new ArrayList<Move>();
 		for (int tabCol = 0; tabCol < Tableau.TABLEAU_SIZE; ++tabCol) {
-			Card c = tableau.getTopTableau(tabCol);
+			Card c = tableau.getTopOfTableauCol(tabCol);
 			if (c != null) {
 				Location to = new Location(Area.Foundation, c.suit().ordinal(), 0, -1);
 				Card oc = tableau.foundation(to.column());
 				if ((oc == null && c.rank() == 1) || (oc != null && c.isNextRankOf(oc))) {
-					Location from = new Location(Area.Tableau, tabCol, 0, -1);
+					Location from = new Location(Area.Tableau, tabCol, 0, tableau.originalColumn(tabCol));
 					Move m = new Move(from, to);
 					result.add(m);
 				}
@@ -95,11 +95,11 @@ public class MoveCalculator {
 		for (int freeIdx = 0; freeIdx < Tableau.FREECELL_COUNT; ++freeIdx) {
 			Card frc = tableau.freecell(freeIdx);
 			if (frc != null && frc.rank() != 1) {
-				for (int tabIdx = 0; tabIdx < Tableau.TABLEAU_SIZE; ++tabIdx) {
-					Card ftc = tableau.getTopTableau(tabIdx);
+				for (int tabCol = 0; tabCol < Tableau.TABLEAU_SIZE; ++tabCol) {
+					Card ftc = tableau.getTopOfTableauCol(tabCol);
 					if (ftc == null || frc.canBePlacedOn(ftc)) {
 						Location from = new Location(Area.Freecell, freeIdx, 0, -1);
-						Location to = new Location(Area.Tableau, tabIdx, 0, -1);
+						Location to = new Location(Area.Tableau, tabCol, 0, tableau.originalColumn(tabCol));
 						Move m = new Move(from, to);
 						result.add(m);
 					}
@@ -128,8 +128,9 @@ public class MoveCalculator {
 					continue;
 				}
 
-				if (bottomCard.canBePlacedOn(tableau.getTopTableau(tabCol))) {
-					Location to = new Location(Area.Tableau, tabCol, 0, -1);
+				Card c = tableau.getTopOfTableauCol(tabCol);
+				if (bottomCard.canBePlacedOn(c)) {
+					Location to = new Location(Area.Tableau, tabCol, 0, tableau.originalColumn(tabCol));
 					Move m = new Move(l, to);
 					moves.add(m);
 				}
@@ -140,7 +141,7 @@ public class MoveCalculator {
 	}
 
 	static List<Location> moveableColumnsOfTableau(Tableau tableau, Move lastMove) {
-		List<Location> moves = new ArrayList<Location>();
+		List<Location> fromLocations = new ArrayList<Location>();
 
 		for (int tabCol = 0; tabCol < Tableau.TABLEAU_SIZE; ++tabCol) {
 			// skip any card we JUST placed
@@ -148,8 +149,10 @@ public class MoveCalculator {
 				continue;
 			}
 
-			Location l = new Location(Area.Tableau, tabCol, 0, -1);
-			moves.add(l);
+			// debugging
+			Card c = tableau.getCardFromTableau(tabCol, 0);
+			Location l = new Location(Area.Tableau, tabCol, 0, tableau.originalColumn(tabCol));
+			fromLocations.add(l);
 			/*
 			 * skip moving more than one card at a time for now. List<Card>
 			 * colCards = tableau.getColumn(tabCol); if (colCards.isEmpty()) {
@@ -166,7 +169,7 @@ public class MoveCalculator {
 			 */
 		}
 
-		return moves;
+		return fromLocations;
 	}
 
 	static List<Move> freecellMoves(Tableau tableau, Move lastMove) {
@@ -185,8 +188,9 @@ public class MoveCalculator {
 					continue;
 				}
 
-				if (tableau.getTopTableau(tabCol) != null) {
-					Location from = new Location(Area.Tableau, tabCol, 0, -1);
+				Card top = tableau.getTopOfTableauCol(tabCol);
+				if (top != null && top.rank() != 1) {
+					Location from = new Location(Area.Tableau, tabCol, 0, tableau.originalColumn(tabCol));
 					Move m = new Move(from, to);
 					moves.add(m);
 				}
