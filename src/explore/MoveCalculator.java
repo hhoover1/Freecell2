@@ -149,10 +149,10 @@ public class MoveCalculator {
 				continue;
 			}
 
-			// debugging
-			Card c = tableau.getCardFromTableau(tabCol, 0);
-			Location l = new Location(Area.Tableau, tabCol, 0, tableau.originalColumn(tabCol));
-			fromLocations.add(l);
+			if (tableau.heightOfTableauStack(tabCol) > 0) {
+				Location l = new Location(Area.Tableau, tabCol, 0, tableau.originalColumn(tabCol));
+				fromLocations.add(l);
+			}
 			/*
 			 * skip moving more than one card at a time for now. List<Card>
 			 * colCards = tableau.getColumn(tabCol); if (colCards.isEmpty()) {

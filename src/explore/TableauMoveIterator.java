@@ -9,6 +9,7 @@ import java.util.Queue;
 import freecellState.Move;
 import freecellState.Mover;
 import freecellState.Tableau;
+import freecellState.TableauHash;
 
 /* 
  * The main point of this class is to generate (a portion of) the MoveTree.
@@ -19,7 +20,7 @@ import freecellState.Tableau;
 public class TableauMoveIterator {
 	private static final int DEPTH_BASE = 100;
 	private static final int INITIAL_EXAMINEDSTATES_SIZE = 1000000000;
-	private static HashMap<String, Integer> _examinedStates = new HashMap<String, Integer>(INITIAL_EXAMINEDSTATES_SIZE);
+	private static HashMap<TableauHash, Integer> _examinedStates = new HashMap<TableauHash, Integer>(INITIAL_EXAMINEDSTATES_SIZE);
 	private static long _checkedStates = 0;
 	private static long _repeatOffenders = 0;
 	private static long _moveTreesRemoved = 0;
@@ -184,7 +185,7 @@ public class TableauMoveIterator {
 			}
 
 			if (!Mover.isWin(nt)) {
-				String ntHash = nt.tableauHash();
+				TableauHash ntHash = nt.tableauHash();
 				synchronized (_examinedStates) {
 					if (_examinedStates.containsKey(ntHash)) {
 						Integer c = _examinedStates.get(ntHash);

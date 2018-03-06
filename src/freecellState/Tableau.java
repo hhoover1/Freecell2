@@ -1,16 +1,14 @@
 package freecellState;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
 import deck.Card;
-import deck.Deck;
 import deck.Card.Suit;
 import deck.Deal;
+import deck.Deck;
 
 /*
  * class Tableau
@@ -31,11 +29,13 @@ public class Tableau {
 	public static final int TABLEAU_SIZE = 8;
 	private static final int MAX_FITNESS_VALUE = 80000 + 80000 + 4000 + 20000 + 10000;
 	private static final int NO_TRAPPED_CARDS = 10000;
+	public static final int FOUNDATION_COUNT = Card.Suit.values().length;
 
 	final Card[] _foundation;
 	final Card[] _freecells;
 	//final Card[][] _tableau;
 	final TableauStack[] _tableau;
+	private TableauHash _tableauHash;
 
 	public Tableau(Card[] fd, Card[] fc, TableauStack[] newT) {
 		_foundation = fd;
@@ -127,22 +127,12 @@ public class Tableau {
 		this.sortStacks();
 	}
 
-	public String tableauHash() {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			md.update(this.toString().getBytes());
-			byte[] digest = md.digest();
-			StringBuilder sb = new StringBuilder();
-			for (byte b : digest) {
-				sb.append((b & 0xF0) >> 4 + 'A');
-				sb.append((b & 0x0F) + 'A');
-			}
-			return sb.toString();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+	public TableauHash tableauHash() {
+		if (_tableauHash == null) {
+			_tableauHash = new TableauHash(this);
 		}
-
-		return "fail";
+		
+		return _tableauHash;
 	}
 
 	public boolean hasTrappedCard() {
@@ -537,7 +527,7 @@ public class Tableau {
 		case Tableau:
 			fromStack = _tableau[from.column()];
 			if (fromStack.stackHeight() > 0) {
-				for (int ii = 0; ii < from.offset() + 1; ++ii) {
+				for (int ii = from.offset(); ii >= 0; --ii) {
 					c = fromStack.getCard(ii);
 					res.add(c);
 				}
