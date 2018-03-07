@@ -10,7 +10,7 @@ public class TableauHash implements Comparable<TableauHash> {
 	private static final int TABLEAU_MAX_CARD_COUNT = Deck.DECKSIZE + Tableau.FREECELL_COUNT + Tableau.FOUNDATION_COUNT;
 	private static final int TABLEAU_HASH_SIZE = TABLEAU_MAX_CARD_COUNT * 3 / 4;
 
-	final Tableau _tableau;
+	Tableau _tableau;
 	byte[] _bits = null;
 	int _computedHash = -1;
 
@@ -54,6 +54,7 @@ public class TableauHash implements Comparable<TableauHash> {
 		}
 
 		_bits = fourToThreeConversion(tempBits);
+		_tableau = null;
 	}
 
 	private byte[] fourToThreeConversion(byte[] tempBits) {

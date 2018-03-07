@@ -65,6 +65,6 @@ public class DeckStringVariations implements Iterator<String> {
 	public String next() {
 		String result = variation;
 		update();
-		return variation;
+		return result;
 	}
 }
