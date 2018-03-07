@@ -48,6 +48,18 @@ public class Card implements Comparable<Card>, CardLike {
 		return _rank;
 	}
 	
+	public byte ordinal() {
+		if (this == null) {
+			return 0x3F;
+		}
+
+		int suit = _suit.ordinal();
+		int rank = this.rank() - 1;
+		byte b = (byte) ((suit * 13) + rank);
+
+		return b;
+	}
+
 	public String rankName() {
 		switch (_rank) {
 		case 0:

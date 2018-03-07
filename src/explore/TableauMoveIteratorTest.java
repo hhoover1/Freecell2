@@ -25,8 +25,8 @@ public class TableauMoveIteratorTest {
 	}
 
 	@Test
-	public final void testTableauMoveIteratorTableauInt() {
-		Tableau t = new Tableau(found1, new Card[4], TableauStack.fromCardArray(tableau1));
+	public final void testTableauMoveIteratorTableauInt() throws Exception {
+		Tableau t = new Tableau(found1, new Card[4], TableauStack.fromCardArray(tableau1), false);
 		System.out.println(t);
 		MoveTree root = new MoveTree();
 		TableauMoveIterator tmi = new TableauMoveIterator(t, root, 10, 0);
@@ -34,8 +34,8 @@ public class TableauMoveIteratorTest {
 	}
 
 	@Test
-	public final void testTableauMoveIteratorTableauMoveTreeInt() {
-		Tableau t = new Tableau(found1, new Card[Tableau.FREECELL_COUNT], TableauStack.fromCardArray(tableau1));
+	public final void testTableauMoveIteratorTableauMoveTreeInt() throws Exception {
+		Tableau t = new Tableau(found1, new Card[Tableau.FREECELL_COUNT], TableauStack.fromCardArray(tableau1), false);
 		MoveTree m = new MoveTree();
 		TableauMoveIterator tmi = new TableauMoveIterator(t, m, 120, 0);
 		assertNotNull(tmi);

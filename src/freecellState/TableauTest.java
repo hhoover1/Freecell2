@@ -56,7 +56,7 @@ public class TableauTest {
 			cardTab[idx] = new Card[0];
 		}
 
-		tableau = new Tableau(found, free, TableauStack.fromCardArray(cardTab));
+		tableau = new Tableau(found, free, TableauStack.fromCardArray(cardTab), false);
 	}
 
 	@Test

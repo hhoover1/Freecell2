@@ -181,6 +181,7 @@ public class TableauMoveIterator {
 			_checkedStates += 1;
 			nt = Mover.move(tableau, move);
 			if (this.fitness(nt, depth) == Integer.MAX_VALUE) {
+				// this is a dead branch...
 				return null;
 			}
 
@@ -197,9 +198,12 @@ public class TableauMoveIterator {
 							_examinedStates.put(ntHash, new Integer(depth));
 						}
 					} else {
+						// not seen before, we have now...
 						_examinedStates.put(ntHash, new Integer(depth));
 					}
 				}
+			} else {
+				System.err.println("found a win:\n" + nt);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -36,20 +36,20 @@ public class TableauHash implements Comparable<TableauHash> {
 			Location from = new Location(Area.Tableau, ii, _tableau.heightOfTableauStack(ii) - 1, -1);
 			List<Card> stack = _tableau.getCards(from);
 			for (Card c : stack) {
-				byte b = bitsHash(c);
+				byte b = c == null ? 0x3F : c.ordinal();
 				tempBits[hashIndex++] = b;
 			}
 		}
 
 		for (int ii = 0; ii < Card.Suit.values().length; ++ii) {
 			Card c = _tableau.foundation(ii);
-			byte b = bitsHash(c);
+			byte b = c == null ? 0x3F : c.ordinal();
 			tempBits[hashIndex++] = b;
 		}
 
 		for (int ii = 0; ii < Card.Suit.values().length; ++ii) {
 			Card c = _tableau.freecell(ii);
-			byte b = bitsHash(c);
+			byte b = c == null ? 0x3F : c.ordinal();
 			tempBits[hashIndex++] = b;
 		}
 
@@ -70,19 +70,6 @@ public class TableauHash implements Comparable<TableauHash> {
 		}
 
 		return bits;
-	}
-
-	private static byte bitsHash(Card c) {
-		if (c == null) {
-			return 0x3F;
-		}
-
-		int suit = c.suit().ordinal();
-		int rank = c.rank();
-		byte b = (byte) ((suit & 0x3) << 4);
-		b |= (byte) (rank & 0xF);
-
-		return b;
 	}
 
 	@Override

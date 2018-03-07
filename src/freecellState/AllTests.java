@@ -5,7 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ MoverTest.class, TableauTest.class })
+@SuiteClasses({ MoverTest.class, TableauTest.class, TableauHashTest.class })
 public class AllTests {
 
 }

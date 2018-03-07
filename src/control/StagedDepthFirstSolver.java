@@ -190,6 +190,7 @@ public class StagedDepthFirstSolver {
 		for (int ii = 0; ii < PARALLEL_TOPS; ++ii) {
 			MoveTree m = allQueue[r.nextInt(allQueue.length)];
 			parallelTops.add(m);
+			_priorityMoveQueue.remove(m);
 		}
 	}
 

@@ -36,7 +36,7 @@ public class MoverTest {
 		for (int idx = 2; idx < cardTab.length; ++idx) {
 			cardTab[idx] = new Card[0];
 		}
-		tableau = new Tableau(found, free, TableauStack.fromCardArray(cardTab));
+		tableau = new Tableau(found, free, TableauStack.fromCardArray(cardTab), false);
 	}
 
 
@@ -67,21 +67,21 @@ public class MoverTest {
 	}
 	
 	@Test
-	public final void testIsWin_Win() {
+	public final void testIsWin_Win() throws Exception {
 		Card[] found = {Card.cardFrom("KH"), Card.cardFrom("KC"), Card.cardFrom("KD"), Card.cardFrom("KS") };
 		Card[][] tab = new Card[Tableau.TABLEAU_SIZE][];
 		Card[] free = new Card[Tableau.FREECELL_COUNT];
 		for (int ii = 0; ii < tab.length; ++ii) {
 			tab[ii] = new Card[0];
 		}
-		Tableau winTab = new Tableau(found, free, TableauStack.fromCardArray(tab));
+		Tableau winTab = new Tableau(found, free, TableauStack.fromCardArray(tab), false);
 		assertNotNull(winTab);
 		assertFalse(winTab.hasTrappedCard());
 		assertTrue(Mover.isWin(winTab));
 	}
 	
 	@Test
-	public final void testIsWin_NotWin() {
+	public final void testIsWin_NotWin() throws Exception {
 		Card[] found = {Card.cardFrom("KH"), Card.cardFrom("QC"), Card.cardFrom("KD"), Card.cardFrom("KS") };
 		Card[][] tab = new Card[Tableau.TABLEAU_SIZE][];
 		Card[] free = new Card[Tableau.FREECELL_COUNT];
@@ -91,7 +91,7 @@ public class MoverTest {
 		Card[] holdOut = { Card.cardFrom("KC") };
 		tab[0] = holdOut;
 		
-		Tableau winTab = new Tableau(found, free, TableauStack.fromCardArray(tab));
+		Tableau winTab = new Tableau(found, free, TableauStack.fromCardArray(tab), false);
 		assertNotNull(winTab);
 		assertFalse(winTab.hasTrappedCard());
 		assertFalse(Mover.isWin(winTab));		

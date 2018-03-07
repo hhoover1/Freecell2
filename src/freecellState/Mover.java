@@ -49,7 +49,7 @@ public class Mover {
 		case Tableau:
 			TableauStack tc = newT[from.column()];
 			TableauStack ntc = new TableauStack(tc);
-			c = ntc.removeCard(tc.stackHeight() - from.offset() - 1);
+			c = ntc.removeCard(from.offset());
 			newT[from.column()] = ntc;
 			break;
 		default:
@@ -74,7 +74,7 @@ public class Mover {
 			throw new Exception("unknown to Area in Mover.move: " + to);
 		}
 				
-		return new Tableau(newFd, newFr, newT);
+		return new Tableau(newFd, newFr, newT, tableau.validation());
 	}
 
 	public static boolean isWin(Tableau nt) {

@@ -2,6 +2,8 @@ package freecellState;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -67,13 +69,5 @@ public class TableauHashTest {
 		String ts1 = t1.toString();
 		assertNotNull(ts1);
 		assertEquals(ts1, "TableauHash(67372036, 0010203040506070)");
-	}
-
-	@Test
-	public final void testCanonicalHashes() {
-		Tableau tableau = Tableau.fromString(DECKSTRING_38);
-		TableauHash baseHash = tableau.tableauHash();
-		System.out.println("base hash = " + baseHash);
-		
 	}
 }

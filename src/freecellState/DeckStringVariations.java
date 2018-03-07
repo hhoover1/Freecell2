@@ -26,7 +26,9 @@ import java.util.Iterator;
 public class DeckStringVariations implements Iterator<String> {
 	private final String base;
 	private String variation;
-	private int changeNumber;
+	private int changeNumber = 0;
+	private int topCharIndex = 1;
+	private DeckStringVariations lowerDeckString = null;
 	
 	DeckStringVariations(String start) {
 		base = start;
@@ -35,10 +37,25 @@ public class DeckStringVariations implements Iterator<String> {
 		update();
 	}
 	
-	private void update() {
-		
+	DeckStringVariations(String start, int topIndex) {
+		base = start;
+		variation = start;
+		changeNumber = 0;
+		topCharIndex = topIndex;
+		update();
 	}
 	
+	private void update() {
+		if (lowerDeckString == null && topCharIndex > 1) {
+			lowerDeckString = new DeckStringVariations(base, topCharIndex);
+			topCharIndex += 1;
+		}
+		
+		if (lowerDeckString != null && lowerDeckString.hasNext()) {
+			variation = lowerDeckString.next();
+		}
+	}
+
 	@Override
 	public boolean hasNext() {
 		return variation != null;
@@ -46,6 +63,8 @@ public class DeckStringVariations implements Iterator<String> {
 
 	@Override
 	public String next() {
+		String result = variation;
+		update();
 		return variation;
 	}
 }

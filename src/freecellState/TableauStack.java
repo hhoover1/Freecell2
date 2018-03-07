@@ -65,7 +65,7 @@ public class TableauStack implements Comparable<TableauStack> {
 	}
 
 	public Card removeCard(int i) {
-		Card c = this.cardsInStack[i];
+		Card c = this.cardsInStack[cardsInStack.length - i - 1];
 		for (int ii = cardsInStack.length - i - 1; ii < cardsInStack.length - 1; ++ii) {
 			this.cardsInStack[ii] = this.cardsInStack[ii + 1];
 		}

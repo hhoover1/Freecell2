@@ -33,27 +33,79 @@ public class Tableau {
 
 	final Card[] _foundation;
 	final Card[] _freecells;
-	//final Card[][] _tableau;
+	// final Card[][] _tableau;
 	final TableauStack[] _tableau;
 	private TableauHash _tableauHash;
+	private boolean _doValidation = true;
 
-	public Tableau(Card[] fd, Card[] fc, TableauStack[] newT) {
+	public Tableau(Card[] fd, Card[] fc, TableauStack[] newT, boolean validation) throws Exception {
 		_foundation = fd;
 		_freecells = fc;
 		_tableau = newT;
+		_doValidation = validation;
 		this.sortStacks();
+		if (_doValidation) {
+			this.validate();
+		}
 	}
 
 	public Tableau(Deck d) {
 		_foundation = new Card[Card.Suit.values().length];
 		_freecells = new Card[FREECELL_COUNT];
-		//_tableau = new Card[TABLEAU_SIZE][0];
+		// _tableau = new Card[TABLEAU_SIZE][0];
 		_tableau = new TableauStack[TABLEAU_SIZE];
 		for (int colIdx = 0; colIdx < _tableau.length; ++colIdx) {
 			_tableau[colIdx] = new TableauStack(colIdx);
 		}
-		
+
 		this.deal(d);
+	}
+
+	private void validate() throws Exception {
+		boolean[] foundCard = new boolean[Deck.DECKSIZE];
+		// why didn't this work?
+		for (int ii = 0; ii < FOUNDATION_COUNT; ++ii) {
+			if (_foundation[ii] != null) {
+				setFound(foundCard, _foundation[ii]);
+			}
+		}
+
+		for (int ii = 0; ii < FREECELL_COUNT; ++ii) {
+			if (_freecells[ii] != null) {
+				int cardId = _freecells[ii].ordinal();
+				foundCard[cardId] = true;
+			}
+		}
+
+		for (int ii = 0; ii < TABLEAU_SIZE; ++ii) {
+			TableauStack ts = _tableau[ii];
+			if (ts.stackHeight() > 0) {
+				for (Card c : ts.cards()) {
+					int cardId = c.ordinal();
+					if (foundCard[cardId]) {
+						throw new Exception("card already found!");
+					}
+					foundCard[cardId] = true;
+				}
+			}
+		}
+
+		for (int ii = 0; ii < foundCard.length; ++ii) {
+			if (!foundCard[ii]) {
+				throw new Exception("Card not found!");
+			}
+		}
+	}
+
+	private void setFound(boolean[] found, Card card) throws Exception {
+		int cardId = card.ordinal();
+		int count = card.rank();
+		for (int ii = 0; ii < count; ++ii) {
+			if (found[cardId]) {
+				throw new Exception("card already found!");
+			}
+			found[cardId--] = true;
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -106,7 +158,7 @@ public class Tableau {
 		for (int ii = 0; ii < TABLEAU_SIZE; ++ii) {
 			stacks.add(new ArrayList<Card>(8));
 		}
-		
+
 		while (!d.isEmpty()) {
 			try {
 				Card c = d.next();
@@ -116,7 +168,7 @@ public class Tableau {
 				e.printStackTrace();
 			}
 		}
-		
+
 		Card[] template = new Card[0];
 		for (int colIdx = 0; colIdx < TABLEAU_SIZE; ++colIdx) {
 			ArrayList<Card> cc = stacks.get(colIdx);
@@ -131,7 +183,7 @@ public class Tableau {
 		if (_tableauHash == null) {
 			_tableauHash = new TableauHash(this);
 		}
-		
+
 		return _tableauHash;
 	}
 
@@ -141,7 +193,7 @@ public class Tableau {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -149,7 +201,7 @@ public class Tableau {
 		TableauStack col = _tableau[colIdx];
 		return trappedCardHeight(col);
 	}
-	
+
 	public int trappedDepths() {
 		int depths = 0;
 		for (int ii = 0; ii < Tableau.TABLEAU_SIZE; ++ii) {
@@ -158,7 +210,7 @@ public class Tableau {
 				depths += this.heightOfTableauStack(ii) - d - 1;
 			}
 		}
-		
+
 		return depths;
 	}
 
@@ -176,10 +228,10 @@ public class Tableau {
 				lastCard = c;
 			}
 		}
-		
+
 		return -1;
 	}
-	
+
 	public int fitness() {
 		// bestest tableau is one card from done.
 		int result = 0;
@@ -204,7 +256,7 @@ public class Tableau {
 		result += 10 * partialOrderedHeights();
 
 		// fully ordered depths
-		//result += 500 * fullyOrderedDepths();
+		// result += 500 * fullyOrderedDepths();
 		int[] fullyOrdered = fullyOrderedTableauDepths();
 		for (int foc : fullyOrdered) {
 			result += foc * foc * 100;
@@ -214,7 +266,7 @@ public class Tableau {
 		result += tallestOrderedStack() * 100;
 
 		result += stackCardScores();
-		
+
 		if (!this.hasTrappedCard()) {
 			result += NO_TRAPPED_CARDS;
 		}
@@ -231,10 +283,10 @@ public class Tableau {
 		for (int ii = 0; ii < _tableau.length; ++ii) {
 			res[ii] = fullyOrderedDepth(_tableau[ii]);
 		}
-		
+
 		return res;
 	}
-	
+
 	int stackCardScores() {
 		int result = 0;
 		for (int ii = 0; ii < _tableau.length; ++ii) {
@@ -644,5 +696,9 @@ public class Tableau {
 	public int originalColumn(int tabCol) {
 		TableauStack ts = _tableau[tabCol];
 		return ts.originalColumn();
+	}
+
+	public boolean validation() {
+		return _doValidation;
 	}
 }
