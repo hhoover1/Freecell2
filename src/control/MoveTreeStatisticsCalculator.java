@@ -24,8 +24,11 @@ public class MoveTreeStatisticsCalculator {
 	}
 	
 	public void calculateStatistics(MoveTree root, Queue<MoveTree> queued) {
+		System.out.println("Starting statistics calculations");
 		processRoot(root);
+		System.out.println("done root, starting queue");
 		processQueue(queued);
+		System.out.println("Done statistics calculations");
 	}
 
 	public MoveTreeStatistic globalTreeStats() {
@@ -80,8 +83,9 @@ public class MoveTreeStatisticsCalculator {
 		processCollection(iter, _statsQueue, treeCollection);
 	}
 
-	private void processCollection(Iterator<MoveTree> iter, MoveTreeStatistic global,
-			final ArrayList<MoveTreeStatistic> treeCollection) {
+	private void processCollection(Iterator<MoveTree> iter,
+								  MoveTreeStatistic global,
+								  final ArrayList<MoveTreeStatistic> treeCollection) {
 		while (iter.hasNext()) {
 			MoveTree m = iter.next();
 			int d = m.depth();
