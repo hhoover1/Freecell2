@@ -227,7 +227,7 @@ public class TableauMoveIterator {
 		int result = (DEPTH_BASE * DEPTH_BASE) - (adjustedDepth * adjustedDepth);
 		// result *= Math.signum(-adjustedDepth);
 
-		if (nt.cardsLeft() + nt.trappedDepths() + depth > _maxDepth) {
+		if (nt.cardsLeft() + /*nt.trappedDepths() +*/ depth > _maxDepth) {
 			result = Integer.MAX_VALUE;
 		}
 

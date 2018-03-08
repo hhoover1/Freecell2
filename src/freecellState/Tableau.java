@@ -27,9 +27,10 @@ import deck.Deck;
 public class Tableau {
 	public static final int FREECELL_COUNT = 4;
 	public static final int TABLEAU_SIZE = 8;
-	private static final int MAX_FITNESS_VALUE = 80000 + 80000 + 4000 + 20000 + 10000;
+	private static final int MAX_FITNESS_VALUE = 40000 + 127500 + 20000 + 20000 + 10000;
 	private static final int NO_TRAPPED_CARDS = 10000;
 	public static final int FOUNDATION_COUNT = Card.Suit.values().length;
+	private static final int[] emptyColumnScores = { 0, 5000, 15000, 20000, 4500, 4000, 3500, 3000, 10000 };
 
 	final Card[] _foundation;
 	final Card[] _freecells;
@@ -246,11 +247,26 @@ public class Tableau {
 		// # of non-empty foundation columns - max 40000
 		result += 10000 * nonEmptyFoundation;
 
-		// total depth of foundation columns -- max 13000
+		// total depth of foundation columns -- max 127500
 		result += 2500 * totalRetired;
 
 		// number of empty tableau columns -- max 16000
-		result += 5000 * this.emptyTableauColumns();
+		/* result += 5000 * this.emptyTableauColumns();
+		 * we need a little more sophisticated, I think...
+		 * the first empty column is important and two
+		 * make for almost sure solution.  Three is almost
+		 * guaranteed solution.  After that, more empty
+		 * columns don't really help much, and really,
+		 * probably make the solution harder.  So a function
+		 * that peaks at three empties and goes back down
+		 * is likely best...
+		 * 
+		 * hmmm.  in reality, having this based upon
+		 * both empty columns and something like remaining
+		 * column heights or just remaining cards...
+		 */
+		
+		result += emptyColumnScores[this.emptyTableauColumns()];
 
 		// partial ordered height
 		result += 10 * partialOrderedHeights();
