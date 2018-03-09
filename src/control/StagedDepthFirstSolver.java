@@ -20,7 +20,7 @@ import freecellState.Tableau;
 
 public class StagedDepthFirstSolver {
 	private static int INTERMEDIATE_DEPTH = 6;
-	public static int MAX_EXPLORE_DEPTH = 150;
+	public static int MAX_EXPLORE_DEPTH = 135;
 	private static final int MOVETREE_QUEUE_LENGTH = 1000000;
 	private static final long STATUS_UPDATE_INTERVAL = 100000;
 	private static final long TABLEAU_PRINT_INTERVAL = 1000000;
