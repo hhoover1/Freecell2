@@ -236,9 +236,16 @@ public class StagedDepthFirstSolver {
 	}
 
 	private void flushDeepTrees(Queue<MoveTree> moveTreeQueue, int newMaxDepth) {
+		System.out.println("\nflushing deep trees");
+		int cnt = 0;
+		long startCount = _flushedTrees;
 		MoveTree[] queuedTrees = moveTreeQueue.toArray(new MoveTree[moveTreeQueue.size()]);
 		moveTreeQueue.clear();
 		for (MoveTree mt : queuedTrees) {
+			if (++cnt % 10000 == 0) {
+				System.out.print(".");
+			}
+			
 			Tableau t = mt.resultingTableau(startTableau);
 			if (mt.depth() + t.cardsLeft() + t.trappedDepths() <= newMaxDepth) {
 				moveTreeQueue.add(mt);
@@ -246,6 +253,8 @@ public class StagedDepthFirstSolver {
 				_flushedTrees += mt.remove();
 			}
 		}
+		
+		System.out.println("done flushing trees, flushed " + (_flushedTrees - startCount));
 	}
 
 	/**
