@@ -6,6 +6,7 @@ import java.util.Queue;
 
 import explore.MoveTree;
 import freecellState.Tableau;
+import main.Arguments;
 
 public class MoveTreeStatisticsCalculator {
 	private final int MAX_EXPLORE_DEPTH = StagedDepthFirstSolver.MAX_EXPLORE_DEPTH;
@@ -14,9 +15,11 @@ public class MoveTreeStatisticsCalculator {
 	ArrayList<MoveTreeStatistic> _statsByDepthQueue = new ArrayList<MoveTreeStatistic>(MAX_EXPLORE_DEPTH);
 	MoveTreeStatistic _statsTree = new MoveTreeStatistic();
 	MoveTreeStatistic _statsQueue = new MoveTreeStatistic();
+	Arguments arguments;
 
-	public MoveTreeStatisticsCalculator(Tableau start) {
+	public MoveTreeStatisticsCalculator(Tableau start, Arguments args) {
 		_startingTableau = start;
+		arguments = args;
 		for (int ii = 0; ii < MAX_EXPLORE_DEPTH; ++ii) {
 			_statsByDepthTree.add(new MoveTreeStatistic());
 			_statsByDepthQueue.add(new MoveTreeStatistic());
@@ -86,6 +89,8 @@ public class MoveTreeStatisticsCalculator {
 	private void processCollection(Iterator<MoveTree> iter,
 								  MoveTreeStatistic global,
 								  final ArrayList<MoveTreeStatistic> treeCollection) {
+		int count = 0;
+		int dotInterval = arguments.flushDotInterval;
 		while (iter.hasNext()) {
 			MoveTree m = iter.next();
 			int d = m.depth();
@@ -97,6 +102,9 @@ public class MoveTreeStatisticsCalculator {
 			mts.addTree();
 			mts.addScore(m.score());
 			mts.addRemaining(resulting.cardsLeft());
+			if (++count % dotInterval == 0) {
+				System.out.print(".");
+			}
 		}
 	}
 
