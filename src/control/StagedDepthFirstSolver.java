@@ -59,7 +59,7 @@ public class StagedDepthFirstSolver {
 	private static long count = 0;
 	
 	private final Arguments arguments;
-	private int _maxExploreDepth = MAX_EXPLORE_DEPTH;
+	//private int _maxExploreDepth = MAX_EXPLORE_DEPTH;
 	private long _flushedTrees = 0;
 	private Queue<MoveTree> _priorityMoveQueue;
 	private int _maxDepthExplored = 0;
@@ -100,6 +100,7 @@ public class StagedDepthFirstSolver {
 		String designatedDeck = arguments.deckString;
 		deck = Deck.deckFrom(arguments.getString(designatedDeck));
 		startTableau = new Tableau(deck);
+		startTableau.setValidation(arguments.validation);
 	}
 
 	public StagedDepthFirstSolver(Arguments args) {
@@ -112,7 +113,6 @@ public class StagedDepthFirstSolver {
 			e.printStackTrace();
 		}
 		
-		_maxExploreDepth = arguments.maxExploreDepth;
 		_priorityMoveQueue = new PriorityQueue<MoveTree>(arguments.moveTreeQueueLength);	
 	}
 
@@ -200,7 +200,7 @@ public class StagedDepthFirstSolver {
 	 * @param moveTreeQueue
 	 */
 	private void addTreesToQueue(Tableau parentTableau, MoveTree parentTree, Queue<MoveTree> moveTreeQueue) {
-		TableauMoveIterator tmi = new TableauMoveIterator(parentTableau, parentTree, _maxExploreDepth,
+		TableauMoveIterator tmi = new TableauMoveIterator(parentTableau, parentTree, arguments.maxExploreDepth,
 				_maxDepthExplored);
 		Meter meter = new Meter(this);
 
@@ -211,7 +211,7 @@ public class StagedDepthFirstSolver {
 		}
 
 		_maxDepthExplored = tmi.maxCurrentDepth();
-		_maxExploreDepth = Math.min(_maxExploreDepth, tmi.maxDepth());
+		arguments.maxExploreDepth = Math.min(arguments.maxExploreDepth, tmi.maxDepth());
 	}
 
 	private void flushDeepTrees(Queue<MoveTree> moveTreeQueue, int newMaxDepth) {

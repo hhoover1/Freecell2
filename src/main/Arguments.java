@@ -5,15 +5,16 @@ import java.util.HashMap;
 
 public class Arguments {
 	public boolean doStatistics;
-	public int maxExploreDepth;
-	public int intermediateDepth;
+	public boolean validation;
 	public int flushDotInterval;
+	public int intermediateDepth;
+	public int maxExploreDepth;
 	public int moveTreeQueueLength;
 	public int parallelTops;
-	public long statusUpdateInterval;
-	public long tableauPrintInterval;
-	public long statisticsLogInterval;
 	public long randomSelectionInterval;
+	public long statusUpdateInterval;
+	public long statisticsLogInterval;
+	public long tableauPrintInterval;
 	public String deckString;
 	public String statisticsLogName;
 

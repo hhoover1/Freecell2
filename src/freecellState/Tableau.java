@@ -62,6 +62,10 @@ public class Tableau {
 		this.deal(d);
 	}
 
+	public void setValidation(boolean val) {
+		this._doValidation = val;
+	}
+	
 	private void validate() throws Exception {
 		boolean[] foundCard = new boolean[Deck.DECKSIZE];
 		// why didn't this work?
