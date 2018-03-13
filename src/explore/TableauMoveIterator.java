@@ -254,19 +254,6 @@ public class TableauMoveIterator {
 			_moves = new ArrayIterator<Move>(_moveArray);
 		}
 
-		public boolean hasTableauInParents(TableauHash ntHash) {
-			if (this._tableau != null) {
-				if (_tableau.tableauHash().equals(ntHash)) {
-					return true;
-				}
-				
-				if (_parent != null) {
-					return _parent.hasTableauInParents(ntHash);
-				}
-			}
-			return false;
-		}
-
 		public Tableau tableau() {
 			return _tableau;
 		}
