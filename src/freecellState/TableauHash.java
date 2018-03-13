@@ -84,9 +84,10 @@ public class TableauHash implements Comparable<TableauHash> {
 		long res = 0;
 		int byteOffset = 0;
 		for (int ii = 0; ii < _bits.length; ++ii) {
-			long b = _bits[ii] << (byteOffset++ * 8);
+			long b = _bits[ii] << ((byteOffset++ * 8) % 32);
 			res ^= b;
 		}
+		
 		_computedHash = (int)res;
 
 		return _computedHash;
@@ -103,6 +104,10 @@ public class TableauHash implements Comparable<TableauHash> {
 		}
 		
 		TableauHash oth = (TableauHash)o;
+		if (oth._bits == null) {
+			oth.composeHash();
+		}
+		
 		for (int ii = 0; ii < _bits.length; ++ii) {
 			if (_bits[ii] != oth._bits[ii]) {
 				return false;

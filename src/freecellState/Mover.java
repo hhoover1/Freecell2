@@ -65,7 +65,6 @@ public class Mover {
 			newFr[to.column()] = c;
 			break;
 		case Tableau:
-			int newLength = newT[to.column()].stackHeight() + 1;
 			TableauStack ntc = new TableauStack(newT[to.column()]);
 			ntc.addCardToStack(c);
 			newT[to.column()] = ntc;

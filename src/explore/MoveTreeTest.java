@@ -60,7 +60,7 @@ public class MoveTreeTest {
 		MoveTree child1 = new MoveTree(parent, move2, 1003);
 		String sn = child1.toString();
 		//System.out.println(sn);
-		assertEquals("MoveTree(^0,Move(Fr10:Fr00),1,1003)", sn);
+		assertEquals("MoveTree(^0,Move(Fr10:Fr00),1,1002)", sn);
 		sn = parent.toString();
 		//System.out.println(sn);
 		assertEquals("MoveTree(1,Move(Fr00:Fr10),0,1000)", sn);

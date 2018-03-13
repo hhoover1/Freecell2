@@ -87,12 +87,14 @@ public class Card implements Comparable<Card>, CardLike {
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof Card)) {
+		if (!(other instanceof Card) || other == null) {
 			return false;
 		}
+		
 		if (!(this._rank == ((Card) other).rank())) {
 			return false;
 		}
+		
 		return this._suit.equals(((Card) other).suit());
 	}
 	

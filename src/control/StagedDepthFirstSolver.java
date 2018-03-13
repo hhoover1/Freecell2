@@ -43,17 +43,16 @@ public class StagedDepthFirstSolver {
 	private static final long STATUS_UPDATE_INTERVAL = 100000;
 	private static final int FLUSH_DOT_COUNT = 100000;
 	public static final String DECKSTRING_38 = "2H,JS,KC,4C,3D,AH,QC,AS,8H,QH,6S,3C,6C,4H,4S,TS,5C,5D,7C,6H,4D,7D,KH,KD,5S,5H,3H,9D,7H,JC,KS,9C,8C,8D,JH,2D,9H,JD,QS,QD,6D,8S,2C,TH,7S,TC,AC,9S,AD,TD,2S,3S";
+	public static final String DECKSTRING_635 = "9C,7H,3D,4D,5H,AS,4S,4H,AH,KD,8S,QC,5C,7S,JC,6C,KH,6D,7D,3S,8H,QS,JS,2D,9S,KS,AD,3C,AC,6H,6S,QH,TD,8C,TC,2H,2C,9H,KC,JD,QD,5D,4C,5S,2S,9D,TS,7C,JH,8D,TH,3H";
+	public static final String DECKSTRING_3920 = "QS,TS,7C,5H,9S,QH,5S,6S,9C,AS,3D,4H,8S,2H,8H,KC,AH,3H,8C,7H,9D,5D,JD,TH,4C,6D,QC,6C,TC,KD,TD,4D,KS,AD,JS,2D,7D,6H,JC,AC,8D,4S,3C,5C,7S,9H,QD,KH,3S,JH,2C,2S";
+	public static final String DECKSTRING_11987 = "5S,JD,8S,3S,3H,KC,2S,KD,4S,5D,6H,7D,6D,KH,2C,QD,3C,TD,7S,8C,QH,9H,4C,TH,8D,TC,4D,9S,7C,QC,8H,3D,7H,6C,9D,5C,QS,KS,AC,2D,JS,6S,4H,TS,9C,AD,AH,2H,JC,5H,AS,JH";
+	public static final String DECKSTRING_24943 = "JS,6C,AS,3H,2C,7D,7H,7S,6S,4H,3D,5C,KS,8S,5D,4C,5S,4D,8H,QD,TH,8D,TS,7C,TC,AD,JH,6H,4S,KC,QS,JD,3C,2S,9S,TD,QC,2H,QH,8C,AC,9D,9H,AH,KH,6D,KD,5H,9C,2D,3S,JC";
+	public static final String DECKSTRING_40041 = "JS,2H,2D,JC,JD,6D,5C,2S,QH,5H,JH,TD,3C,7c,AD,AS,tc,KD,5S,3D,8S,KC,QS,2C,3H,TH,4C,QD,KS,9D,8H,8D,4S,9C,3S,4D,9S,TS,7D,6H,6C,QC,AH,KH,AC,6S,7S,5D,9H,8C,7H,4H";
+	public static final String DECKSTRING_170414 = "3S,6C,4H,9D,TC,9S,KD,TD,4D,8H,3H,JS,7C,4S,7D,KC,2C,TS,QD,QC,KS,7H,9H,QH,AH,9C,5D,5H,6H,2H,TH,4C,2D,AC,8S,JC,5S,6S,8C,KH,8D,5C,3C,6D,AD,3D,JH,7S,JD,2S,QS,AS";
 	// private static final String DECKSTRING =
 	// "3H,KH,2D,KD,JD,4H,9D,TS,7C,KS,7D,QH,8C,6H,4C,9S,7H,6C,2C,2H,5D,3D,8S,JH,TC,AD,7S,QS,8D,9H,5C,6S,5S,AH,TH,KC,3C,4D,9C,AS,4S,QC,JC,AC,3S,TD,QD,8H,5H,6D,JS,2S";
-	private static final String DECKSTRING_24943 = "JS,6C,AS,3H,2C,7D,7H,7S,6S,4H,3D,5C,KS,8S,5D,4C,5S,4D,8H,QD,TH,8D,TS,7C,TC,AD,JH,6H,4S,KC,QS,JD,3C,2S,9S,TD,QC,2H,QH,8C,AC,9D,9H,AH,KH,6D,KD,5H,9C,2D,3S,JC";
-	private static final String DECKSTRING_170414 = "3S,6C,4H,9D,TC,9S,KD,TD,4D,8H,3H,JS,7C,4S,7D,KC,2C,TS,QD,QC,KS,7H,9H,QH,AH,9C,5D,5H,6H,2H,TH,4C,2D,AC,8S,JC,5S,6S,8C,KH,8D,5C,3C,6D,AD,3D,JH,7S,JD,2S,QS,AS";
-	private static final String DECKSTRING_3920 = "QS,TS,7C,5H,9S,QH,5S,6S,9C,AS,3D,4H,8S,2H,8H,KC,AH,3H,8C,7H,9D,5D,JD,TH,4C,6D,QC,6C,TC,KD,TD,4D,KS,AD,JS,2D,7D,6H,JC,AC,8D,4S,3C,5C,7S,9H,QD,KH,3S,JH,2C,2S";
-	private static final String DECKSTRING_40041 = "JS,2H,2D,JC,JD,6D,5C,2S,QH,5H,JH,TD,3C,7c,AD,AS,tc,KD,5S,3D,8S,KC,QS,2C,3H,TH,4C,QD,KS,9D,8H,8D,4S,9C,3S,4D,9S,TS,7D,6H,6C,QC,AH,KH,AC,6S,7S,5D,9H,8C,7H,4H";
-	private static final String DECKSTRING_635 = "9C,7H,3D,4D,5H,AS,4S,4H,AH,KD,8S,QC,5C,7S,JC,6C,KH,6D,7D,3S,8H,QS,JS,2D,9S,KS,AD,3C,AC,6H,6S,QH,TD,8C,TC,2H,2C,9H,KC,JD,QD,5D,4C,5S,2S,9D,TS,7C,JH,8D,TH,3H";
-	private static final String DECKSTRING_11987 = "5S,JD,8S,3S,3H,KC,2S,KD,4S,5D,6H,7D,6D,KH,2C,QD,3C,TD,7S,8C,QH,9H,4C,TH,8D,TC,4D,9S,7C,QC,8H,3D,7H,6C,9D,5C,QS,KS,AC,2D,JS,6S,4H,TS,9C,AD,AH,2H,JC,5H,AS,JH";
 	private static final DateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ss.SSS");
 	private static final int PARALLEL_TOPS = 32;
-	private static boolean doStatistics = false;
 	private static Deck deck;
 	private static Tableau startTableau;
 	private static long count = 0;
@@ -77,7 +76,7 @@ public class StagedDepthFirstSolver {
 		arguments.putArg(makeDeckKey(170414), DECKSTRING_170414);
 		arguments.maxExploreDepth = MAX_EXPLORE_DEPTH;
 		arguments.intermediateDepth = INTERMEDIATE_DEPTH;
-		arguments.deckString = makeDeckKey(635);
+		arguments.deckString = makeDeckKey(11987);
 		arguments.moveTreeQueueLength = MOVETREE_QUEUE_LENGTH;
 		arguments.statusUpdateInterval = STATUS_UPDATE_INTERVAL;
 		arguments.tableauPrintInterval = TABLEAU_PRINT_INTERVAL;
@@ -256,7 +255,7 @@ public class StagedDepthFirstSolver {
 			System.out.flush();
 		}
 
-		if (doStatistics && count % arguments.statisticsLogInterval == 0) {
+		if (arguments.doStatistics && count % arguments.statisticsLogInterval == 0) {
 			StatisticsPrinter sp = new StatisticsPrinter(_rootMoveTree, q);
 			sp.printStatisticsOn(statisticsLog);
 			statisticsLog.flush();

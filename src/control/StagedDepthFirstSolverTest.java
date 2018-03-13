@@ -8,7 +8,7 @@ import org.junit.Test;
 import main.Arguments;
 
 public class StagedDepthFirstSolverTest {
-	private static final long EXPECTED_COUNT = 8333;
+	private static final long EXPECTED_COUNT = 1968;
 	private StagedDepthFirstSolver _solver = null;
 	
 	@Before

@@ -15,7 +15,7 @@ public class MoverTest {
 	private static Card[][] cardTab = new Card[8][];
 	private static Tableau tableau;
 	private static final Location l1 = new Location(Area.Tableau, 0, 0, -1);
-	private static final Location l2 = new Location(Area.Freecell, 0, 0, -1);
+	private static final Location l2 = new Location(Area.Freecell, 0);
 	private static final String deck38Str = "2H,JS,KC,4C,3D,AH,QC,AS,8H,QH,6S,3C,6C,4H,4S,TS,5C,5D,7C,6H,4D,7D,KH,KD,5S,5H,3H,9D,7H,JC,KS,9C,8C,8D,JH,2D,9H,JD,QS,QD,6D,8S,2C,TH,7S,TC,AC,9S,AD,TD,2S,3S";
 	private static final Location from1 = new Location(Area.Tableau, 0, 0, -1);
 	private static final Location to1 = new Location(Area.Foundation, 2, 0, -1);

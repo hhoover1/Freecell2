@@ -9,6 +9,7 @@ import deck.Card;
 import deck.Card.Suit;
 import deck.Deal;
 import deck.Deck;
+import freecellState.Location.Area;
 
 /*
  * class Tableau
@@ -25,12 +26,32 @@ import deck.Deck;
  */
 
 public class Tableau {
+	private static final int TALLEST_ORDERED_FACTOR = 100;
+	private static final int FULLY_ORDERED_COUNT = 12;
+	private static final int TALLEST_ORDERED_HEIGHT = 7 + FULLY_ORDERED_COUNT; // king on top of 7 (on left), plus full
+																				// ordered stack (minus ace)
+	private static final int MAX_TALLEST_ORDERED = TALLEST_ORDERED_HEIGHT * TALLEST_ORDERED_FACTOR;
+	private static final int FULLY_ORDERED_FACTOR = 100;
+	private static final int MAX_FULLY_ORDERED = FULLY_ORDERED_COUNT * FULLY_ORDERED_FACTOR;
+	private static final int PARTIAL_ORDER_FACTOR = 10;
+	private static final int PARTIAL_ORDERED_COUNT = TALLEST_ORDERED_HEIGHT;
+	private static final int MAX_PARTIAL_ORDER = PARTIAL_ORDERED_COUNT * PARTIAL_ORDER_FACTOR;
+	private static final int NON_EMPTY_FOUND_FACTOR = 25000;
 	public static final int FREECELL_COUNT = 4;
 	public static final int TABLEAU_SIZE = 8;
-	private static final int MAX_FITNESS_VALUE = 40000 + 127500 + 20000 + 20000 + 10000;
+	private static final int MAX_NONEMPTY_FOUNDATION = Card.Suit.values().length * NON_EMPTY_FOUND_FACTOR;
+	private static final int MAX_FOUNDATION_RETIRED_FACTOR = 2500;
+	private static final int MAX_FOUNDATION_RETIRED = Deck.DECKSIZE * MAX_FOUNDATION_RETIRED_FACTOR;
+	private static final int MAX_EMPTYCOLUMN = 20000;
+	private static final int MAX_FITNESS_VALUE = MAX_NONEMPTY_FOUNDATION + MAX_FOUNDATION_RETIRED + MAX_EMPTYCOLUMN
+			+ MAX_TALLEST_ORDERED + MAX_FULLY_ORDERED + MAX_PARTIAL_ORDER;
+	private static final int MAX_FITNESS2 = 400000;
+	private static final int ACE_ON_TOP = 100000;
 	private static final int NO_TRAPPED_CARDS = 10000;
 	public static final int FOUNDATION_COUNT = Card.Suit.values().length;
-	private static final int[] emptyColumnScores = { 0, 5000, 15000, 20000, 4500, 4000, 3500, 3000, 10000 };
+	private static final int[] emptyColumnScores = { 0, 5000, 15000, MAX_EMPTYCOLUMN, 4500, 4000, 3500, 3000, 10000 };
+	private static final Card[] ACES = { Card.cardFrom("AH"), Card.cardFrom("AC"), Card.cardFrom("AD"),
+			Card.cardFrom("AS") };
 
 	final Card[] _foundation;
 	final Card[] _freecells;
@@ -65,7 +86,7 @@ public class Tableau {
 	public void setValidation(boolean val) {
 		this._doValidation = val;
 	}
-	
+
 	private void validate() throws Exception {
 		boolean[] foundCard = new boolean[Deck.DECKSIZE];
 		// why didn't this work?
@@ -237,6 +258,101 @@ public class Tableau {
 		return -1;
 	}
 
+	/*
+	 * This is an attempt at a different fitness function, based on the perceived
+	 * difficulty of digging out the aces (and perhaps higher cards as well.
+	 */
+
+	public int fitness2() {
+		int result = 0;
+
+		for (Card ace : ACES) {
+			Location loc = findCard(ace);
+			if (loc != null) {
+				if (loc.offset() == 0) {
+					result += ACE_ON_TOP;
+				} else if (this.canMoveCardsAbove(loc)) {
+					if (this.allAcesAbove(loc)) {
+						result += ACE_ON_TOP;
+					} else {
+						result += ACE_ON_TOP - (loc.offset() * 10000);
+					}
+				} else if (loc.offset() < this.emptyFreecellCount()) {
+					result += ACE_ON_TOP - (loc.offset() * 20000);
+				}
+			}
+		}
+
+		return MAX_FITNESS2 - result;
+	}
+
+	private Location findCard(Card c) {
+		for (int ii = 0; ii < _tableau.length; ++ii) {
+			TableauStack ts = _tableau[ii];
+			if (ts != null) {
+				for (int jj = 0; jj < ts.stackHeight(); ++jj) {
+					Card t = ts.getCard(jj);
+					if (c.equals(t)) {
+						Location l = new Location(Area.Tableau, ii, jj, ts.originalColumn());
+						return l;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private boolean canMoveCardsAbove(Location loc) {
+		TableauStack ts = _tableau[loc.column()];
+		int clearTo = loc.offset();
+		int freecellsUnused = this.emptyFreecellCount();
+		int movedCards = 0;
+		boolean cleared = false;
+		for (int ii = 0; ii <= clearTo; ++ii) {
+			Card c = ts.getCard(ii);
+			if (ii == clearTo) {
+				cleared = true;
+				break;
+			} else if (c.rank() == 1 || this.hasTargetInTableau(c, loc.column())) {
+				movedCards += 1;
+			} else if (freecellsUnused > 0) {
+				freecellsUnused -= 1;
+			} else {
+				break;
+			}
+		}
+
+		if (cleared) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private boolean hasTargetInTableau(Card c, int notInCol) {
+		for (int ii = 0; ii < _tableau.length; ++ii) {
+			if (ii != notInCol) {
+				Card tc = _tableau[ii].topCard();
+				if (c.canBePlacedOn(tc)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private boolean allAcesAbove(Location loc) {
+		TableauStack ts = _tableau[loc.column()];
+		for (int ii = 0; ii < loc.offset(); ++ii) {
+			if (ts.getCard(ii).rank() != 1) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public int fitness() {
 		// bestest tableau is one card from done.
 		int result = 0;
@@ -249,41 +365,38 @@ public class Tableau {
 			}
 		}
 		// # of non-empty foundation columns - max 40000
-		result += 10000 * nonEmptyFoundation;
+		result += NON_EMPTY_FOUND_FACTOR * nonEmptyFoundation;
 
 		// total depth of foundation columns -- max 127500
 		result += 2500 * totalRetired;
 
 		// number of empty tableau columns -- max 16000
-		/* result += 5000 * this.emptyTableauColumns();
-		 * we need a little more sophisticated, I think...
-		 * the first empty column is important and two
-		 * make for almost sure solution.  Three is almost
-		 * guaranteed solution.  After that, more empty
-		 * columns don't really help much, and really,
-		 * probably make the solution harder.  So a function
-		 * that peaks at three empties and goes back down
+		/*
+		 * result += 5000 * this.emptyTableauColumns(); we need a little more
+		 * sophisticated, I think... the first empty column is important and two make
+		 * for almost sure solution. Three is almost guaranteed solution. After that,
+		 * more empty columns don't really help much, and really, probably make the
+		 * solution harder. So a function that peaks at three empties and goes back down
 		 * is likely best...
 		 * 
-		 * hmmm.  in reality, having this based upon
-		 * both empty columns and something like remaining
-		 * column heights or just remaining cards...
+		 * hmmm. in reality, having this based upon both empty columns and something
+		 * like remaining column heights or just remaining cards...
 		 */
-		
+
 		result += emptyColumnScores[this.emptyTableauColumns()];
 
 		// partial ordered height
-		result += 10 * partialOrderedHeights();
+		result += PARTIAL_ORDER_FACTOR * partialOrderedHeights();
 
 		// fully ordered depths
 		// result += 500 * fullyOrderedDepths();
 		int[] fullyOrdered = fullyOrderedTableauDepths();
 		for (int foc : fullyOrdered) {
-			result += foc * foc * 100;
+			result += foc * foc * FULLY_ORDERED_FACTOR;
 		}
 
 		// tallest ordered stack -- max 7 + 13 == 20
-		result += tallestOrderedStack() * 100;
+		result += tallestOrderedStack() * TALLEST_ORDERED_FACTOR;
 
 		result += stackCardScores();
 
@@ -370,8 +483,7 @@ public class Tableau {
 	int partialOrderedHeights() {
 		int result = 0;
 
-		for (int stackIndex = 0; stackIndex < _tableau.length; ++stackIndex) {
-			TableauStack stack = _tableau[stackIndex];
+		for (TableauStack stack : _tableau) {
 			if (stack.stackHeight() > 0) {
 				Card lastCard = stack.getCard(0);
 				for (int cardIndex = 1; cardIndex < stack.stackHeight(); ++cardIndex) {

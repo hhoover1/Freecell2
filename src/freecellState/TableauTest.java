@@ -8,8 +8,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import control.StagedDepthFirstSolver;
 import deck.Card;
 import deck.Card.Suit;
+import deck.Deck;
 import freecellState.Location.Area;
 
 public class TableauTest {
@@ -39,6 +41,8 @@ public class TableauTest {
 	private static final Card[] free = new Card[4];
 	private static Card[][] cardTab = new Card[8][];
 	private static Tableau tableau;
+	private static Tableau tableau2;
+	private static Tableau tableau3;
 
 	@Before
 	public void setUp() throws Exception {
@@ -57,6 +61,8 @@ public class TableauTest {
 		}
 
 		tableau = new Tableau(found, free, TableauStack.fromCardArray(cardTab), false);
+		tableau2 = new Tableau(Deck.deckFrom(StagedDepthFirstSolver.DECKSTRING_11987));
+		tableau3 = new Tableau(Deck.deckFrom(StagedDepthFirstSolver.DECKSTRING_635));
 	}
 
 	@Test
@@ -106,13 +112,13 @@ public class TableauTest {
 	@Test
 	public final void testFitnessBasic() {
 		assertNotNull(tableau);
-		assertEquals(200674, tableau.fitness());
+		assertEquals(221464, tableau.fitness());
 	}
 
 	@Test
 	public final void testFitnessOrdered() {
 		addOrderedStack();
-		assertEquals(193136, tableau.fitness());
+		assertEquals(213926, tableau.fitness());
 	}
 	
 	@Test
@@ -121,7 +127,17 @@ public class TableauTest {
 			tableau.put(col2Locations[ii], cardStack[ii]);
 		}
 		System.out.println(tableau);
-		assertEquals(193136, tableau.fitness());
+		assertEquals(213926, tableau.fitness());
+	}
+	
+	@Test
+	public final void testFitness2() {
+		assertNotNull(tableau2);
+		System.out.println("testing fitness2:\n" + tableau2);
+		assertEquals(0, tableau2.fitness2());
+		System.out.println("\ntableau3\n" + tableau3);
+		assertEquals(150000, tableau3.fitness2());
+		System.out.println();
 	}
 	
 	@Test

@@ -11,7 +11,7 @@ import freecellState.Mover;
 import freecellState.Tableau;
 
 public class MoveTree implements Comparable<MoveTree> {
-	private static final int CHILD_START_COUNT = 4;
+	private static final int CHILD_START_COUNT = 2;
 	
 	private MoveTree _parent;
 	private final Move _move;
@@ -61,7 +61,7 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 
 	public int score() {
-		return _treeScore;
+		return _treeScore - (_depth * _depth);
 	}
 
 	public int depth() {
@@ -69,9 +69,9 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 
 	public Tableau resultingTableau(Tableau initial) {
-;		return resultingTableau(initial, 0);
+		return resultingTableau(initial, 0);
 	}
-
+	
 	public Tableau resultingTableau(Tableau initial, int startDepth) {
 		Tableau result = initial;
 		Move[] moves = this.moves();

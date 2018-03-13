@@ -19,7 +19,7 @@ import freecellState.TableauHash;
 
 public class TableauMoveIterator {
 	private static final int DEPTH_BASE = 100;
-	private static final int INITIAL_EXAMINEDSTATES_SIZE = 1000000000;
+	private static final int INITIAL_EXAMINEDSTATES_SIZE = 10000000;
 	private static HashMap<TableauHash, Integer> _examinedStates = new HashMap<TableauHash, Integer>(
 			INITIAL_EXAMINEDSTATES_SIZE);
 	private static long _checkedStates = 0;
@@ -28,7 +28,7 @@ public class TableauMoveIterator {
 	private int _maxDepth;
 	private int _maxCurrentDepth;
 	private MoveState _current;
-	private List<MoveTree> _wins = new ArrayList<MoveTree>();
+	private final List<MoveTree> _wins = new ArrayList<MoveTree>();
 	// private boolean triggeredDeepDive = false;
 
 	public interface ProgressionMeter {
@@ -44,7 +44,7 @@ public class TableauMoveIterator {
 	public TableauMoveIterator(Tableau tab, MoveTree parentTree, int maxD, int maxCurrentDepth) {
 		_maxDepth = maxD;
 		_maxCurrentDepth = maxCurrentDepth;
-		_current = new MoveState(tab, parentTree);
+		_current = new MoveState(null, tab, parentTree);
 	}
 
 	public ArrayIterator<Move> moves() {
@@ -157,7 +157,7 @@ public class TableauMoveIterator {
 						newMoveTree.depth(), _maxDepth));
 			}
 
-			MoveState newMoveState = new MoveState(newTableau, newMoveTree);
+			MoveState newMoveState = new MoveState(moveState, newTableau, newMoveTree);
 			return newMoveState;
 		}
 
@@ -221,7 +221,7 @@ public class TableauMoveIterator {
 				return Integer.MAX_VALUE;
 			}
 
-			return nt.fitness() - depthFit;
+			return nt.fitness() + depthFit;
 		} else {
 			return nt.fitness();
 		}
@@ -240,16 +240,31 @@ public class TableauMoveIterator {
 	}
 
 	private class MoveState {
-		Tableau _tableau;
-		Move[] _moveArray;
-		ArrayIterator<Move> _moves;
-		MoveTree _tree;
+		final MoveState _parent;
+		final Tableau _tableau;
+		final Move[] _moveArray;
+		final ArrayIterator<Move> _moves;
+		final MoveTree _tree;
 
-		MoveState(Tableau t, MoveTree m) {
+		MoveState(MoveState par, Tableau t, MoveTree m) {
+			_parent = par;
 			_tableau = t;
 			_tree = m;
 			_moveArray = MoveCalculator.movesFrom(_tableau, !_tableau.hasTrappedCard());
 			_moves = new ArrayIterator<Move>(_moveArray);
+		}
+
+		public boolean hasTableauInParents(TableauHash ntHash) {
+			if (this._tableau != null) {
+				if (_tableau.tableauHash().equals(ntHash)) {
+					return true;
+				}
+				
+				if (_parent != null) {
+					return _parent.hasTableauInParents(ntHash);
+				}
+			}
+			return false;
 		}
 
 		public Tableau tableau() {
