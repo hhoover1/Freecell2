@@ -14,8 +14,8 @@ public class StagedDepthFirstSolverTest {
 	@Before
 	public void setUp() throws Exception {
 		Arguments arguments = new Arguments();
-		arguments.validation = false;
 		StagedDepthFirstSolver.setupArguments(arguments);
+		arguments.validation = false;
 		StagedDepthFirstSolver.initialize(arguments);
 		arguments.maxExploreDepth = 3;
 		arguments.intermediateDepth = 3;

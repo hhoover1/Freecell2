@@ -85,6 +85,7 @@ public class StagedDepthFirstSolver {
 		arguments.randomSelectionInterval = RANDOM_PRIORITY_INTERVAL;
 		arguments.statisticsLogName = "statistics.log";
 		arguments.doStatistics = true;
+		arguments.validation = true;
 		arguments.parallelTops = PARALLEL_TOPS;
 		arguments.flushDotInterval = FLUSH_DOT_COUNT;
 	}
@@ -206,7 +207,7 @@ public class StagedDepthFirstSolver {
 
 		tmi.descendFor(arguments.intermediateDepth, moveTreeQueue, meter);
 		if (tmi.winOccurred()) {
-			this.flushDeepTrees(moveTreeQueue, tmi.maxDepth());
+			this.flushTooDeepTrees(moveTreeQueue, tmi.maxDepth());
 			_wins.addAll(tmi.wins());
 		}
 
@@ -214,7 +215,7 @@ public class StagedDepthFirstSolver {
 		arguments.maxExploreDepth = Math.min(arguments.maxExploreDepth, tmi.maxDepth());
 	}
 
-	private void flushDeepTrees(Queue<MoveTree> moveTreeQueue, int newMaxDepth) {
+	private void flushTooDeepTrees(Queue<MoveTree> moveTreeQueue, int newMaxDepth) {
 		System.out.println("\nflushing deep trees");
 		int cnt = 0;
 		int flushDotCount = arguments.flushDotInterval;

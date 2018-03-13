@@ -11,9 +11,12 @@ import freecellState.Mover;
 import freecellState.Tableau;
 
 public class MoveTree implements Comparable<MoveTree> {
-	private final MoveTree _parent;
+	private static final int CHILD_START_COUNT = 4;
+	
+	private MoveTree _parent;
 	private final Move _move;
-	private ArrayList<MoveTree> _children = new ArrayList<MoveTree>();
+	private MoveTree[] _children = new MoveTree[CHILD_START_COUNT];
+	private int _childCount = 0;
 	private int _depth;
 	private int _treeScore;
 
@@ -45,7 +48,11 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 
 	private void addChild(MoveTree c, int cs) {
-		_children.add(c);
+		if (_childCount == _children.length) {
+			expandChildren();
+		}
+		
+		_children[_childCount++] = c;
 //		this.updateScore(cs);
 	}
 
@@ -90,14 +97,32 @@ public class MoveTree implements Comparable<MoveTree> {
 
 	public int remove(MoveTree rt) {
 		int cnt = 1;
-		_children.remove(rt);
+		int remIdx = -1;
+		for (int ii = 0; ii < _children.length; ++ii) {
+			if (_children[ii] == rt) {
+				remIdx = ii;
+				break;
+			}
+		}
+		if (remIdx > 0) {
+			_children[remIdx] = null;
+			while (remIdx < _children.length - 1) {
+				_children[remIdx] = _children[remIdx + 1];
+				remIdx += 1;
+			}
+			_children[_children.length - 1] = null;
+			_childCount -= 1;
+		}
+		
 		_treeScore = Integer.MAX_VALUE;
-		for (MoveTree m : _children) {
+		for (int ii = 0; ii < _childCount; ++ii) {
+			MoveTree m = _children[ii];
 			_treeScore = Math.min(m.score(), _treeScore);
 		}
 
-		if (_children.isEmpty() && _parent != null) {
+		if (_childCount == 0 && _parent != null) {
 			cnt += _parent.remove(this);
+			_parent = null;
 		} /*else if (_parent != null) {
 			_parent.updateScore(_treeScore);
 		}*/
@@ -131,12 +156,13 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 
 	public boolean hasChildren() {
-		return !_children.isEmpty();
+		return _childCount > 0;
 	}
 
 	public int treeSize() {
 		int count = 1;
-		for (MoveTree mt : _children) {
+		for (int ii = 0; ii < _childCount; ++ii) {
+			MoveTree mt = _children[ii];
 			count += mt.treeSize(); 
 		}
 		
@@ -144,7 +170,7 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 	
 	Iterator<MoveTree> childIterator() {
-		return _children.iterator();
+		return new ChildIterator(_children, _childCount);
 	}
 
 	public Iterator<MoveTree> iterator() {
@@ -172,6 +198,11 @@ public class MoveTree implements Comparable<MoveTree> {
 		}
 	}
 	
+	void expandChildren() {
+		MoveTree[] nt = Arrays.copyOf(_children, _children.length + CHILD_START_COUNT);
+		_children = nt;
+	}
+	
 	@Override
 	public String toString() {
 		String cname = this.getClass().getName();
@@ -180,7 +211,7 @@ public class MoveTree implements Comparable<MoveTree> {
 		if (_parent != null) {
 			sb.append('^');
 		}
-		sb.append(_children.size());
+		sb.append(_childCount);
 		sb.append(',');
 		if (_move != null) {
 			sb.append(_move.shortName());
@@ -191,6 +222,12 @@ public class MoveTree implements Comparable<MoveTree> {
 		sb.append(this.score());
 		sb.append(')');
 		return sb.toString();
+	}
+
+	@Override
+	public int compareTo(MoveTree o) {
+		int priorityCompare = this.score() - o.score();
+		return priorityCompare;
 	}
 
 	class MTIterator implements Iterator<MoveTree> {
@@ -241,10 +278,26 @@ public class MoveTree implements Comparable<MoveTree> {
 			return res;
 		}
 	}
+	
+	class ChildIterator implements Iterator<MoveTree> {
+		final MoveTree[] _children;
+		final int _childCount;
+		int nextIndex = 0;
+		
+		public ChildIterator(MoveTree[] kids, int count) {
+			_children = kids;
+			_childCount = count;
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return nextIndex < _childCount;
+		}
 
-	@Override
-	public int compareTo(MoveTree o) {
-		int priorityCompare = this.score() - o.score();
-		return priorityCompare;
+		@Override
+		public MoveTree next() {
+			return _children[nextIndex++];
+		}
+		
 	}
 }

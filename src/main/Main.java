@@ -2,7 +2,7 @@ package main;
 
 import control.StagedDepthFirstSolver;
 
-public class main {
+public class Main {
 	private static final Arguments arguments = new Arguments();
 	private static StagedDepthFirstSolver solver;
 
