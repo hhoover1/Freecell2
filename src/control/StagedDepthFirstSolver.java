@@ -226,15 +226,14 @@ public class StagedDepthFirstSolver {
 				System.out.print(".");
 			}
 			
-			Tableau t = mt.resultingTableau(startTableau);
-			if (mt.depth() + t.cardsLeft() + t.trappedDepths() <= newMaxDepth) {
+			if (mt.depth() + mt.cardsLeft() /*+ t.trappedDepths()*/ <= newMaxDepth) {
 				moveTreeQueue.add(mt);
 			} else {
 				_flushedTrees += mt.remove();
 			}
 		}
 		
-		System.out.println("done flushing trees, flushed " + (_flushedTrees - startCount));
+		System.out.println("\ndone flushing trees, flushed " + (_flushedTrees - startCount));
 	}
 
 	/**

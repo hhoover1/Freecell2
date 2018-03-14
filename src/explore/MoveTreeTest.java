@@ -26,38 +26,38 @@ public class MoveTreeTest {
 
 	@Test
 	public final void testMoveTree() {
-		MoveTree mt = new MoveTree(nullParent, move1, 1000);
+		MoveTree mt = new MoveTree(nullParent, move1, 1000, -1);
 		assertNotNull(mt);
 	}
 
 	@Test
 	public final void testAddChild() {
-		MoveTree parent = new MoveTree(nullParent, move1, 1000);
-		MoveTree child1 = new MoveTree(parent, move2, 999);
+		MoveTree parent = new MoveTree(nullParent, move1, 1000, -1);
+		MoveTree child1 = new MoveTree(parent, move2, 999, -1);
 		assertNotNull(child1);
 		assertTrue(parent.hasChildren());
 	}
 
 	@Test
 	public final void testMove() {
-		MoveTree parent = new MoveTree(nullParent, move1, 0);
+		MoveTree parent = new MoveTree(nullParent, move1, 0, -1);
 		assertEquals(move1, parent.move());
 	}
 
 	@Test
 	public final void testHasChildren() {
-		MoveTree parent = new MoveTree(nullParent, move1, 1000);
+		MoveTree parent = new MoveTree(nullParent, move1, 1000, -1);
 		assertFalse(parent.hasChildren());
 		@SuppressWarnings("unused")
-		MoveTree child1 = new MoveTree(parent, move2, 1003);
+		MoveTree child1 = new MoveTree(parent, move2, 1003, -1);
 		assertTrue(parent.hasChildren());
 	}
 	
 	@Test
 	public final void testToString() {
-		MoveTree parent = new MoveTree(nullParent, move1, 1000);
+		MoveTree parent = new MoveTree(nullParent, move1, 1000, -1);
 		assertFalse(parent.hasChildren());
-		MoveTree child1 = new MoveTree(parent, move2, 1003);
+		MoveTree child1 = new MoveTree(parent, move2, 1003, -1);
 		String sn = child1.toString();
 		//System.out.println(sn);
 		assertEquals("MoveTree(^0,Move(Fr10:Fr00),1,1002)", sn);
@@ -69,8 +69,8 @@ public class MoveTreeTest {
 	@Test
 	public final void testChildIterator() {
 		MoveTree[] trees = new MoveTree[5];
-		MoveTree parent = new MoveTree(nullParent, move1, -8801);
-		MoveTree child1 = new MoveTree(parent, move2, 1002);
+		MoveTree parent = new MoveTree(nullParent, move1, -8801, -1);
+		MoveTree child1 = new MoveTree(parent, move2, 1002, -1);
 		trees[0] = parent;
 		trees[1] = child1;
 		assertNotNull(child1);
@@ -80,11 +80,11 @@ public class MoveTreeTest {
 		MoveTree child = parent.childIterator().next();
 		assertNotNull(child);
 		assertEquals(child1, child);
-		MoveTree child2 = new MoveTree(child1, move3, 1004);
+		MoveTree child2 = new MoveTree(child1, move3, 1004, -1);
 		trees[2] = child2;
-		MoveTree child3 = new MoveTree(child1, move3, 1000);
+		MoveTree child3 = new MoveTree(child1, move3, 1000, -1);
 		trees[3] = child3;
-		MoveTree child4 = new MoveTree(parent, move3, 992);
+		MoveTree child4 = new MoveTree(parent, move3, 992, -1);
 		trees[4] = child4;
 		assertTrue(parent.hasChildren());
 		assertNotNull(parent.childIterator());
@@ -102,7 +102,7 @@ public class MoveTreeTest {
 
 	@Test
 	public final void testMTIterator() {
-		MoveTree parent = new MoveTree(nullParent, move1, 1000);
+		MoveTree parent = new MoveTree(nullParent, move1, 1000, -1);
 		MoveTree[] childs = makeChilds(parent);
 
 		Iterator<MoveTree> iter = parent.iterator();
@@ -119,7 +119,7 @@ public class MoveTreeTest {
 	
 	@Test
 	public final void testMoves() {
-		MoveTree parent = new MoveTree(nullParent, move1, 999);
+		MoveTree parent = new MoveTree(nullParent, move1, 999, -1);
 		MoveTree[] childs = makeChilds(parent);
 		Move[] c111 = childs[2].moves();
 		assertNotNull(c111);
@@ -136,7 +136,7 @@ public class MoveTreeTest {
 	
 	@Test
 	public final void testIterationOverChilds() {
-		MoveTree parent = new MoveTree(nullParent, move1, 999);
+		MoveTree parent = new MoveTree(nullParent, move1, 999, -1);
 		MoveTree[] kiddos = makeChilds(parent);
 		Iterator<MoveTree> iter = parent.iterator();
 		assertNotNull(iter);
@@ -160,14 +160,14 @@ public class MoveTreeTest {
 //	}
 
 	private MoveTree[] makeChilds(MoveTree parent) {
-		MoveTree child1 = new MoveTree(parent, move2, 998);
-		MoveTree child11 = new MoveTree(child1, move3, 997);
-		MoveTree child111 = new MoveTree(child11, move1, 996);
-		MoveTree child112 = new MoveTree(child11, move2, 1001);
-		MoveTree child113 = new MoveTree(child11, move3, 1002);
-		MoveTree child2 = new MoveTree(parent, move1, 995);
-		MoveTree child3 = new MoveTree(parent, move3, 1003);
-		MoveTree child31 = new MoveTree(child3, move1, 994);
+		MoveTree child1 = new MoveTree(parent, move2, 998, -1);
+		MoveTree child11 = new MoveTree(child1, move3, 997, -1);
+		MoveTree child111 = new MoveTree(child11, move1, 996, -1);
+		MoveTree child112 = new MoveTree(child11, move2, 1001, -1);
+		MoveTree child113 = new MoveTree(child11, move3, 1002, -1);
+		MoveTree child2 = new MoveTree(parent, move1, 995, -1);
+		MoveTree child3 = new MoveTree(parent, move3, 1003, -1);
+		MoveTree child31 = new MoveTree(child3, move1, 994, -1);
 		MoveTree childs[] = new MoveTree[] { child1, child11, child111, child112, child113, child2, child3, child31 };
 		return childs;
 	}

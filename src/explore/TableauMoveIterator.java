@@ -145,7 +145,7 @@ public class TableauMoveIterator {
 
 		if (newTableau != null) {
 			MoveTree newMoveTree = new MoveTree(moveState.tree(), move,
-					this.fitness(newTableau, moveState.depth() + 1));
+					this.fitness(newTableau, moveState.depth() + 1), newTableau.cardsLeft());
 			meter.progressOneNode(newTableau, newMoveTree, this);
 
 			if (Mover.isWin(newTableau)) {

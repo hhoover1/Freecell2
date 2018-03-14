@@ -94,14 +94,13 @@ public class MoveTreeStatisticsCalculator {
 		while (iter.hasNext()) {
 			MoveTree m = iter.next();
 			int d = m.depth();
-			Tableau resulting = m.resultingTableau(_startingTableau);
 			global.addTree();
 			global.addScore(m.score());
-			global.addRemaining(resulting.cardsLeft());
+			global.addRemaining(m.cardsLeft());
 			MoveTreeStatistic mts = treeCollection.get(d);
 			mts.addTree();
 			mts.addScore(m.score());
-			mts.addRemaining(resulting.cardsLeft());
+			mts.addRemaining(m.cardsLeft());
 			if (++count % dotInterval == 0) {
 				System.out.print(".");
 			}
