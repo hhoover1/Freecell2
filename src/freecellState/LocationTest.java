@@ -40,8 +40,8 @@ public class LocationTest {
 
 	@Test
 	public final void testOriginalColumn() {
-		assertEquals(0, loc1.originalColumn());
-		assertEquals(0, loc2.originalColumn());
+		assertEquals(-1, loc1.originalColumn());
+		assertEquals(-1, loc2.originalColumn());
 		assertEquals(3, loc3.originalColumn());
 	}
 
@@ -64,7 +64,7 @@ public class LocationTest {
 
 	@Test
 	public final void testToString() {
-		assertEquals("Location(Foundation(0), 1, 0)", loc1.toString());
+		assertEquals("Location(Foundation 1, 0)", loc1.toString());
 	}
 
 	@Test

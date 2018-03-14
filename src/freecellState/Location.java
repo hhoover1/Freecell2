@@ -77,6 +77,8 @@ public class Location {
 			sb.append("(");
 			sb.append(_origColumn);
 			sb.append("), ");
+		} else {
+			sb.append(' ');
 		}
 		sb.append(column());
 		sb.append(", ");
