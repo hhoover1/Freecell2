@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import control.StagedDepthFirstSolver;
 import deck.Card;
 import deck.Card.Suit;
 import freecellState.Location.Area;
@@ -95,5 +96,18 @@ public class MoverTest {
 		assertNotNull(winTab);
 		assertFalse(winTab.hasTrappedCard());
 		assertFalse(Mover.isWin(winTab));		
+	}
+	
+	// [Move(Ta40:Fr10), Move(Ta40:Ta50), Move(Ta40:Fr20), Move(Ta40:Fo00), Move(Ta20:Fo00)]
+	@Test
+	public final void testFailingSequence11987() throws Exception {
+		System.out.println("failing 11987 test");
+		Tableau tab0 = Tableau.fromString(StagedDepthFirstSolver.DECKSTRING_11987);
+		System.out.println(tab0);
+		Move[] moves = {
+				new Move(new Location(Area.Tableau, 4, 0, 6), new Location(Area.Freecell, 0))
+		};
+		Tableau tab1 = Mover.move(tab0, moves[0]); 
+		System.out.println(tab1);
 	}
 }

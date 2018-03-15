@@ -44,7 +44,7 @@ public class TableauMoveIterator {
 	public TableauMoveIterator(Tableau tab, MoveTree parentTree, int maxD, int maxCurrentDepth) {
 		_maxDepth = maxD;
 		_maxCurrentDepth = maxCurrentDepth;
-		_current = new MoveState(null, tab, parentTree);
+		_current = new MoveState(tab, parentTree);
 	}
 
 	public ArrayIterator<Move> moves() {
@@ -157,7 +157,7 @@ public class TableauMoveIterator {
 						newMoveTree.depth(), _maxDepth));
 			}
 
-			MoveState newMoveState = new MoveState(moveState, newTableau, newMoveTree);
+			MoveState newMoveState = new MoveState(newTableau, newMoveTree);
 			return newMoveState;
 		}
 
@@ -240,14 +240,12 @@ public class TableauMoveIterator {
 	}
 
 	private class MoveState {
-		final MoveState _parent;
 		final Tableau _tableau;
 		final Move[] _moveArray;
 		final ArrayIterator<Move> _moves;
 		final MoveTree _tree;
 
-		MoveState(MoveState par, Tableau t, MoveTree m) {
-			_parent = par;
+		MoveState(Tableau t, MoveTree m) {
 			_tableau = t;
 			_tree = m;
 			_moveArray = MoveCalculator.movesFrom(_tableau, !_tableau.hasTrappedCard());

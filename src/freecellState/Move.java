@@ -1,7 +1,6 @@
 package freecellState;
 
 import deck.Card;
-import freecellState.Location.Area;
 
 public class Move implements Comparable<Move> {
 	private Card _card;
@@ -38,8 +37,8 @@ public class Move implements Comparable<Move> {
 	}
 
 	public String shortName() {
-		String cname = this.getClass().getName();
-		StringBuilder sb = new StringBuilder(cname.substring(cname.lastIndexOf('.') + 1));
+		String cname = this.getClass().getSimpleName();
+		StringBuilder sb = new StringBuilder(cname);
 		sb.append('(');
 		if (_card != null) {
 			sb.append(_card.shortName());
@@ -54,8 +53,8 @@ public class Move implements Comparable<Move> {
 
 	@Override
 	public String toString() {
-		String cname = this.getClass().getName();
-		StringBuilder sb = new StringBuilder(cname.substring(cname.lastIndexOf('.') + 1));
+		String cname = this.getClass().getSimpleName();
+		StringBuilder sb = new StringBuilder(cname);
 		sb.append('(');
 		
 		if (debuggingMove) {
@@ -85,16 +84,13 @@ public class Move implements Comparable<Move> {
 	}
 	
 	public int compareTo(Move _move) {
-		if (this._from.area() == Area.Freecell) {
-			return 2;
+		int res = this._from.compareTo(_move._from);
+		if (res != 0) {
+			return res;
 		}
-		if (this._to.area() == Area.Foundation) {
-			return 1;
-		}
-		if (this._to.area() == Area.Freecell) {
-			return 5;
-		}
-		return 3;
+		
+		res = this._to.compareTo(_move._to);
+		return res;
 	}
 	
 	@Override
@@ -112,7 +108,7 @@ public class Move implements Comparable<Move> {
 	
 	@Override
 	public int hashCode() {
-		int res = _from.hashCode() + _to.hashCode();
+		int res = _from.hashCode() ^ _to.hashCode();
 		return res;
 	}
 }

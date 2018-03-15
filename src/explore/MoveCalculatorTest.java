@@ -11,6 +11,7 @@ import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 
+import control.StagedDepthFirstSolver;
 import freecellState.Location;
 import freecellState.Location.Area;
 import freecellState.Move;
@@ -87,16 +88,29 @@ public class MoveCalculatorTest {
 			new Move(Tab[7], Free[0])
 	};
 	
+	private static final Move[] tableau11987Moves0 = {
+			new Move(Tab[0], Found[3]),
+			new Move(Tab[4], Found[0]),
+			new Move(Tab[5], Found[2]),
+			new Move(Tab[1], Free[0]),
+			new Move(Tab[2], Free[0]),
+			new Move(Tab[3], Free[0]),
+			new Move(Tab[6], Free[0]),
+			new Move(Tab[7], Free[0])
+	};
+	
 	private Tableau shortTab;
 	private Tableau tableau1;
+	private Tableau tableau11987;
 	
 	@Before
 	public void setUp() throws Exception {
 		shortTab = Tableau.fromStringNoValidation(SHORTDECK);
 		tableau1 = Tableau.fromStringNoValidation(DECKSTRING);
+		tableau11987 = Tableau.fromString(StagedDepthFirstSolver.DECKSTRING_11987);
 		Move.debuggingMove = false;
 	}
-
+	
 	@Test
 	public final void testShort() {
 		System.out.println("shortTab = " + shortTab);
@@ -121,20 +135,7 @@ public class MoveCalculatorTest {
 		Move[] moves = MoveCalculator.movesFrom(tableau1, false);
 		System.out.println("moves = " + Arrays.toString(moves));
 		assertNotNull(moves);
-		ArrayIterator<Move> mi = new ArrayIterator<Move>(moves);
-		assertTrue(mi.hasNext());
-		HashSet<Move> moveSet = new HashSet<Move>(tableau1Moves.length);
-		for (Move m : tableau1Moves) {
-			moveSet.add(m);
-		}
-		while (mi.hasNext()) {
-			Move m = mi.next();
-			System.out.println("move: " + m);
-			assertTrue(moveSet.contains(m));
-			assertTrue(moveSet.remove(m));
-		}
-		assertFalse(mi.hasNext());
-		assertTrue(moveSet.isEmpty());
+		checkMoveList(moves, tableau1Moves);
 		System.out.println("---------------");
 		assertNotNull(moves[0]);
 		Move firstMove = moves[0];
@@ -146,13 +147,34 @@ public class MoveCalculatorTest {
 			e.printStackTrace();
 		}
 		Move[] moves2 = MoveCalculator.movesFrom(nt, false);
-		mi = new ArrayIterator<Move>(moves2);
-		for (Move m: tableau1Moves2) {
-			moveSet.add(m);
+		checkMoveList(moves2, tableau1Moves2);
+	}
+
+	@Test
+	public final void test11987Moves() {
+		assertNotNull(tableau11987);
+		System.out.println("\ntableau 11987 \n" + tableau11987);
+		Move[] moves0 = MoveCalculator.movesFrom(tableau11987, false);
+		checkMoveList(moves0, tableau11987Moves0);
+		System.out.println("\nend tableau 11987\n");
+	}
+
+	/**
+	 * @param moves
+	 * @param moveList TODO
+	 * @return
+	 */
+	private void checkMoveList(Move[] moves, Move[] moveList) {
+		ArrayIterator<Move> mi = new ArrayIterator<Move>(moves);
+		assertTrue(mi.hasNext());
+		HashSet<Move> moveSet = new HashSet<Move>(moveList.length);
+		for (Move m : moveList) {
+			assertTrue(moveSet.add(m));
 		}
+		int count = 0;
 		while (mi.hasNext()) {
 			Move m = mi.next();
-			System.out.println(m);
+			System.out.println(++count + " move: " + m);
 			assertTrue(moveSet.contains(m));
 			assertTrue(moveSet.remove(m));
 		}

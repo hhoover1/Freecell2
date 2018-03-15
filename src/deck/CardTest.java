@@ -89,6 +89,10 @@ public class CardTest {
 	public final void testToString() {
 		Card c = new Card(Suit.Diamonds, 8);
 		assertEquals("Card(8 of Diamonds)", c.toString());
+		c = new Card(Suit.Spades, 0);
+		assertEquals("Card(King of Spades)", c.toString());
+		c = new Card(Suit.Hearts, 1);
+		assertEquals("Card(Ace of Hearts)", c.toString());
 	}
 
 	@Test

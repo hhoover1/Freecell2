@@ -1,6 +1,6 @@
 package freecellState;
 
-public class Location {
+public class Location implements Comparable<Location> {
 	public enum Area {
 		Foundation, Tableau, Freecell
 	}
@@ -23,6 +23,13 @@ public class Location {
 		_offset = (byte) off;
 		_origColumn = (byte) origCol;
 	}
+	
+	public Location(Location other) {
+		_area = other._area;
+		_column = other._column;
+		_offset = other._offset;
+		_origColumn = other._origColumn;
+	}
 
 	public Area area() {
 		return _area;
@@ -43,7 +50,7 @@ public class Location {
 	@Override
 	public int hashCode() {
 		int result = ((this._area.ordinal() + 1) * 1013) << 13;
-		result += (_column + 1) * 1013;
+		result += (_column + 1) * 1013 << 5;
 		result += _offset;
 
 		return result;
@@ -99,12 +106,28 @@ public class Location {
 		StringBuilder sb = new StringBuilder();
 		sb.append(area().name().substring(0, 2));
 		if (area() == Area.Tableau) {
-			sb.append(originalColumn());
+			sb.append(_origColumn);
 		} else {
 			sb.append(column());
 		}
 
 		sb.append(offset());
 		return sb.toString();
+	}
+
+	@Override
+	public int compareTo(Location o) {
+		int res = _area.ordinal() - o._area.ordinal();
+		if (res != 0) {
+			return res;
+		}
+		
+		res = _column - o._column;
+		if (res != 0) {
+			return res;
+		}
+		
+		res = _offset - o._offset;
+		return res;
 	}
 }

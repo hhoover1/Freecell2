@@ -307,7 +307,6 @@ public class Tableau {
 		TableauStack ts = _tableau[loc.column()];
 		int clearTo = loc.offset();
 		int freecellsUnused = this.emptyFreecellCount();
-		int movedCards = 0;
 		boolean cleared = false;
 		for (int ii = 0; ii <= clearTo; ++ii) {
 			Card c = ts.getCard(ii);
@@ -315,7 +314,7 @@ public class Tableau {
 				cleared = true;
 				break;
 			} else if (c.rank() == 1 || this.hasTargetInTableau(c, loc.column())) {
-				movedCards += 1;
+				continue;
 			} else if (freecellsUnused > 0) {
 				freecellsUnused -= 1;
 			} else {
