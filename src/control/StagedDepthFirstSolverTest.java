@@ -23,7 +23,7 @@ public class StagedDepthFirstSolverTest {
 	}
 
 	@Test
-	public final void testVeryShortTree() {
+	public final void testVeryShortTree() throws Exception {
 		_solver.runStagedDepthFirstSearch();
 		assertEquals(EXPECTED_COUNT, _solver.count());
 	}

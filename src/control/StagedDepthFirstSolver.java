@@ -129,7 +129,7 @@ public class StagedDepthFirstSolver {
 		}
 	};
 
-	public void runStagedDepthFirstSearch() {
+	public void runStagedDepthFirstSearch() throws Exception {
 		MoveTree base = _rootMoveTree;
 
 		System.out.println(startTableau);
@@ -198,8 +198,9 @@ public class StagedDepthFirstSolver {
 	 * @param parentTableau
 	 * @param parentTree
 	 * @param moveTreeQueue
+	 * @throws Exception 
 	 */
-	private void addTreesToQueue(Tableau parentTableau, MoveTree parentTree, Queue<MoveTree> moveTreeQueue) {
+	private void addTreesToQueue(Tableau parentTableau, MoveTree parentTree, Queue<MoveTree> moveTreeQueue) throws Exception {
 		TableauMoveIterator tmi = new TableauMoveIterator(parentTableau, parentTree, arguments.maxExploreDepth,
 				_maxDepthExplored);
 		Meter meter = new Meter(this);

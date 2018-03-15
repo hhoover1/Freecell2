@@ -28,13 +28,19 @@ public class MoveTree implements Comparable<MoveTree> {
 		_depth = 0;
 	}
 
-	public MoveTree(MoveTree p, Move m, int score, int left) {
+	public MoveTree(MoveTree p, Move m, int score, int left, Tableau tableau, int depth) {
 		_parent = p;
 		_move = m;
+		_cardsLeft = (byte)tableau.cardsLeft();
+		try {
+			_move.validate(tableau, depth);
+		} catch (Exception ble) {
+			ble.printStackTrace();
+		}
 		_treeScore = score;
 		if (_parent != null) {
 			_parent.addChild(this, score);
-			_depth = (byte)(_parent._depth + 1);
+			_depth = (byte) (_parent._depth + 1);
 		} else {
 			_depth = 0;
 		}
@@ -83,8 +89,10 @@ public class MoveTree implements Comparable<MoveTree> {
 		if (startDepth > 0) {
 			moves = Arrays.copyOfRange(moves, startDepth, moves.length);
 		}
+		int depth = startDepth;
 		for (Move m : moves) {
 			try {
+				m.validate(result, depth++);
 				result = Mover.move(result, m);
 			} catch (Exception e) {
 				e.printStackTrace();

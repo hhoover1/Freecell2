@@ -191,7 +191,7 @@ public class TableauTest {
 		Card c2 = Card.cardFrom("TS");
 		Location l2 = new Location(Area.Tableau, 3, 1, -1);
 		tableau.put(l2,  c2);
-		assertEquals(c2, tableau.get(l2));
+		assertEquals(c2, tableau.getCardFromTableau(l2.column(), l2.offset()));
 //		Card c3 = Card.cardFrom("QC");
 //		tableau.put(l2,  c3);
 //		Location l3 = new Location(Area.Tableau, 3, 2);

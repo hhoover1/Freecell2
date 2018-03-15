@@ -6,7 +6,7 @@ public class Main {
 	private static final Arguments arguments = new Arguments();
 	private static StagedDepthFirstSolver solver;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		StagedDepthFirstSolver.setupArguments(arguments);
 		
 		if (args.length > 0) {

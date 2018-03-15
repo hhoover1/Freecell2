@@ -106,12 +106,17 @@ public class Location implements Comparable<Location> {
 		StringBuilder sb = new StringBuilder();
 		sb.append(area().name().substring(0, 2));
 		if (area() == Area.Tableau) {
-			sb.append(_origColumn);
+			sb.append(_column);
 		} else {
-			sb.append(column());
+			sb.append(_column);
 		}
 
 		sb.append(offset());
+		if (_origColumn != -1) {
+			sb.append('(');
+			sb.append(_origColumn);
+			sb.append(')');
+		}
 		return sb.toString();
 	}
 

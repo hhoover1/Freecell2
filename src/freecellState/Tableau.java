@@ -159,8 +159,11 @@ public class Tableau {
 		switch (from.area()) {
 		case Tableau:
 			TableauStack col = _tableau[from.column()];
-			if (from.offset() != col.stackHeight() - 1) {
+			if (from.offset() != 0) {
 				throw new Exception("get only returns top card! : " + from);
+			}
+			if (col.stackHeight() == 0) {
+				return null;
 			}
 			res = col.getCard(from.offset());
 			break;

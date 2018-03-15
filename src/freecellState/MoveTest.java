@@ -57,13 +57,13 @@ public class MoveTest {
 	@Test
 	public final void testShortName() {
 		String s1 = moves1[0].shortName();
-		assertEquals("Move(Ta20:Fo30)", s1);
+		assertEquals("Move(Ta20(2):Fo30)", s1);
 	}
 
 	@Test
 	public final void testToString() {
 		String s1 = moves1[0].toString();
-		assertEquals("Move(Ta20:Fo30)", s1);
+		assertEquals("Move(Ta20(2):Fo30)", s1);
 	}
 
 	@Test

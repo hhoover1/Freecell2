@@ -75,7 +75,7 @@ public class TableauMoveIterator {
 	// and iterate over all of the possible moves not beyond depth.
 	// the iteration happens depth-first.
 	// it returns the top of the MoveTree from where it started.
-	public MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter) {
+	public MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter) throws Exception {
 		MoveTree result = null;
 		if (_current != null) {
 			result = this.descendFor(depth, pmt, meter, _current);
@@ -87,7 +87,8 @@ public class TableauMoveIterator {
 	// So - we descend,
 	// The fields _current and _next are important to the existing code
 	// but we'd prefer to move to parameters...
-	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter, MoveState moveState) {
+	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter, MoveState moveState)
+			throws Exception {
 		boolean deepDive = !moveState.tableau().hasTrappedCard();
 
 		if (depth > 1 || deepDive) { // forget the interim depth check if no trapped cards.
@@ -124,8 +125,9 @@ public class TableauMoveIterator {
 	/**
 	 * @param pmt
 	 * @param moveState
+	 * @throws Exception
 	 */
-	private void queueLeaves(Queue<MoveTree> pmt, MoveState moveState, ProgressionMeter meter) {
+	private void queueLeaves(Queue<MoveTree> pmt, MoveState moveState, ProgressionMeter meter) throws Exception {
 		while (moveState.moves().hasNext()) {
 			MoveState newMoveState = createNextMoveState(moveState, meter);
 			if (newMoveState != null) {
@@ -138,14 +140,17 @@ public class TableauMoveIterator {
 	/**
 	 * @param moveState
 	 * @return
+	 * @throws Exception
 	 */
-	private MoveState createNextMoveState(MoveState moveState, ProgressionMeter meter) {
+	private MoveState createNextMoveState(MoveState moveState, ProgressionMeter meter) throws Exception {
 		Move move = moveState.moves().next();
-		Tableau newTableau = nextTableauWith(moveState._tableau, move, moveState.depth() + 1);
+		int depth;
+		move.validate(moveState._tableau, depth = moveState.depth());
+		Tableau newTableau = nextTableauWith(moveState._tableau, move, depth + 1);
 
 		if (newTableau != null) {
-			MoveTree newMoveTree = new MoveTree(moveState.tree(), move,
-					this.fitness(newTableau, moveState.depth() + 1), newTableau.cardsLeft());
+			MoveTree newMoveTree = new MoveTree(moveState.tree(), move, this.fitness(newTableau, moveState.depth() + 1),
+					newTableau.cardsLeft(), moveState._tableau, depth);
 			meter.progressOneNode(newTableau, newMoveTree, this);
 
 			if (Mover.isWin(newTableau)) {
