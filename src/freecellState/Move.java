@@ -123,7 +123,7 @@ public class Move implements Comparable<Move> {
 		if (_to.area() == Area.Tableau) {
 			Card c1 = tableau.get(_from);
 			Card c2 = tableau.get(_to);
-			if (!c1.canBePlacedOn(c2)) {
+			if ((c1 != null) && !c1.canBePlacedOn(c2)) {
 				throw new BadLocationException("Cards don't stack!", _to.column());
 			}
 		}

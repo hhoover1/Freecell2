@@ -87,7 +87,7 @@ public class Card implements Comparable<Card>, CardLike {
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof Card) || other == null) {
+		if ((other == null) || !(other instanceof Card)) {
 			return false;
 		}
 		

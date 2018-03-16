@@ -37,15 +37,18 @@ public class TableauTest {
 		Card.cardFrom("KS")
 	};
 	
-	private static final Card[] found = new Card[4];
-	private static final Card[] free = new Card[4];
-	private static Card[][] cardTab = new Card[8][];
-	private static Tableau tableau;
-	private static Tableau tableau2;
-	private static Tableau tableau3;
+	private Card[] found;
+	private Card[] free;
+	private Card[][] cardTab;
+	private Tableau tableau;
+	private Tableau tableau2;
+	private Tableau tableau3;
 
 	@Before
 	public void setUp() throws Exception {
+		found  = new Card[4];
+		free = new Card[4];
+		cardTab = new Card[8][];
 		found[0] = new Card(Suit.Hearts, 1);
 		free[1] = new Card(Suit.Clubs, 12);
 		Card[] t0 = new Card[3];
@@ -80,10 +83,11 @@ public class TableauTest {
 	}
 
 	@Test
-	public final void testGetFree() {
+	public final void testGetFree() throws Exception {
+		tableau = new Tableau(found, free, TableauStack.fromCardArray(cardTab), false);
 		assertNotNull(tableau);
-		assertNull(tableau.getFree(0));
-		assertNotNull(tableau.getFree(1));
+		assertNotNull(tableau.getFree(0));
+		assertNull(tableau.getFree(1));
 		assertNull(tableau.getFree(2));
 		assertNull(tableau.getFree(3));
 	}
@@ -106,7 +110,8 @@ public class TableauTest {
 	@Test
 	public final void testGet() throws Exception {
 		assertNotNull(tableau);
-		assertNotNull(tableau.get(new Location(Area.Freecell, 1, 0, -1)));
+		assertNotNull(tableau.get(new Location(Area.Freecell, 0)));
+		assertNull(tableau.get(new Location(Area.Freecell, 1)));
 	}
 
 	@Test

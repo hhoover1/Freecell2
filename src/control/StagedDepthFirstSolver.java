@@ -62,7 +62,7 @@ public class StagedDepthFirstSolver {
 	private long _flushedTrees = 0;
 	private Queue<MoveTree> _priorityMoveQueue;
 	private int _maxDepthExplored = 0;
-	private static final MoveTree _rootMoveTree = new MoveTree();
+	private final MoveTree _rootMoveTree;
 	private List<MoveTree> _wins = new ArrayList<MoveTree>(100);
 	private PrintStream statisticsLog;
 
@@ -114,6 +114,7 @@ public class StagedDepthFirstSolver {
 		}
 		
 		_priorityMoveQueue = new PriorityQueue<MoveTree>(arguments.moveTreeQueueLength);	
+		_rootMoveTree = new MoveTree(null, null, Integer.MAX_VALUE, Deck.DECKSIZE, startTableau, 0);
 	}
 
 	private class Meter implements TableauMoveIterator.ProgressionMeter {
@@ -147,11 +148,17 @@ public class StagedDepthFirstSolver {
 			}
 
 			for (MoveTree nextBase : parallelTops) {
+				if (nextBase.cardsLeft() == -1 && nextBase.depth() == -1) {
+					// this moveTree has been eliminated.
+					this._flushedTrees += 1;
+					continue;
+				}
 				Tableau pt = nextBase.resultingTableau(startTableau);
 				addTreesToQueue(pt, nextBase, _priorityMoveQueue);
 				whileCount += 1;
 			}
 			parallelTops.clear();
+			this.flushBadTreesFromQueue();
 		}
 
 		if (_wins.isEmpty()) {
@@ -164,6 +171,18 @@ public class StagedDepthFirstSolver {
 		for (MoveTree mt : _wins) {
 			System.out.println(String.format("Win #%d - depth %d", ++winCount, mt.depth()));
 			Mover.printWin(mt);
+		}
+	}
+
+	private void flushBadTreesFromQueue() {
+		MoveTree[] allQueue = _priorityMoveQueue.toArray(new MoveTree[_priorityMoveQueue.size()]);
+		_priorityMoveQueue.clear();
+		for (MoveTree mt : allQueue) {
+			if (mt.cardsLeft() != -1 && mt.depth() != -1) {
+				_priorityMoveQueue.add(mt);
+			} else {
+				this._flushedTrees += 1;
+			}
 		}
 	}
 
@@ -230,7 +249,7 @@ public class StagedDepthFirstSolver {
 			if (mt.depth() + mt.cardsLeft() /*+ t.trappedDepths()*/ <= newMaxDepth) {
 				moveTreeQueue.add(mt);
 			} else {
-				_flushedTrees += mt.remove();
+				_flushedTrees += mt.remove(true);
 			}
 		}
 		

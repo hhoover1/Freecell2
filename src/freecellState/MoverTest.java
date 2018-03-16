@@ -45,6 +45,7 @@ public class MoverTest {
 	public final void testMove() throws Exception {
 		assertNotNull(tableau);
 		System.out.println(tableau);
+		tableau.setValidation(false);
 		Move m1 = new Move(l1, l2);
 		Tableau newT = Mover.move(tableau, m1);
 		assertNotNull(newT.getFree(0));

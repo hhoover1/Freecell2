@@ -9,51 +9,49 @@ import java.util.Stack;
 import freecellState.Move;
 import freecellState.Mover;
 import freecellState.Tableau;
+import main.Arguments;
 
 public class MoveTree implements Comparable<MoveTree> {
-	private static final int CHILD_START_COUNT = 2;
+	private static final int CHILD_START_COUNT = 1;
+	private static final int CHILD_EXPAND_COUNT = 4;
 
 	private MoveTree _parent;
 	private final Move _move;
+	private final Move[] _moves;
+	private final ArrayIterator<Move> _moveIterator;
 	private MoveTree[] _children = new MoveTree[CHILD_START_COUNT];
 	private short _childCount = 0;
 	private byte _depth;
 	private byte _cardsLeft;
 	private int _treeScore;
 
-	public MoveTree() {
-		_parent = null;
-		_move = null;
-		_treeScore = Integer.MAX_VALUE;
-		_depth = 0;
-	}
-
 	public MoveTree(MoveTree p, Move m, int score, int left, Tableau tableau, int depth) {
 		_parent = p;
 		_move = m;
-		_cardsLeft = (byte)tableau.cardsLeft();
-		try {
-			_move.validate(tableau, depth);
-		} catch (Exception ble) {
-			ble.printStackTrace();
-		}
+		_moves = MoveCalculator.movesFrom(tableau, !tableau.hasTrappedCard());
+		_moveIterator = new ArrayIterator<Move>(_moves);
+		_cardsLeft = (byte) tableau.cardsLeft();
 		_treeScore = score;
 		if (_parent != null) {
-			_parent.addChild(this, score);
+			try {
+				_parent.addChild(this, score);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			_depth = (byte) (_parent._depth + 1);
 		} else {
 			_depth = 0;
 		}
 	}
 
-	// special constructor for testing
-	MoveTree(MoveTree p, Move m, int score, int left, int depth) {
-		_parent = p;
-		_move = m;
-		_treeScore = score;
-		_depth = (byte) depth;
+	public ArrayIterator<Move> childMoves() {
+		return _moveIterator;
 	}
 
+	public boolean hasMoves() {
+		return _moveIterator.hasNext();
+	}
+	
 	private void addChild(MoveTree c, int cs) {
 		if (_childCount == _children.length) {
 			expandChildren();
@@ -79,11 +77,11 @@ public class MoveTree implements Comparable<MoveTree> {
 		return _cardsLeft;
 	}
 
-	public Tableau resultingTableau(Tableau initial) {
+	public Tableau resultingTableau(Tableau initial) throws Exception {
 		return resultingTableau(initial, 0);
 	}
 
-	public Tableau resultingTableau(Tableau initial, int startDepth) {
+	public Tableau resultingTableau(Tableau initial, int startDepth) throws Exception {
 		Tableau result = initial;
 		Move[] moves = this.moves();
 		if (startDepth > 0) {
@@ -111,6 +109,7 @@ public class MoveTree implements Comparable<MoveTree> {
 	public int remove(MoveTree rt) {
 		int cnt = 1;
 		int remIdx = -1;
+
 		for (int ii = 0; ii < _children.length; ++ii) {
 			if (_children[ii] == rt) {
 				remIdx = ii;
@@ -134,7 +133,10 @@ public class MoveTree implements Comparable<MoveTree> {
 			_treeScore = Math.min(m.score(), _treeScore);
 		}
 
-		if (_childCount == 0 && _parent != null) {
+		rt._depth = -1;
+		rt._cardsLeft = -1;
+
+		if (_childCount == 0 && !_moveIterator.hasNext() && _parent != null) {
 			cnt += _parent.remove(this);
 			_parent = null;
 		} /*
@@ -144,15 +146,22 @@ public class MoveTree implements Comparable<MoveTree> {
 		return cnt;
 	}
 
-	public int remove() {
-		int cnt = 0;
+	public int remove(boolean force) {
+		int cnt = 1;
+
+		if (!force && (_childCount > 0 || _moveIterator.hasNext())) {
+			return 0;
+		}
+
+		_depth = -1;
+		_cardsLeft = -1;
 
 		// transitively remove children first
 
 		if (_children != null) {
 			for (MoveTree kid : _children) {
 				if (kid != null) {
-					cnt += kid.remove();
+					cnt += kid.remove(force);
 				}
 			}
 
@@ -198,10 +207,10 @@ public class MoveTree implements Comparable<MoveTree> {
 		return new MTIterator(this);
 	}
 
-	public Move[] moves() {
+	public Move[] moves() throws Exception {
 		ArrayList<Move> m = new ArrayList<Move>();
 		this.addParentMoves(m);
-		Move[] result = m.toArray(new Move[0]);
+		Move[] result = m.toArray(new Move[m.size()]);
 		return result;
 	}
 
@@ -209,9 +218,11 @@ public class MoveTree implements Comparable<MoveTree> {
 		return _parent;
 	}
 
-	private void addParentMoves(ArrayList<Move> m) {
+	private void addParentMoves(ArrayList<Move> m) throws Exception {
 		if (_parent != null) {
 			_parent.addParentMoves(m);
+		} else if (_depth != 0) {
+			throw new Exception("early termination");
 		}
 
 		if (_move != null) {
@@ -220,7 +231,7 @@ public class MoveTree implements Comparable<MoveTree> {
 	}
 
 	void expandChildren() {
-		MoveTree[] nt = Arrays.copyOf(_children, _children.length + CHILD_START_COUNT);
+		MoveTree[] nt = Arrays.copyOf(_children, _children.length + CHILD_EXPAND_COUNT);
 		_children = nt;
 	}
 

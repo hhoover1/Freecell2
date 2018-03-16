@@ -29,7 +29,7 @@ public class ArgumentsTest {
 			"-doStatistics", PARSE_BOOLEAN_VALUE
 	};
 	
-	Arguments args = new Arguments();
+	Arguments args = Arguments.arguments();
 	
 	@Before
 	public final void setup() {

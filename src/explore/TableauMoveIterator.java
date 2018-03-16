@@ -35,7 +35,8 @@ public class TableauMoveIterator {
 		void progressOneNode(Tableau t, MoveTree newTree, TableauMoveIterator tmi);
 	};
 
-	public static void clearExamined() {
+	// testing only method
+	static void clearExamined() {
 		synchronized (TableauMoveIterator._examinedStates) {
 			TableauMoveIterator._examinedStates.clear();
 		}
@@ -49,10 +50,6 @@ public class TableauMoveIterator {
 
 	public ArrayIterator<Move> moves() {
 		return _current.moves();
-	}
-
-	public Move[] moveArray() {
-		return _current.moveArray();
 	}
 
 	public Tableau tableau() {
@@ -87,31 +84,36 @@ public class TableauMoveIterator {
 	// So - we descend,
 	// The fields _current and _next are important to the existing code
 	// but we'd prefer to move to parameters...
-	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter, MoveState moveState)
+	private MoveTree descendFor(int depth, Queue<MoveTree> pmt, ProgressionMeter meter, MoveState parentState)
 			throws Exception {
-		boolean deepDive = !moveState.tableau().hasTrappedCard();
+		boolean deepDive = !parentState.tableau().hasTrappedCard();
 
 		if (depth > 1 || deepDive) { // forget the interim depth check if no trapped cards.
-			while (moveState.moves().hasNext()) {
-				MoveState newMoveState = createNextMoveState(moveState, meter);
+			while (parentState.moves().hasNext()) {
+				Move nextMove = parentState.moves().next();
+				MoveState newMoveState = createNextMoveState(parentState, nextMove, meter);
 				if (newMoveState != null) {
 					if (newMoveState.depth() <= _maxDepth) {
 						this._maxCurrentDepth = Math.max(newMoveState.depth(), _maxCurrentDepth);
 						this.descendFor(depth - 1, pmt, meter, newMoveState);
 					} else {
-						_moveTreesRemoved += newMoveState.tree().remove();
+						_moveTreesRemoved += newMoveState.tree().remove(false);
 					}
 				}
 			}
 
-			if (!moveState.tree().hasChildren()) {
-				_moveTreesRemoved += moveState.tree().remove();
+			if (!parentState.tree().hasChildren() && !parentState.tree().hasMoves()) {
+				_moveTreesRemoved += parentState.tree().remove(false);
 			}
 		} else {
-			queueLeaves(pmt, moveState, meter);
+			queueLeaves(pmt, parentState, meter);
 		}
 
-		return moveState.tree();
+		if (parentState.tree().depth() != -1 && parentState.tree().cardsLeft() != -1) {
+			return parentState.tree();
+		}
+
+		return null;
 	}
 
 	public boolean winOccurred() {
@@ -129,7 +131,8 @@ public class TableauMoveIterator {
 	 */
 	private void queueLeaves(Queue<MoveTree> pmt, MoveState moveState, ProgressionMeter meter) throws Exception {
 		while (moveState.moves().hasNext()) {
-			MoveState newMoveState = createNextMoveState(moveState, meter);
+			Move nextMove = moveState.moves().next();
+			MoveState newMoveState = createNextMoveState(moveState, nextMove, meter);
 			if (newMoveState != null) {
 				this._maxCurrentDepth = Math.max(this._maxCurrentDepth, newMoveState.depth());
 				pmt.add(newMoveState.tree());
@@ -138,19 +141,19 @@ public class TableauMoveIterator {
 	}
 
 	/**
-	 * @param moveState
+	 * @param parentState
+	 * @param nextMove TODO
 	 * @return
 	 * @throws Exception
 	 */
-	private MoveState createNextMoveState(MoveState moveState, ProgressionMeter meter) throws Exception {
-		Move move = moveState.moves().next();
+	private MoveState createNextMoveState(MoveState parentState, Move nextMove, ProgressionMeter meter) throws Exception {
 		int depth;
-		move.validate(moveState._tableau, depth = moveState.depth());
-		Tableau newTableau = nextTableauWith(moveState._tableau, move, depth + 1);
+		nextMove.validate(parentState._tableau, depth = parentState.depth());
+		Tableau newTableau = nextTableauWith(parentState._tableau, nextMove, depth + 1);
 
 		if (newTableau != null) {
-			MoveTree newMoveTree = new MoveTree(moveState.tree(), move, this.fitness(newTableau, moveState.depth() + 1),
-					newTableau.cardsLeft(), moveState._tableau, depth);
+			MoveTree newMoveTree = new MoveTree(parentState.tree(), nextMove, this.fitness(newTableau, parentState.depth() + 1),
+					newTableau.cardsLeft(), newTableau, depth + 1);
 			meter.progressOneNode(newTableau, newMoveTree, this);
 
 			if (Mover.isWin(newTableau)) {
@@ -246,15 +249,11 @@ public class TableauMoveIterator {
 
 	private class MoveState {
 		final Tableau _tableau;
-		final Move[] _moveArray;
-		final ArrayIterator<Move> _moves;
 		final MoveTree _tree;
 
 		MoveState(Tableau t, MoveTree m) {
 			_tableau = t;
 			_tree = m;
-			_moveArray = MoveCalculator.movesFrom(_tableau, !_tableau.hasTrappedCard());
-			_moves = new ArrayIterator<Move>(_moveArray);
 		}
 
 		public Tableau tableau() {
@@ -262,11 +261,7 @@ public class TableauMoveIterator {
 		}
 
 		public ArrayIterator<Move> moves() {
-			return _moves;
-		}
-
-		public Move[] moveArray() {
-			return _moveArray;
+			return _tree.childMoves();
 		}
 
 		public MoveTree tree() {

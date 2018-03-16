@@ -764,8 +764,15 @@ public class Tableau {
 	private void sortStacks() {
 		Arrays.sort(_tableau, (Comparator<? super TableauStack>) new CompareStacks());
 		int placeIdx = 0;
+		int notNullCount = 0;
 		for (Card c : this._freecells) {
-			this._freecells[placeIdx++] = c;
+			if (c != null) {
+				this._freecells[placeIdx++] = c;
+				notNullCount += 1;
+			}
+		}
+		while (notNullCount < this._freecells.length) {
+			this._freecells[notNullCount++] = null;
 		}
 	}
 

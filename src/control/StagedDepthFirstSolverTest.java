@@ -8,12 +8,12 @@ import org.junit.Test;
 import main.Arguments;
 
 public class StagedDepthFirstSolverTest {
-	private static final long EXPECTED_COUNT = 1968;
+	private static final long EXPECTED_COUNT = 1882;
 	private StagedDepthFirstSolver _solver = null;
 	
 	@Before
 	public void setUp() throws Exception {
-		Arguments arguments = new Arguments();
+		Arguments arguments = Arguments.arguments();
 		StagedDepthFirstSolver.setupArguments(arguments);
 		arguments.validation = false;
 		StagedDepthFirstSolver.initialize(arguments);

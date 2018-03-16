@@ -17,9 +17,21 @@ public class Arguments {
 	public long tableauPrintInterval;
 	public String deckString;
 	public String statisticsLogName;
+	private static Arguments _singleton = null;
 
 	private final HashMap<String, Object> arguments = new HashMap<String, Object>();
 
+	public static Arguments arguments() {
+		if (_singleton == null) {
+			_singleton = new Arguments();
+		}
+		return _singleton;
+	}
+	
+	private Arguments() {
+		
+	}
+	
 	public void parseArgs(String[] args) {
 		if (args.length == 0) {
 			return;
