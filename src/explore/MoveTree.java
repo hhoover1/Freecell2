@@ -9,7 +9,6 @@ import java.util.Stack;
 import freecellState.Move;
 import freecellState.Mover;
 import freecellState.Tableau;
-import main.Arguments;
 
 public class MoveTree implements Comparable<MoveTree> {
 	private static final int CHILD_START_COUNT = 1;

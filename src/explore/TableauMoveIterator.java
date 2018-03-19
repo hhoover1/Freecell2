@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.Set;
 
 import freecellState.Move;
 import freecellState.Mover;
@@ -124,6 +126,22 @@ public class TableauMoveIterator {
 		return _wins;
 	}
 
+	public int flushDeepBoards(int flushDepth) {
+		int result = _examinedStates.size();
+
+		Set<Entry<TableauHash, Integer>> entrySet = _examinedStates.entrySet();
+		_examinedStates.clear();
+
+		entrySet.stream().forEach((entry) -> {
+			if (entry.getValue() <= flushDepth) {
+				_examinedStates.put(entry.getKey(), entry.getValue());
+			}
+		});
+		
+		result -= _examinedStates.size();
+		return result;
+	}
+
 	/**
 	 * @param pmt
 	 * @param moveState
@@ -142,18 +160,20 @@ public class TableauMoveIterator {
 
 	/**
 	 * @param parentState
-	 * @param nextMove TODO
+	 * @param nextMove
+	 *            TODO
 	 * @return
 	 * @throws Exception
 	 */
-	private MoveState createNextMoveState(MoveState parentState, Move nextMove, ProgressionMeter meter) throws Exception {
+	private MoveState createNextMoveState(MoveState parentState, Move nextMove, ProgressionMeter meter)
+			throws Exception {
 		int depth;
 		nextMove.validate(parentState._tableau, depth = parentState.depth());
 		Tableau newTableau = nextTableauWith(parentState._tableau, nextMove, depth + 1);
 
 		if (newTableau != null) {
-			MoveTree newMoveTree = new MoveTree(parentState.tree(), nextMove, this.fitness(newTableau, parentState.depth() + 1),
-					newTableau.cardsLeft(), newTableau, depth + 1);
+			MoveTree newMoveTree = new MoveTree(parentState.tree(), nextMove,
+					this.fitness(newTableau, parentState.depth() + 1), newTableau.cardsLeft(), newTableau, depth + 1);
 			meter.progressOneNode(newTableau, newMoveTree, this);
 
 			if (Mover.isWin(newTableau)) {

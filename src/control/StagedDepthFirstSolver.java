@@ -175,6 +175,7 @@ public class StagedDepthFirstSolver {
 	}
 
 	private void flushBadTreesFromQueue() {
+		int flushed = 0;
 		MoveTree[] allQueue = _priorityMoveQueue.toArray(new MoveTree[_priorityMoveQueue.size()]);
 		_priorityMoveQueue.clear();
 		for (MoveTree mt : allQueue) {
@@ -182,8 +183,11 @@ public class StagedDepthFirstSolver {
 				_priorityMoveQueue.add(mt);
 			} else {
 				this._flushedTrees += 1;
+				flushed += 1;
 			}
 		}
+		
+		System.out.println("flushed " + flushed + " bad trees from queue");
 	}
 
 	private void grabRandomOfQueue(ArrayList<MoveTree> parallelTops) {
@@ -227,6 +231,9 @@ public class StagedDepthFirstSolver {
 		tmi.descendFor(arguments.intermediateDepth, moveTreeQueue, meter);
 		if (tmi.winOccurred()) {
 			this.flushTooDeepTrees(moveTreeQueue, tmi.maxDepth());
+			
+			int flushed = tmi.flushDeepBoards(tmi.maxDepth());
+			System.out.println("flushed " + flushed + " TableauHash's");
 			_wins.addAll(tmi.wins());
 		}
 
