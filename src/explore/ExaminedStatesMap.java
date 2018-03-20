@@ -5,12 +5,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import freecellState.TableauHash;
 
 public class ExaminedStatesMap implements Map<TableauHash, Integer> {
+	private static final int MAX_COMPACTED_BYTEARRAY_SIZE = TableauHash.COMPACT_FORM_SIZE * 1000000;
 	private static final byte[] erasedBits = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -168,35 +170,115 @@ public class ExaminedStatesMap implements Map<TableauHash, Integer> {
 			_uncompactedHashMap.put(entry.getKey(), entry.getValue());
 		}
 
-		byte[] compacted = new byte[toCompactList.size() * TableauHash.COMPACT_FORM_SIZE];
-		toCompactList.sort(new EntryComparer());
-		int nextEntryOffset = 0;
-		for (Entry<TableauHash, Integer> entry : toCompactList) {
-			int offset = nextEntryOffset * TableauHash.COMPACT_FORM_SIZE;
-			byte[] compact = entry.getKey().compactForm(entry.getValue());
-			System.arraycopy(compact, 0, compacted, offset, TableauHash.COMPACT_FORM_SIZE);
-			nextEntryOffset += 1;
+		int totalCompacted = 0;
+		int compactedSize = toCompactList.size() * TableauHash.COMPACT_FORM_SIZE;
+		byte[] compacted = null;
+		int partOffset = 0;
+		while (compactedSize > 0) {
+			int partSize = Math.min(MAX_COMPACTED_BYTEARRAY_SIZE, compactedSize);
+			int partCount = partSize / TableauHash.COMPACT_FORM_SIZE;
+			List<Entry<TableauHash, Integer>> partList = toCompactList.subList(partOffset, partCount);
+			compactedSize -= partSize;
+			compacted = new byte[partSize];
+			partList.sort(new EntryKeyComparer());
+			int nextEntryOffset = 0;
+			for (Entry<TableauHash, Integer> entry : toCompactList) {
+				int offset = nextEntryOffset * TableauHash.COMPACT_FORM_SIZE;
+				if (offset >= partSize) {
+					break;
+				}
+				byte[] compact = entry.getKey().compactForm(entry.getValue());
+				System.arraycopy(compact, 0, compacted, offset, TableauHash.COMPACT_FORM_SIZE);
+				nextEntryOffset += 1;
+			}
+			totalCompacted += nextEntryOffset;
 		}
 
-		_compactedTable = Arrays.copyOf(_compactedTable, _compactedTable.length + 1);
-		_compactedTable[_compactedTable.length - 1] = compacted;
+		if (compacted != null) {
+			_compactedTable = Arrays.copyOf(_compactedTable, _compactedTable.length + 1);
+			_compactedTable[_compactedTable.length - 1] = compacted;
+		}
 
-		System.out.println("finished compacting examinedStates - now " + _uncompactedHashMap.size());
+		System.out.println("finished compacting examinedStates - uncompacted now " + _uncompactedHashMap.size());
 
-		return nextEntryOffset;
+		for (int ii = 0; ii < _compactedTable.length - 1; ++ii) {
+			if (_compactedTable[ii].length + _compactedTable[ii + 1].length < MAX_COMPACTED_BYTEARRAY_SIZE) {
+				combineCompacteds(ii);
+			}
+		}
+
+		return totalCompacted;
 	}
-	
+
+	private void combineCompacteds(int lower) {
+		byte[] combined = mergeSortCompacted(_compactedTable[lower], _compactedTable[lower + 1]);
+		_compactedTable[lower] = combined;
+		_compactedTable[lower + 1] = null;
+		if (lower < _compactedTable.length - 2) {
+			System.arraycopy(_compactedTable, lower + 2, _compactedTable, lower + 1, _compactedTable.length - lower - 1);
+		}
+		_compactedTable = Arrays.copyOf(_compactedTable, _compactedTable.length - 1);
+	}
+
+	private byte[] mergeSortCompacted(byte[] first, byte[] second) {
+		int combinedSize = first.length + second.length;
+		byte[] combined = new byte[combinedSize];
+		int combinedOffset = 0;
+		int firstOffset = TableauHash.COMPACT_FORM_SIZE;
+		byte[] firstNext = new byte[TableauHash.COMPACT_FORM_SIZE];
+		int secondOffset = TableauHash.COMPACT_FORM_SIZE;
+		byte[] secondNext = new byte[TableauHash.COMPACT_FORM_SIZE];
+		System.arraycopy(first, 0, firstNext, 0, firstNext.length);
+		System.arraycopy(second, 0, secondNext, 0, secondNext.length);
+		while (combinedOffset < combined.length) {
+			int cmp;
+			if ((cmp = compareBits(firstNext, secondNext)) <= 0) {
+				System.arraycopy(firstNext, 0, combined, combinedOffset, firstNext.length);
+				if (firstOffset < first.length) {
+					System.arraycopy(first, firstOffset, firstNext, 0, firstNext.length);
+				} else {
+					System.arraycopy(erasedBits, 0, firstNext, 0, firstNext.length);
+				}
+				firstOffset += TableauHash.COMPACT_FORM_SIZE;
+				combinedOffset += TableauHash.COMPACT_FORM_SIZE;
+			} else if (cmp > 0) {
+				System.arraycopy(secondNext, 0, combined, combinedOffset, secondNext.length);
+				if (secondOffset < second.length) {
+					System.arraycopy(second, secondOffset, secondNext, 0, secondNext.length);
+				} else {
+					System.arraycopy(erasedBits, 0, secondNext, 0, secondNext.length);
+				}
+				secondOffset += TableauHash.COMPACT_FORM_SIZE;
+				combinedOffset += TableauHash.COMPACT_FORM_SIZE;
+			}
+		}
+
+		return combined;
+	}
+
+	private int compareBits(byte[] bits1, byte[] bits2) {
+		int result = 0;
+		for (int ii = 0; ii < bits1.length; ++ii) {
+			result = bits2[ii] - bits1[ii];
+			if (result != 0) {
+				return result;
+			}
+		}
+
+		return result;
+	}
+
 	public int[] compactedStatistics() {
-		int[] result = new int[1+_compactedTable.length];
+		int[] result = new int[1 + _compactedTable.length];
 		result[0] = _uncompactedHashMap.size();
 		for (int ii = 0; ii < _compactedTable.length; ++ii) {
 			result[ii + 1] = _compactedTable[ii].length;
 		}
-		
+
 		return result;
 	}
 
-	private int findKey(byte[] ba, byte[] bits) {
+	int findKey(byte[] ba, byte[] bits) {
 		int upper = (ba.length / TableauHash.COMPACT_FORM_SIZE) - 1;
 		int lower = 0;
 		while (lower <= upper) {
@@ -219,7 +301,7 @@ public class ExaminedStatesMap implements Map<TableauHash, Integer> {
 		int offset = 0;
 		int tableOffset = i1 * TableauHash.COMPACT_FORM_SIZE;
 		while (res == 0 && offset < b2.length - 1) { // don't compare the depth byte.
-			res = b2[offset] - ba[tableOffset + offset];
+			res = ba[tableOffset + offset] - b2[offset];
 			offset += 1;
 			if (res != 0) {
 				return res;
@@ -229,11 +311,11 @@ public class ExaminedStatesMap implements Map<TableauHash, Integer> {
 		return 0;
 	}
 
-	private class EntryComparer implements Comparator<Entry<TableauHash, Integer>> {
+	private class EntryKeyComparer implements Comparator<Entry<TableauHash, Integer>> {
 
 		@Override
 		public int compare(Entry<TableauHash, Integer> o1, Entry<TableauHash, Integer> o2) {
-			return o1.getValue() - o2.getValue();
+			return o1.getKey().compareTo(o2.getKey());
 		}
 	}
 }

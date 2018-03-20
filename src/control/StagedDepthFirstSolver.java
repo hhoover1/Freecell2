@@ -39,7 +39,7 @@ public class StagedDepthFirstSolver {
 	public static int MAX_EXPLORE_DEPTH = 135;
 	private static final int MOVETREE_QUEUE_LENGTH = 1000000;
 	private static final long TABLEAU_PRINT_INTERVAL = 1000000;
-	private static final long LOG_INTERVAL = 10000000;
+	private static final long LOG_INTERVAL = 1000000;
 	private static final int RANDOM_PRIORITY_INTERVAL = 10000000;
 	private static final long STATUS_UPDATE_INTERVAL = 100000;
 	private static final int FLUSH_DOT_COUNT = 100000;
@@ -235,7 +235,7 @@ public class StagedDepthFirstSolver {
 		if (tmi.winOccurred()) {
 			this.flushTooDeepTrees(moveTreeQueue, tmi.maxDepth());
 			
-			int compactedSize = tmi.compactExaminedStates(Math.max(tmi.maxDepth() - 24, 24));
+			int compactedSize = tmi.compactExaminedStates(Math.max(tmi.maxDepth() - 12, 12));
 			System.out.println("compacted size is " + compactedSize);
 			_wins.addAll(tmi.wins());
 		}
@@ -333,7 +333,7 @@ public class StagedDepthFirstSolver {
 			int solution = 1;
 			for (int stat : esmStats) {
 				out.println(stat);
-				if (solution < esmStats.length - 1) {
+				if (solution < esmStats.length) {
 					out.print("compressed map: " + solution++ + " : ");
 				}
 			}
