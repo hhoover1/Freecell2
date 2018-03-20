@@ -16,6 +16,7 @@ public class MoveTreeStatisticsCalculator {
 	MoveTreeStatistic _statsTree = new MoveTreeStatistic();
 	MoveTreeStatistic _statsQueue = new MoveTreeStatistic();
 	Arguments arguments;
+	boolean _calculated = false;
 
 	public MoveTreeStatisticsCalculator(Tableau start, Arguments args) {
 		_startingTableau = start;
@@ -24,14 +25,18 @@ public class MoveTreeStatisticsCalculator {
 			_statsByDepthTree.add(new MoveTreeStatistic());
 			_statsByDepthQueue.add(new MoveTreeStatistic());
 		}
+		_calculated = false;
 	}
-	
+
 	public void calculateStatistics(MoveTree root, Queue<MoveTree> queued) {
-		System.out.println("Starting statistics calculations");
-		processRoot(root);
-		System.out.println("done root, starting queue");
-		processQueue(queued);
-		System.out.println("Done statistics calculations");
+		if (!_calculated) {
+			System.out.println("Starting statistics calculations");
+			processRoot(root);
+			System.out.println("done root, starting queue");
+			processQueue(queued);
+			System.out.println("Done statistics calculations");
+			_calculated = true;
+		}
 	}
 
 	public MoveTreeStatistic globalTreeStats() {
@@ -48,20 +53,20 @@ public class MoveTreeStatisticsCalculator {
 				return ii;
 			}
 		}
-		
+
 		return _statsByDepthTree.size();
 	}
-	
+
 	public int queueDepth() {
 		for (int ii = _statsByDepthQueue.size() - 1; ii >= 0; --ii) {
 			if (_statsByDepthQueue.get(ii).validData()) {
 				return ii + 1;
 			}
 		}
-		
+
 		return _statsByDepthQueue.size();
 	}
-	
+
 	public MoveTreeStatistic treeStatAtDepth(int depth) {
 		return _statsByDepthTree.get(depth);
 	}
@@ -86,9 +91,8 @@ public class MoveTreeStatisticsCalculator {
 		processCollection(iter, _statsQueue, treeCollection);
 	}
 
-	private void processCollection(Iterator<MoveTree> iter,
-								  MoveTreeStatistic global,
-								  final ArrayList<MoveTreeStatistic> treeCollection) {
+	private void processCollection(Iterator<MoveTree> iter, MoveTreeStatistic global,
+			final ArrayList<MoveTreeStatistic> treeCollection) {
 		int count = 0;
 		int dotInterval = arguments.flushDotInterval;
 		while (iter.hasNext()) {
@@ -125,7 +129,7 @@ public class MoveTreeStatisticsCalculator {
 		public boolean validData() {
 			return _minScore != Integer.MAX_VALUE;
 		}
-		
+
 		public void addTree() {
 			_movetreesInGroup += 1;
 		}
@@ -145,11 +149,11 @@ public class MoveTreeStatisticsCalculator {
 		public long count() {
 			return _movetreesInGroup;
 		}
-		
+
 		public String formatMinMax(String format) {
 			return String.format(format, _minScore, _maxScore, _minRemaining, _maxRemaining);
 		}
-		
+
 		public float averageScore() {
 			double avgScore = (double) _movetreeSumScore / _movetreesInGroup;
 			return (float) avgScore;
@@ -159,7 +163,6 @@ public class MoveTreeStatisticsCalculator {
 			double avgRemain = (double) _movetreeSumRemainingMoves / _movetreesInGroup;
 			return (float) avgRemain;
 		}
-		
-		
+
 	}
 }

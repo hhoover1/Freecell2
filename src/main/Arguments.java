@@ -52,7 +52,7 @@ public class Arguments {
 			} else {
 
 				String a2 = null;
-				if (argIdx < args.length - 1 && args[argIdx].charAt(0) != '-') {
+				if (argIdx < args.length && args[argIdx].charAt(0) != '-') {
 					a2 = args[argIdx++];
 				}
 
@@ -63,7 +63,7 @@ public class Arguments {
 							long l = Long.parseLong(a2);
 							arguments.put(key, new Long(l));
 						} else if (lastChar == 'i') {
-							int i = Integer.parseInt(a2);
+							int i = Integer.parseInt(a2.substring(0, a2.length() - 1));
 							arguments.put(key, new Integer(i));
 						} else {
 							arguments.put(key, a2);

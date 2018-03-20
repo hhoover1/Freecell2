@@ -71,4 +71,11 @@ public class TableauHashTest {
 		assertNotNull(ts1);
 		assertEquals(ts1, "TableauHash(67372036, 0010203040506070)");
 	}
+	
+	@Test
+	public final void testCompactForm() {
+		byte[] b1 = t1.compactForm(121);
+		assertNotNull(b1);
+		assertEquals(TableauHash.COMPACT_FORM_SIZE, b1.length);
+	}
 }

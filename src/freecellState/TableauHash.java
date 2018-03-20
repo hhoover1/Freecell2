@@ -7,19 +7,21 @@ import deck.Deck;
 import freecellState.Location.Area;
 
 public class TableauHash implements Comparable<TableauHash> {
+	private static final int DEPTH_BYTES = 1;
 	private static final int TABLEAU_MAX_CARD_COUNT = Deck.DECKSIZE + Tableau.FREECELL_COUNT + Tableau.FOUNDATION_COUNT;
 	private static final int TABLEAU_HASH_SIZE = TABLEAU_MAX_CARD_COUNT * 3 / 4;
+	public static final int COMPACT_FORM_SIZE = TABLEAU_HASH_SIZE + DEPTH_BYTES;
 
 	Tableau _tableau;
 	byte[] _bits = null;
 	int _computedHash = -1;
 
-	TableauHash(Tableau tableau) {
+	public TableauHash(Tableau tableau) {
 		_tableau = tableau;
 	}
 	
 	// testing
-	TableauHash(byte[] bits) {
+	public TableauHash(byte[] bits) {
 		_bits = bits;
 		_tableau = null;
 	}
@@ -73,6 +75,25 @@ public class TableauHash implements Comparable<TableauHash> {
 		return bits;
 	}
 
+	public byte[] compactForm(int depth) {
+		if (_bits == null) {
+			composeHash();
+		}
+		
+		if (_computedHash == -1) {
+			hashCode();
+		}
+		
+		byte[] result = new byte[COMPACT_FORM_SIZE];
+		
+		for (int ii = 0; ii < _bits.length; ++ii) {
+			result[ii] = _bits[ii];
+		}
+		result[TABLEAU_HASH_SIZE] = (byte) depth;
+		
+		return result;
+	}
+	
 	@Override
 	public int hashCode() {
 		if (_computedHash != -1) {

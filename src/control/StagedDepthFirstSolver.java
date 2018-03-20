@@ -13,6 +13,7 @@ import java.util.Random;
 
 import control.MoveTreeStatisticsCalculator.MoveTreeStatistic;
 import deck.Deck;
+import explore.ExaminedStatesMap;
 import explore.MoveTree;
 import explore.TableauMoveIterator;
 import freecellState.Mover;
@@ -158,7 +159,9 @@ public class StagedDepthFirstSolver {
 				whileCount += 1;
 			}
 			parallelTops.clear();
-			this.flushBadTreesFromQueue();
+			if (whileCount % randomIntervalCount < parallelTopCount) {
+				this.flushBadTreesFromQueue();
+			}
 		}
 
 		if (_wins.isEmpty()) {
@@ -232,8 +235,8 @@ public class StagedDepthFirstSolver {
 		if (tmi.winOccurred()) {
 			this.flushTooDeepTrees(moveTreeQueue, tmi.maxDepth());
 			
-			int flushed = tmi.flushDeepBoards(tmi.maxDepth());
-			System.out.println("flushed " + flushed + " TableauHash's");
+			int compactedSize = tmi.compactExaminedStates(Math.max(tmi.maxDepth() - 24, 24));
+			System.out.println("compacted size is " + compactedSize);
 			_wins.addAll(tmi.wins());
 		}
 
@@ -282,9 +285,10 @@ public class StagedDepthFirstSolver {
 		}
 
 		if (arguments.doStatistics && count % arguments.statisticsLogInterval == 0) {
-			StatisticsPrinter sp = new StatisticsPrinter(_rootMoveTree, q);
+			StatisticsPrinter sp = new StatisticsPrinter(_rootMoveTree, q, tmi);
 			sp.printStatisticsOn(statisticsLog);
 			statisticsLog.flush();
+			sp.printStatisticsOn(System.out); // dump to console as well.
 		}
 	}
 
@@ -296,11 +300,13 @@ public class StagedDepthFirstSolver {
 		MoveTreeStatisticsCalculator mtsc;
 		MoveTree _root;
 		Queue<MoveTree> _queue;
+		ExaminedStatesMap _esm;
 
-		StatisticsPrinter(MoveTree root, Queue<MoveTree> queue) {
+		StatisticsPrinter(MoveTree root, Queue<MoveTree> queue, TableauMoveIterator tmi) {
 			mtsc = new MoveTreeStatisticsCalculator(startTableau, arguments);
 			_root = root;
 			_queue = queue;
+			_esm = tmi.examinedStates();
 		}
 
 		public void printStatisticsOn(PrintStream out) {
@@ -320,6 +326,15 @@ public class StagedDepthFirstSolver {
 				if (mts.validData()) {
 					out.print(String.format("depth: %3d - ", ii));
 					printStat(out, mts);
+				}
+			}
+			int[] esmStats = _esm.compactedStatistics();
+			out.print("ExaminedStates stats: hashmap size: ");
+			int solution = 1;
+			for (int stat : esmStats) {
+				out.println(stat);
+				if (solution < esmStats.length - 1) {
+					out.print("compressed map: " + solution++ + " : ");
 				}
 			}
 		}

@@ -2,11 +2,8 @@ package explore;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Queue;
-import java.util.Set;
 
 import freecellState.Move;
 import freecellState.Mover;
@@ -22,8 +19,7 @@ import freecellState.TableauHash;
 public class TableauMoveIterator {
 	private static final int DEPTH_BASE = 100;
 	private static final int INITIAL_EXAMINEDSTATES_SIZE = 10000000;
-	private static HashMap<TableauHash, Integer> _examinedStates = new HashMap<TableauHash, Integer>(
-			INITIAL_EXAMINEDSTATES_SIZE);
+	private static ExaminedStatesMap _examinedStates = new ExaminedStatesMap(INITIAL_EXAMINEDSTATES_SIZE);
 	private static long _checkedStates = 0;
 	private static long _repeatOffenders = 0;
 	private static long _moveTreesRemoved = 0;
@@ -124,22 +120,6 @@ public class TableauMoveIterator {
 
 	public Collection<MoveTree> wins() {
 		return _wins;
-	}
-
-	public int flushDeepBoards(int flushDepth) {
-		int result = _examinedStates.size();
-
-		Set<Entry<TableauHash, Integer>> entrySet = _examinedStates.entrySet();
-		_examinedStates.clear();
-
-		entrySet.stream().forEach((entry) -> {
-			if (entry.getValue() <= flushDepth) {
-				_examinedStates.put(entry.getKey(), entry.getValue());
-			}
-		});
-		
-		result -= _examinedStates.size();
-		return result;
 	}
 
 	/**
@@ -291,5 +271,13 @@ public class TableauMoveIterator {
 		public int depth() {
 			return _tree.depth();
 		}
+	}
+
+	public int compactExaminedStates(int maxDepth) {
+		return _examinedStates.compactExaminedStates(maxDepth);
+	}
+
+	public ExaminedStatesMap examinedStates() {
+		return _examinedStates;
 	}
 }
