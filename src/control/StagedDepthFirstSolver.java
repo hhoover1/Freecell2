@@ -34,7 +34,7 @@ public class StagedDepthFirstSolver {
 	public static final String DO_STATISTICS_KEY = "doStatistics";
 	public static final String PARALLEL_TOPS_KEY = "parallelTops";
 	public static final String FLUSH_DOT_COUNT_KEY = "flushDotCount";
-	
+
 	private static int INTERMEDIATE_DEPTH = 6;
 	public static int MAX_EXPLORE_DEPTH = 135;
 	private static final int MOVETREE_QUEUE_LENGTH = 1000000;
@@ -57,9 +57,9 @@ public class StagedDepthFirstSolver {
 	private static Deck deck;
 	private static Tableau startTableau;
 	private static long count = 0;
-	
+
 	private final Arguments arguments;
-	//private int _maxExploreDepth = MAX_EXPLORE_DEPTH;
+	// private int _maxExploreDepth = MAX_EXPLORE_DEPTH;
 	private long _flushedTrees = 0;
 	private Queue<MoveTree> _priorityMoveQueue;
 	private int _maxDepthExplored = 0;
@@ -69,7 +69,7 @@ public class StagedDepthFirstSolver {
 
 	public static void setupArguments(Arguments arguments) {
 		arguments.putArg(makeDeckKey(38), DECKSTRING_38);
-		arguments.putArg(makeDeckKey(635),  DECKSTRING_635);
+		arguments.putArg(makeDeckKey(635), DECKSTRING_635);
 		arguments.putArg(makeDeckKey(3920), DECKSTRING_3920);
 		arguments.putArg(makeDeckKey(11987), DECKSTRING_11987);
 		arguments.putArg(makeDeckKey(24943), DECKSTRING_24943);
@@ -89,14 +89,14 @@ public class StagedDepthFirstSolver {
 		arguments.parallelTops = PARALLEL_TOPS;
 		arguments.flushDotInterval = FLUSH_DOT_COUNT;
 	}
-	
+
 	public static String makeDeckKey(int deckNumber) {
 		StringBuilder sb = new StringBuilder("DECK_STRING_KEY");
 		sb.append('_');
 		sb.append(deckNumber);
 		return sb.toString();
 	}
-	
+
 	public static void initialize(Arguments arguments) {
 		String designatedDeck = arguments.deckString;
 		deck = Deck.deckFrom(arguments.getString(designatedDeck));
@@ -113,8 +113,8 @@ public class StagedDepthFirstSolver {
 			System.err.println("failed to open log file: '" + logName + "'");
 			e.printStackTrace();
 		}
-		
-		_priorityMoveQueue = new PriorityQueue<MoveTree>(arguments.moveTreeQueueLength);	
+
+		_priorityMoveQueue = new PriorityQueue<MoveTree>(arguments.moveTreeQueueLength);
 		_rootMoveTree = new MoveTree(null, null, Integer.MAX_VALUE, Deck.DECKSIZE, startTableau, 0);
 	}
 
@@ -149,11 +149,6 @@ public class StagedDepthFirstSolver {
 			}
 
 			for (MoveTree nextBase : parallelTops) {
-				if (nextBase.cardsLeft() == -1 && nextBase.depth() == -1) {
-					// this moveTree has been eliminated.
-					this._flushedTrees += 1;
-					continue;
-				}
 				Tableau pt = nextBase.resultingTableau(startTableau);
 				addTreesToQueue(pt, nextBase, _priorityMoveQueue);
 				whileCount += 1;
@@ -185,11 +180,12 @@ public class StagedDepthFirstSolver {
 			if (mt.cardsLeft() != -1 && mt.depth() != -1) {
 				_priorityMoveQueue.add(mt);
 			} else {
+				mt.remove(true);
 				this._flushedTrees += 1;
 				flushed += 1;
 			}
 		}
-		
+
 		System.out.println("flushed " + flushed + " bad trees from queue");
 	}
 
@@ -197,10 +193,16 @@ public class StagedDepthFirstSolver {
 		MoveTree[] allQueue = _priorityMoveQueue.toArray(new MoveTree[_priorityMoveQueue.size()]);
 		Random r = new Random();
 		int parallelTopCount = arguments.parallelTops;
-		for (int ii = 0; ii < parallelTopCount; ++ii) {
+		while (parallelTopCount > 0) {
 			MoveTree m = allQueue[r.nextInt(allQueue.length)];
-			parallelTops.add(m);
-			_priorityMoveQueue.remove(m);
+			if (m.cardsLeft() >= 0 && m.depth() >= 0) {
+				parallelTops.add(m);
+				_priorityMoveQueue.remove(m);
+				parallelTopCount -= 1;
+			} else {
+				m.remove(true);
+				this._flushedTrees += 1;
+			}
 		}
 	}
 
@@ -209,10 +211,14 @@ public class StagedDepthFirstSolver {
 	 */
 	private void grabTopOfQueue(ArrayList<MoveTree> parallelTops) {
 		int parallelTopCount = arguments.parallelTops;
-		for (int ii = 0; ii < parallelTopCount; ++ii) {
+		while (parallelTopCount > 0) {
 			MoveTree nextBase = _priorityMoveQueue.poll();
-			if (nextBase != null) {
+			if (nextBase != null && nextBase.cardsLeft() >= 0 && nextBase.depth() >= 0) {
 				parallelTops.add(nextBase);
+				parallelTopCount -= 1;
+			} else if (nextBase != null) {
+				nextBase.remove(true);
+				this._flushedTrees += 1;
 			}
 		}
 	}
@@ -224,9 +230,10 @@ public class StagedDepthFirstSolver {
 	 * @param parentTableau
 	 * @param parentTree
 	 * @param moveTreeQueue
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	private void addTreesToQueue(Tableau parentTableau, MoveTree parentTree, Queue<MoveTree> moveTreeQueue) throws Exception {
+	private void addTreesToQueue(Tableau parentTableau, MoveTree parentTree, Queue<MoveTree> moveTreeQueue)
+			throws Exception {
 		TableauMoveIterator tmi = new TableauMoveIterator(parentTableau, parentTree, arguments.maxExploreDepth,
 				_maxDepthExplored);
 		Meter meter = new Meter(this);
@@ -234,7 +241,7 @@ public class StagedDepthFirstSolver {
 		tmi.descendFor(arguments.intermediateDepth, moveTreeQueue, meter);
 		if (tmi.winOccurred()) {
 			this.flushTooDeepTrees(moveTreeQueue, tmi.maxDepth());
-			
+
 			int compactedSize = tmi.compactExaminedStates(Math.max(tmi.maxDepth() - 12, 12));
 			System.out.println("compacted size is " + compactedSize);
 			_wins.addAll(tmi.wins());
@@ -255,14 +262,14 @@ public class StagedDepthFirstSolver {
 			if (++cnt % flushDotCount == 0) {
 				System.out.print(".");
 			}
-			
-			if (mt.depth() + mt.cardsLeft() /*+ t.trappedDepths()*/ <= newMaxDepth) {
+
+			if (mt.depth() + mt.cardsLeft() /* + t.trappedDepths() */ <= newMaxDepth) {
 				moveTreeQueue.add(mt);
 			} else {
 				_flushedTrees += mt.remove(true);
 			}
 		}
-		
+
 		System.out.println("\ndone flushing trees, flushed " + (_flushedTrees - startCount));
 	}
 

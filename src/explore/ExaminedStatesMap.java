@@ -73,7 +73,7 @@ public class ExaminedStatesMap implements Map<TableauHash, Integer> {
 		for (byte[] ba : _compactedTable) {
 			int index = this.findKey(ba, bits);
 			if (index >= 0) {
-				byte d = ba[index * TableauHash.COMPACT_FORM_SIZE - 1];
+				byte d = ba[((index + 1) * TableauHash.COMPACT_FORM_SIZE) - 1];
 				return new Integer(d);
 			}
 		}
@@ -191,12 +191,13 @@ public class ExaminedStatesMap implements Map<TableauHash, Integer> {
 				System.arraycopy(compact, 0, compacted, offset, compact.length);
 				nextEntryOffset += 1;
 			}
-			totalCompacted += nextEntryOffset;
-		}
 
-		if (compacted != null) {
-			_compactedTable = Arrays.copyOf(_compactedTable, _compactedTable.length + 1);
-			_compactedTable[_compactedTable.length - 1] = compacted;
+			if (compacted != null && compacted.length > 0) {
+				_compactedTable = Arrays.copyOf(_compactedTable, _compactedTable.length + 1);
+				_compactedTable[_compactedTable.length - 1] = compacted;
+			}
+
+			totalCompacted += nextEntryOffset;
 		}
 
 		System.out.println("finished compacting examinedStates - uncompacted now " + _uncompactedHashMap.size());
