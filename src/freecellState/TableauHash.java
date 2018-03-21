@@ -19,11 +19,36 @@ public class TableauHash implements Comparable<TableauHash> {
 	public TableauHash(Tableau tableau) {
 		_tableau = tableau;
 	}
-	
+
 	// testing
 	public TableauHash(byte[] bits) {
 		_bits = bits;
 		_tableau = null;
+	}
+
+	int bytesRequired() {
+		if (_tableau == null) {
+			return _bits.length;
+		}
+
+		int result = 0;
+
+		for (int ii = 0; ii < Card.Suit.values().length; ++ii) {
+			Card card;
+			if ((card = _tableau.foundation(ii)) != null) {
+				int left = Card.KING_RANK - card.rank() + 1;
+				result += left;
+			} else {
+				result += Card.KING_RANK;
+			}
+		}
+
+		result += Tableau.FREECELL_COUNT + Card.Suit.values().length;
+		if (result % 4 != 0) {
+			result += 4 - (result % 4); // pad out to 4 byte chunks for 4/3 conversion.
+		}
+		
+		return result;
 	}
 
 	private void composeHash() {
@@ -31,17 +56,8 @@ public class TableauHash implements Comparable<TableauHash> {
 			return;
 		}
 
-		byte[] tempBits = new byte[TABLEAU_MAX_CARD_COUNT];
+		byte[] tempBits = new byte[this.bytesRequired()];
 		int hashIndex = 0;
-
-		for (int ii = 0; ii < Tableau.TABLEAU_SIZE; ++ii) {
-			Location from = new Location(Area.Tableau, ii, _tableau.heightOfTableauStack(ii) - 1, -1);
-			List<Card> stack = _tableau.getCards(from);
-			for (Card c : stack) {
-				byte b = c == null ? 0x3F : c.ordinal();
-				tempBits[hashIndex++] = b;
-			}
-		}
 
 		for (int ii = 0; ii < Card.Suit.values().length; ++ii) {
 			Card c = _tableau.foundation(ii);
@@ -55,12 +71,25 @@ public class TableauHash implements Comparable<TableauHash> {
 			tempBits[hashIndex++] = b;
 		}
 
+		// this ordering is not reconstructible.
+		for (int ii = 0; ii < Tableau.TABLEAU_SIZE; ++ii) {
+			Location from = new Location(Area.Tableau, ii, _tableau.heightOfTableauStack(ii) - 1, -1);
+			List<Card> stack = _tableau.getCards(from);
+			for (Card c : stack) {
+				if (c == null)
+					continue;
+				byte b = c.ordinal();
+				tempBits[hashIndex++] = b;
+			}
+		}
+
 		_bits = fourToThreeConversion(tempBits);
 		_tableau = null;
 	}
 
 	private byte[] fourToThreeConversion(byte[] tempBits) {
-		byte[] bits = new byte[TABLEAU_HASH_SIZE];
+		int bytesNeeded = tempBits.length * 3 / 4;
+		byte[] bits = new byte[bytesNeeded];
 		int bitIndex = 0;
 
 		for (int ii = 0; ii < tempBits.length; ii += 4) {
@@ -79,21 +108,19 @@ public class TableauHash implements Comparable<TableauHash> {
 		if (_bits == null) {
 			composeHash();
 		}
-		
+
 		if (_computedHash == -1) {
 			hashCode();
 		}
-		
-		byte[] result = new byte[COMPACT_FORM_SIZE];
-		
-		for (int ii = 0; ii < _bits.length; ++ii) {
-			result[ii] = _bits[ii];
-		}
-		result[TABLEAU_HASH_SIZE] = (byte) depth;
-		
+
+		byte[] result = new byte[_bits.length + 1];
+		System.arraycopy(_bits, 0, result, 0, _bits.length);
+
+		result[result.length - 1] = (byte) depth;
+
 		return result;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		if (_computedHash != -1) {
@@ -108,8 +135,8 @@ public class TableauHash implements Comparable<TableauHash> {
 			long b = _bits[ii] << ((byteOffset++ * 8) % 32);
 			res ^= b;
 		}
-		
-		_computedHash = (int)res;
+
+		_computedHash = (int) res;
 
 		return _computedHash;
 	}
@@ -119,22 +146,22 @@ public class TableauHash implements Comparable<TableauHash> {
 		if (!(o instanceof TableauHash)) {
 			return false;
 		}
-		
+
 		if (_bits == null) {
 			composeHash();
 		}
-		
-		TableauHash oth = (TableauHash)o;
+
+		TableauHash oth = (TableauHash) o;
 		if (oth._bits == null) {
 			oth.composeHash();
 		}
-		
+
 		for (int ii = 0; ii < _bits.length; ++ii) {
 			if (_bits[ii] != oth._bits[ii]) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -156,11 +183,11 @@ public class TableauHash implements Comparable<TableauHash> {
 
 		return 0;
 	}
-	
+
 	@Override
 	public String toString() {
-		String cn = this.getClass().getName();
-		StringBuilder sb = new StringBuilder(cn.substring(cn.lastIndexOf('.') + 1));
+		String cn = this.getClass().getSimpleName();
+		StringBuilder sb = new StringBuilder(cn);
 		sb.append('(');
 		sb.append(this.hashCode());
 		sb.append(", ");
@@ -170,7 +197,7 @@ public class TableauHash implements Comparable<TableauHash> {
 			sb.append(Integer.toHexString((cur & 0xF0) >> 4));
 		}
 		sb.append(')');
-		
+
 		return sb.toString();
 	}
 }

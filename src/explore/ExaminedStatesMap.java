@@ -188,7 +188,7 @@ public class ExaminedStatesMap implements Map<TableauHash, Integer> {
 					break;
 				}
 				byte[] compact = entry.getKey().compactForm(entry.getValue());
-				System.arraycopy(compact, 0, compacted, offset, TableauHash.COMPACT_FORM_SIZE);
+				System.arraycopy(compact, 0, compacted, offset, compact.length);
 				nextEntryOffset += 1;
 			}
 			totalCompacted += nextEntryOffset;

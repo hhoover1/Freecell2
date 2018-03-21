@@ -76,6 +76,14 @@ public class TableauHashTest {
 	public final void testCompactForm() {
 		byte[] b1 = t1.compactForm(121);
 		assertNotNull(b1);
-		assertEquals(TableauHash.COMPACT_FORM_SIZE, b1.length);
+		assertEquals(9, b1.length);
+	}
+	
+	@Test
+	public final void testBytesRequired() {
+		Tableau t = Tableau.fromString(StagedDepthFirstSolver.DECKSTRING_11987);
+		TableauHash hash = t.tableauHash();
+		assertEquals(60, hash.bytesRequired());
+		System.out.println(hash);
 	}
 }
