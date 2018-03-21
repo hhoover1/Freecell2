@@ -39,7 +39,7 @@ public class StagedDepthFirstSolver {
 	public static int MAX_EXPLORE_DEPTH = 135;
 	private static final int MOVETREE_QUEUE_LENGTH = 1000000;
 	private static final long TABLEAU_PRINT_INTERVAL = 1000000;
-	private static final long LOG_INTERVAL = 1000000;
+	private static final long LOG_INTERVAL = 3000000;
 	private static final int RANDOM_PRIORITY_INTERVAL = 10000000;
 	private static final long STATUS_UPDATE_INTERVAL = 100000;
 	private static final int FLUSH_DOT_COUNT = 100000;
