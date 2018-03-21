@@ -115,6 +115,7 @@ public class MoveTreeStatisticsCalculator {
 		long _movetreesInGroup;
 		long _movetreeSumScore;
 		long _movetreeSumRemainingMoves;
+		long _remainingMovesCount;
 		int _minScore = Integer.MAX_VALUE;
 		int _maxScore = Integer.MIN_VALUE;
 		int _minRemaining = Integer.MAX_VALUE;
@@ -124,6 +125,7 @@ public class MoveTreeStatisticsCalculator {
 			_movetreesInGroup = 0;
 			_movetreeSumScore = 0;
 			_movetreeSumRemainingMoves = 0;
+			_remainingMovesCount = 0;
 		}
 
 		public boolean validData() {
@@ -141,8 +143,11 @@ public class MoveTreeStatisticsCalculator {
 		}
 
 		public void addRemaining(int remaining) {
-			_movetreeSumRemainingMoves += remaining;
-			_minRemaining = Math.min(_minRemaining, remaining);
+			if (remaining >= 0) {
+				_movetreeSumRemainingMoves += remaining;
+				_minRemaining = Math.min(_minRemaining, remaining);
+				_remainingMovesCount += 1;
+			}
 			_maxRemaining = Math.max(_maxRemaining, remaining);
 		}
 
@@ -160,7 +165,7 @@ public class MoveTreeStatisticsCalculator {
 		}
 
 		public float averageRemainingMoves() {
-			double avgRemain = (double) _movetreeSumRemainingMoves / _movetreesInGroup;
+			double avgRemain = (double) _movetreeSumRemainingMoves / _remainingMovesCount;
 			return (float) avgRemain;
 		}
 
