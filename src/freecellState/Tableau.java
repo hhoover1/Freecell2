@@ -749,15 +749,6 @@ public class Tableau {
 		return -1;
 	}
 
-	public Card[] topTableauCards() {
-		Card[] tops = new Card[TABLEAU_SIZE];
-		for (int ii = 0; ii < tops.length; ++ii) {
-			tops[ii] = this.getTopOfTableauCol(ii);
-		}
-
-		return tops;
-	}
-
 	// Canonicalize a tableau by sorting the stacks by the top card and
 	// moving all freecell cards to the lowest slots
 	// this shortens searching by eliminating otherwise duplicate states.

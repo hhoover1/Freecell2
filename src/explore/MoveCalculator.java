@@ -58,7 +58,7 @@ public class MoveCalculator {
 		for (int tabCol = 0; tabCol < Tableau.TABLEAU_SIZE; ++tabCol) {
 			Card c = tableau.getTopOfTableauCol(tabCol);
 			if (c != null) {
-				Location to = new Location(Area.Foundation, c.suit().ordinal(), 0, -1);
+				Location to = new Location(Area.Foundation, c.suit().ordinal());
 				Card oc = tableau.foundation(to.column());
 				if ((oc == null && c.rank() == 1) || (oc != null && c.isNextRankOf(oc))) {
 					Location from = new Location(Area.Tableau, tabCol, 0, tableau.originalColumn(tabCol));
@@ -79,8 +79,8 @@ public class MoveCalculator {
 				int foundIdx = frc.suit().ordinal();
 				Card foc = tableau.foundation(foundIdx);
 				if ((foc != null && frc.isNextRankOf(foc)) || ((foc == null && frc.rank() == 1))) {
-					Location from = new Location(Area.Freecell, freeIdx, 0, -1);
-					Location to = new Location(Area.Foundation, foundIdx, 0, -1);
+					Location from = new Location(Area.Freecell, freeIdx);
+					Location to = new Location(Area.Foundation, foundIdx);
 					Move m = new Move(from, to);
 					result.add(m);
 				}
@@ -181,7 +181,7 @@ public class MoveCalculator {
 		ArrayList<Move> moves = new ArrayList<Move>();
 		int openFree = tableau.firstEmptyFreecell();
 		if (openFree >= 0) {
-			Location to = new Location(Area.Freecell, openFree, 0, -1);
+			Location to = new Location(Area.Freecell, openFree);
 
 			for (int tabCol = 0; tabCol < Tableau.TABLEAU_SIZE; ++tabCol) {
 				if (tabCol == lastCol) {
